@@ -1,0 +1,25 @@
+---
+import { marked } from "marked";
+
+import Layout from "../layouts/Layout.astro";
+import content from "../content/pages/home.json";
+
+const { title, body } = content;
+---
+
+<Layout title="The Veteran Culture Project" isLandingPage={true}>
+  <main class="flex flex-col container mx-auto text-slate-100 justify-center">
+    <div
+      class="container mx-auto prose prose-lg prose-invert px-4 py-6"
+      set:html={marked.parse(body)}
+    />
+    <div class="flex p-4 justify-center">
+      <a class="flex" href="/questions"
+        ><button
+          class="bg-gradient-to-r from-violet-700 to-purple-500 text-3xl font-bold rounded-lg p-6"
+          >Take the Survey</button
+        >
+      </a>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,34 @@
+---
+interface Props {
+  question: string;
+}
+
+const { question } = Astro.props;
+const options = ["True", "False"];
+const labelClass =
+  "flex-1 peer-checked/{choice}:bg-gradient-to-r from-violet-700 to-purple-500 peer-checked/{choice}:text-slate-100 cursor-pointer p-2 rounded-md";
+---
+
+<div
+  class="bg-gray-300 p-4 md:p-8 text-zinc-900 rounded-2xl flex-1 flex-column"
+>
+  <h2 class="text-2xl md:text-3xl font-bold pb-4 flex-1">{question}</h2>
+  {
+    options.map((choice) => (
+      <div class="flex-column">
+        <div class="flex-1 p-0.5 flex">
+          <input
+            type="radio"
+            name={question}
+            value={choice}
+            class="peer/{choice} appearance-none flex"
+            id={choice}
+          />
+          <label for={choice} class={labelClass}>
+            {choice}
+          </label>
+        </div>
+      </div>
+    ))
+  }
+</div>

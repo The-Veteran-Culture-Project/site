@@ -1,0 +1,65 @@
+publish_mode: editorial_workflow
+
+media_folder: "src/assets/images"
+public_folder: "src/assets/images"
+
+backend:
+  name: github
+  repo: onnenon/vcp # Path to your GitHub repository
+  branch: main
+  base_url: https://vcp.onnen.dev
+  auth_endpoint: /api/auth
+  squash_merges: true
+
+collections:
+  - name: Pages
+    label: Pages
+    description: "Edit the content of a specific page on the site"
+    files:
+      - file: "src/content/pages/home.json"
+        label: Home
+        name: home
+        preview_path: "/"
+        description: "Content for the site home page"
+        fields:
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Body", name: "body", widget: "markdown" }
+  - name: Layouts
+    label: Layouts
+    description: "Edit the layout of the site"
+    files:
+      - file: "src/content/layouts/footer.json"
+        label: Footer
+        preview_path: "/"
+        description: "Text included in the site footer"
+        name: footer
+        fields:
+          - { label: "Center Text", name: "center_text", widget: "string" }
+  - name: "multiple_choice_questions"
+    label: "Multiple Choice Questions"
+    label_singular: MC Question
+    folder: "src/content/multiChoiceQuestions"
+    create: true
+    description: "Create and edit multiple choice questions"
+    extension: json
+    format: json
+    preview_path: "/questions"
+    identifier_field: question
+    fields:
+      - { label: "Question", name: "question", widget: "text" }
+      - { label: "A", name: "choice_a", widget: "string" }
+      - { label: "B", name: "choice_b", widget: "string" }
+      - { label: "C", name: "choice_c", widget: "string" }
+      - { label: "D", name: "choice_d", widget: "string" }
+  - name: "tf_choice_questions"
+    label: "True/False Questions"
+    label_singular: T/F Question
+    folder: "src/content/tfQuestions"
+    description: "Create and edit true/false questions"
+    create: true
+    extension: json
+    preview_path: "/questions"
+    format: json
+    identifier_field: question
+    fields:
+      - { label: "Question", name: "question", widget: "text" }

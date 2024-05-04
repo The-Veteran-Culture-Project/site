@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+
+import Layout from "../layouts/Layout.astro";
+import MCQuestionCard from "../components/MultiChoiceQuestionCard.astro";
+import TFQuestionCard from "../components/TrueFalseQuestionCard.astro";
+
+const mcQuestions = await getCollection("multiChoiceQuestions");
+const tfQuestions = await getCollection("tfQuestions");
+const linkCardClass =
+  "grid grid-rows-[repeat(auto-fit, minmax(24ch, 1fr))] gap-8 padding-0";
+---
+
+<Layout title="The Veteran Culture Project" isLandingPage={false}>
+  <main>
+    <div class="p-4">
+      <ul role="list" class={linkCardClass}>
+        {
+          mcQuestions.map((q) => (
+            <MCQuestionCard
+              question={q.data.question}
+              choices={[
+                q.data.choice_a,
+                q.data.choice_b,
+                q.data.choice_c,
+                q.data.choice_d,
+              ]}
+            />
+          ))
+        }
+      </ul>
+    </div>
+    <div class="p-4">
+      <ul role="list" class={linkCardClass}>
+        {tfQuestions.map((q) => <TFQuestionCard question={q.data.question} />)}
+      </ul>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 1rem;
+    width: 800px;
+    max-width: calc(100% - 2rem);
+    color: white;
+    font-size: 20px;
+    line-height: 1.6;
+  }
+
+  .link-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+    gap: 2rem;
+    padding: 0;
+  }
+</style>

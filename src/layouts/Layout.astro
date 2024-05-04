@@ -1,0 +1,36 @@
+---
+interface Props {
+  title: string;
+  isLandingPage: boolean;
+}
+
+const { title, isLandingPage } = Astro.props;
+
+const baseheaderStyle =
+  "font-bold p-4 md:p-6 text-slate-100 hover:cursor-pointer";
+const headerStyle = isLandingPage
+  ? `${baseheaderStyle} text-5xl md:text-7xl lg:text-center`
+  : `${baseheaderStyle} text-4xl`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Home of the Veteran Culture Project." />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-zinc-900 container mx-auto">
+    <div>
+      <a href="/"><h1 class={headerStyle}>{title}</h1> </a>
+    </div>
+    <slot />
+  </body>
+</html>
+<style is:global>
+  html {
+    font-family: system-ui, sans-serif;
+  }
+</style>
