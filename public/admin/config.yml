@@ -5,9 +5,9 @@ public_folder: "src/assets/images"
 
 backend:
   name: github
-  repo: onnenon/vcp # Path to your GitHub repository
+  repo: The-Veteran-Culture-Project/site
   branch: main
-  base_url: https://vcp.onnen.dev
+  base_url: https://veterancultureproject.org/
   auth_endpoint: /api/auth
   squash_merges: true
 
