@@ -5,7 +5,6 @@ import Layout from "../layouts/Layout.astro";
 import MCQuestionCard from "../components/MultiChoiceQuestionCard.astro";
 
 const mcQuestions = await getCollection("multiChoiceQuestions");
-const tfQuestions = await getCollection("tfQuestions");
 const linkCardClass =
   "grid grid-rows-[repeat(auto-fit, minmax(24ch, 1fr))] gap-8 padding-0";
 ---
