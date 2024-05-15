@@ -10,8 +10,8 @@ const linkCardClass =
 ---
 
 <Layout title="The Veteran Culture Project" isLandingPage={false}>
-  <main>
-    <div class="p-4">
+  <main class="px-4 py-8 container max-w-prose mx-auto">
+    <div>
       <ul role="list" class={linkCardClass}>
         {
           mcQuestions.map((q) => (
@@ -32,16 +32,6 @@ const linkCardClass =
 </Layout>
 
 <style>
-  main {
-    margin: auto;
-    padding: 1rem;
-    width: 800px;
-    max-width: calc(100% - 2rem);
-    color: white;
-    font-size: 20px;
-    line-height: 1.6;
-  }
-
   .link-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
