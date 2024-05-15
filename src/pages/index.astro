@@ -4,7 +4,7 @@ import { marked } from "marked";
 import Layout from "../layouts/Layout.astro";
 import content from "../content/pages/home.json";
 
-const { title, body } = content;
+const { title, body, disclaimer } = content;
 ---
 
 <Layout title="The Veteran Culture Project" isLandingPage={true}>
@@ -13,13 +13,16 @@ const { title, body } = content;
       class="container mx-auto prose prose-lg prose-invert px-4 py-6"
       set:html={marked.parse(body)}
     />
-    <div class="flex p-4 justify-center">
+    <div class="flex p-12 justify-center">
       <a class="flex" href="/questions"
         ><button
           class="bg-gradient-to-r from-violet-700 to-purple-500 text-3xl font-bold rounded-lg p-6"
           >Take the Test</button
         >
       </a>
+    </div>
+    <div class="flex justify-center">
+      <p class="flex p-8 text-center text-slate-400 italic">{disclaimer}</p>
     </div>
   </main>
 </Layout>
