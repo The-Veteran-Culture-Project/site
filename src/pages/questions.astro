@@ -3,7 +3,6 @@ import { getCollection } from "astro:content";
 
 import Layout from "../layouts/Layout.astro";
 import MCQuestionCard from "../components/MultiChoiceQuestionCard.astro";
-import TFQuestionCard from "../components/TrueFalseQuestionCard.astro";
 
 const mcQuestions = await getCollection("multiChoiceQuestions");
 const tfQuestions = await getCollection("tfQuestions");
@@ -28,11 +27,6 @@ const linkCardClass =
             />
           ))
         }
-      </ul>
-    </div>
-    <div class="p-4">
-      <ul role="list" class={linkCardClass}>
-        {tfQuestions.map((q) => <TFQuestionCard question={q.data.question} />)}
       </ul>
     </div>
   </main>

@@ -11,13 +11,6 @@ const multipleChoiceQuestionsCollection = defineCollection({
   }),
 });
 
-const tfQuestionsCollection = defineCollection({
-  type: "data",
-  schema: z.object({
-    question: z.string(),
-  }),
-});
 export const collections = {
   multiChoiceQuestions: multipleChoiceQuestionsCollection,
-  tfQuestions: tfQuestionsCollection,
 };

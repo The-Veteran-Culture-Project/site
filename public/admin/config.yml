@@ -24,6 +24,15 @@ collections:
         fields:
           - { label: "Title", name: "title", widget: "string" }
           - { label: "Body", name: "body", widget: "markdown" }
+          - { label: "Disclaimer", name: "disclaimer", widget: "text" }
+      - file: "src/content/pages/about.json"
+        label: About
+        name: about
+        preview_path: "/about"
+        description: "Content for the site about page"
+        fields:
+          - { label: "Header", name: "header", widget: "string" }
+          - { label: "Body", name: "body", widget: "markdown" }
   - name: Layouts
     label: Layouts
     description: "Edit the layout of the site"
@@ -51,15 +60,3 @@ collections:
       - { label: "B", name: "choice_b", widget: "string" }
       - { label: "C", name: "choice_c", widget: "string" }
       - { label: "D", name: "choice_d", widget: "string" }
-  - name: "tf_choice_questions"
-    label: "True/False Questions"
-    label_singular: T/F Question
-    folder: "src/content/tfQuestions"
-    description: "Create and edit true/false questions"
-    create: true
-    extension: json
-    preview_path: "/questions"
-    format: json
-    identifier_field: question
-    fields:
-      - { label: "Question", name: "question", widget: "text" }
