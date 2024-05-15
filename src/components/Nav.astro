@@ -1,0 +1,23 @@
+---
+type LinkInfo = {
+  name: string;
+  path: string;
+};
+
+const links: LinkInfo[] = [
+  { name: "Home", path: "/" },
+  { name: "About", path: "/about" },
+];
+---
+
+<div class="flex flex-auto text-slate-200 justify-start sm:justify-end m-4">
+  {
+    links.map((link) => {
+      return (
+        <a class="ml-4 hover:text-slate-400" href={`${link.path}`}>
+          {link.name}
+        </a>
+      );
+    })
+  }
+</div>
