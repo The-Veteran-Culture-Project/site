@@ -7,11 +7,10 @@ interface Props {
 
 const { title, isLandingPage } = Astro.props;
 
-const baseheaderStyle =
-  "font-bold p-4 md:p-6 text-slate-100 hover:cursor-pointer";
+const baseheaderStyle = "hover:cursor-pointer m-4 flex flex-auto";
 const headerStyle = isLandingPage
-  ? `${baseheaderStyle} text-5xl md:text-7xl lg:text-center`
-  : `${baseheaderStyle} text-4xl`;
+  ? `${baseheaderStyle} max-w-120`
+  : `${baseheaderStyle} max-w-64`;
 ---
 
 <!doctype html>
@@ -26,12 +25,12 @@ const headerStyle = isLandingPage
   <body class="bg-zinc-950 flex flex-col">
     <div class="bg-zinc-900 flex flex-auto">
       <div class="flex flex-row flex-wrap container mx-auto max-w-5xl">
-        <div class="m-4 max-w-lg flex flex-auto">
+        <div class={headerStyle}>
           <a href="/" class="flex flex-auto">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 85.381 17.88631"
-              class="fill-slate-200 min-h-25 min-w-64 sm:min-w-96"
+              class="fill-slate-200 min-h-25 min-w-64 sm:min-w-50"
               ><g
                 aria-label="The Veteran Culture Project"
                 style='font-size:40px;line-height:.9;font-family:"Iowan Old Style";-inkscape-font-specification:"Iowan Old Style";letter-spacing:-1.29px;white-space:pre'
