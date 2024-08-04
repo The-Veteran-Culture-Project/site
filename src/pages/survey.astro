@@ -1,0 +1,32 @@
+---
+import { getCollection } from "astro:content";
+
+import Layout from "../layouts/Layout.astro";
+// import AxisQuestionCard from "../components/AxisQuestionCard.astro";
+import SurveyForm from "../components/SurveyForm.tsx";
+
+const questions = await getCollection("axisQuestions");
+
+const linkCardClass =
+  "grid grid-rows-[repeat(auto-fit, minmax(24ch, 1fr))] gap-8 padding-0";
+
+function handleSubmit(event: SubmitEvent) {
+  event.preventDefault();
+  console.log("Foo");
+}
+---
+
+<Layout title="The Veteran Culture Project" isLandingPage={false}>
+  <SurveyForm client:load />
+  <!-- <main class="px-4 py-8 container max-w-prose mx-auto">
+    <div>
+      <ul role="list" class={linkCardClass}>
+        {questions.map((q) => <AxisQuestionCard question={q.data.question} />)}
+      </ul>
+    </div>
+  </main> -->
+  <!-- <form onsubmit="handleSubmit()">
+    {questions.map((q) => <AxisQuestionCard question={q.data.question} />)}
+    <button type="submit" class="flex text-lg text-yellow-200">Submit</button>
+  </form> -->
+</Layout>
