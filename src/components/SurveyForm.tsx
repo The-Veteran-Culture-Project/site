@@ -6,6 +6,7 @@ import AxisQuestionCard from "./AxisQuestionCard.tsx";
 const onSubmit = (event: SubmitEvent) => {
   event.preventDefault();
   console.log("submitted");
+  console.log(answersStore.get());
 };
 
 type Props = {
@@ -34,7 +35,7 @@ const QuestionForm = ({ questions }: Props) => {
         />
       ))}
       <button
-        disabled={allQuestionsAnswered}
+        disabled={!allQuestionsAnswered}
         type="Submit"
         class="text-yellow-500 text-lg"
       >
