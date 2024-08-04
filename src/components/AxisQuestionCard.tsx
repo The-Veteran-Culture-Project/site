@@ -1,9 +1,9 @@
----
-interface Props {
-  question: string;
-}
+import type { TargetedEvent } from "preact/compat";
 
-const { question } = Astro.props;
+type Props = {
+  question: string;
+};
+
 const choices = [
   "Strongly Disagree",
   "Disagree",
@@ -11,17 +11,16 @@ const choices = [
   "Agree",
   "Strongly Agree",
 ];
----
 
-<div
-  class="bg-gray-300 p-4 md:p-8 text-zinc-900 rounded-2xl flex-1 flex-column"
->
-  <h2 class="text-2xl md:text-3xl font-bold pb-4 flex-1">
-    {question}
-  </h2>
-  <div class="flex-column">
-    {
-      choices.map((choice) => (
+const onInput = (event: TargetedEvent<HTMLInputElement>) => {
+  console.log(event.currentTarget.value);
+};
+
+const AxisQuestionCard = ({ question }: Props) => (
+  <div class="bg-gray-300 p-4 md:p-8 text-zinc-900 rounded-2xl flex-1 flex-column my-4">
+    <h2 class="text-2xl md:text-3xl font-bold pb-4 flex-1">{question}</h2>
+    <div class="flex-column">
+      {choices.map((choice) => (
         <div class="flex-1 p-0.5 flex">
           <input
             type="radio"
@@ -29,6 +28,7 @@ const choices = [
             name={question}
             value={choice}
             class="peer/{choice} appearance-none flex"
+            onClick={onInput}
           />
           <label
             for={`${question}-${choice}`}
@@ -37,7 +37,9 @@ const choices = [
             {choice}
           </label>
         </div>
-      ))
-    }
+      ))}
+    </div>
   </div>
-</div>
+);
+
+export default AxisQuestionCard;
