@@ -19,6 +19,7 @@
     "@nanostores/preact": "^0.5.2",
     "astro": "^4.13.1",
     "chart.js": "^4.4.3",
+    "chartjs-plugin-annotation": "^3.0.1",
     "marked": "^12.0.2",
     "nanostores": "^0.11.0",
     "preact": "^10.23.1",
