@@ -3,12 +3,6 @@ import { useStore } from "@nanostores/preact";
 import { answersStore } from "../stores/answersStore.ts";
 import AxisQuestionCard from "./AxisQuestionCard.tsx";
 
-const onSubmit = (event: SubmitEvent) => {
-  event.preventDefault();
-  console.log("submitted");
-  console.log(answersStore.get());
-};
-
 type Props = {
   questions: Array<{ data: { question: string } }>;
 };
@@ -27,21 +21,23 @@ const QuestionForm = ({ questions }: Props) => {
     (q) => answers[q.data.question] !== undefined
   );
   return (
-    <form onSubmit={onSubmit} class="flex flex-col">
+    <div class="flex flex-col">
       {questions.map((q) => (
         <AxisQuestionCard
           question={q.data.question}
           onInputChange={handleInputChange}
         />
       ))}
-      <button
-        disabled={!allQuestionsAnswered}
-        type="Submit"
-        class="text-yellow-500 text-lg"
-      >
-        Submit
-      </button>
-    </form>
+      <a href="/results">
+        <button
+          disabled={!allQuestionsAnswered}
+          type="Submit"
+          class="text-yellow-500 text-lg"
+        >
+          Submit
+        </button>
+      </a>
+    </div>
   );
 };
 
