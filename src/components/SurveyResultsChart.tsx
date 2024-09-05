@@ -96,7 +96,7 @@ const SurveyResultsChart = () => {
                 title: {
                   display: true,
                   text: "Positive Feelings Towards Civilian Life",
-                  color: "#94a3b8",
+                  color: "#f1f5f9",
                 },
                 min: -20,
                 max: 20,

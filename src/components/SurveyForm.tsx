@@ -26,7 +26,7 @@ const QuestionForm = ({ questions }: Props) => {
     (q) => $answers[q.data.question] !== undefined
   );
   return (
-    <div class="flex flex-col">
+    <div class="flex flex-col container-sm mx-auto">
       {questions.map((q) => (
         <AxisQuestionCard
           question={q.data.question}
