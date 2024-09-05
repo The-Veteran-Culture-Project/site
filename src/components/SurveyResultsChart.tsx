@@ -163,7 +163,7 @@ const SurveyResultsChart = () => {
   }, []);
 
   return (
-    <div>
+    <div class="container mx-auto">
       <h2>Survey Results Chart</h2>
       <canvas ref={chartRef}></canvas>
     </div>
