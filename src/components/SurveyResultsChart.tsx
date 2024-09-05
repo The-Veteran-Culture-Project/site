@@ -61,8 +61,8 @@ const SurveyResultsChart = () => {
             ],
           },
           options: {
-            maintainAspectRatio: true,
-            aspectRatio: 1,
+            // maintainAspectRatio: true,
+            // aspectRatio: 1,
             scales: {
               x: {
                 type: "linear",
@@ -145,29 +145,29 @@ const SurveyResultsChart = () => {
                   },
                   label1: {
                     type: "label",
-                    xValue: -10,
-                    yValue: 10,
+                    xValue: -20,
+                    yValue: 20,
                     content: "Separation",
                     color: "#334155",
                   },
                   label2: {
                     type: "label",
-                    xValue: 10,
-                    yValue: 10,
+                    xValue: 20,
+                    yValue: 20,
                     content: "Integration",
                     color: "#334155",
                   },
                   label3: {
                     type: "label",
-                    xValue: -10,
-                    yValue: -10,
+                    xValue: -20,
+                    yValue: -20,
                     content: "Marginalization",
                     color: "#334155",
                   },
                   label4: {
                     type: "label",
-                    xValue: 10,
-                    yValue: -10,
+                    xValue: 20,
+                    yValue: -20,
                     content: "Assimilation",
                     color: "#334155",
                   },
@@ -181,11 +181,9 @@ const SurveyResultsChart = () => {
   }, []);
 
   return (
-    <div class="container flex flex-col items-center content-center mx-auto max-h-screen mb-96">
+    <div class="container flex flex-col items-center content-center mx-auto max-h-screen mb-96 min-w-[700px] overflow-scroll">
       <h2 class="flex text-2xl text-slate-50 p-8 font-bold">Survey Results</h2>
-      <div class="flex h-svh pb-48 px-4 w-svw mx-auto min-w-80 min-h-80">
-        <canvas ref={chartRef}></canvas>
-      </div>
+      <canvas ref={chartRef}></canvas>
     </div>
   );
 };
