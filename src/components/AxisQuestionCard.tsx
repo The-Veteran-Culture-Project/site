@@ -1,4 +1,6 @@
 import type { TargetedEvent } from "preact/compat";
+import { useStore } from "@nanostores/preact";
+import { answersStore } from "../stores/answersStore";
 
 type Props = {
   question: string;
@@ -23,6 +25,8 @@ const AxisQuestionCard = ({
   category,
   onInputChange,
 }: Props) => {
+  const $answers = useStore(answersStore);
+
   const onInput = (event: TargetedEvent<HTMLInputElement>) => {
     const offset = choices[event.currentTarget.value];
     onInputChange(question, axis, offset);
@@ -30,10 +34,12 @@ const AxisQuestionCard = ({
 
   return (
     <div class="bg-gray-300 m-8 p-4 md:p-8 text-zinc-900 rounded-2xl flex-1 flex-column my-4">
-      <h2 class="text-2xl md:text-3xl font-bold pb-4 flex-1">{question}</h2>
-      <div class="flex-column">
+      <h2 class="flex text-2xl md:text-3xl font-bold pb-4 flex-1">
+        {question}
+      </h2>
+      <div class="flex flex-col flex-1">
         {choiceKeys.map((choice) => (
-          <div class="flex-1 p-0.5 flex">
+          <div class="flex flex-1 p-0.5">
             <input
               type="radio"
               id={`${question}-${choice}`}
@@ -41,10 +47,11 @@ const AxisQuestionCard = ({
               value={choice}
               class="peer/{choice} appearance-none flex"
               onClick={onInput}
+              checked={$answers[question]?.offset === choices[choice]}
             />
             <label
               for={`${question}-${choice}`}
-              class="flex-1 font-display peer-checked/{choice}:bg-gradient-to-r from-violet-700 to-purple-500 peer-checked/{choice}:text-slate-100 cursor-pointer p-2 rounded-md"
+              class="flex flex-1 font-display peer-checked/{choice}:bg-gradient-to-r from-violet-700 to-purple-500 peer-checked/{choice}:text-slate-100 cursor-pointer p-2 rounded-md"
             >
               {choice}
             </label>
