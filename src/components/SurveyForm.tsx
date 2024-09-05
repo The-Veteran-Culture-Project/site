@@ -81,7 +81,7 @@ const QuestionForm = ({ questions }: Props) => {
   };
 
   const buttonClass =
-    "flex flex-1 p-4 m-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold grow justify-center min-w-36";
+    "flex flex-1 p-6 m-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold grow justify-center min-w-36";
 
   return (
     <div className="flex flex-col flex-1 container-sm mx-auto">
