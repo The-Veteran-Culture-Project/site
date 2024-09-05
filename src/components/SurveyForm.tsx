@@ -1,5 +1,8 @@
-import { useStore } from "@nanostores/preact";
-import { useEffect, useState } from "preact/hooks";
+import "@/styles/global.css";
+
+import { useStore } from "@nanostores/react";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 import { answersStore } from "../stores/answersStore.ts";
 import AxisQuestionCard from "./AxisQuestionCard.tsx";
@@ -44,14 +47,17 @@ const QuestionForm = ({ questions }: Props) => {
   const $answers = useStore(answersStore);
 
   const allQuestionsAnswered = questions.every(
-    (q) => $answers[q.data.question] !== undefined
+    (q) => $answers[q.data.question] !== undefined,
   );
 
   const categories = Array.from(categoryMap.keys());
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
   const [currentQuestions, setCurrentQuestions] = useState(
-    categoryMap.get(categories[0]) || []
+    categoryMap.get(categories[0]) || [],
+  );
+  const allQuestionsAnsweredForPage = currentQuestions.every(
+    (q) => $answers[q.data.question] !== undefined,
   );
 
   const handleNext = () => {
@@ -78,8 +84,8 @@ const QuestionForm = ({ questions }: Props) => {
     "flex flex-1 p-4 m-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold grow justify-center min-w-36";
 
   return (
-    <div class="flex flex-col container-sm mx-auto">
-      <h2 class="text-slate-50 text-3xl font-bold p-4 text-center">
+    <div className="flex flex-col container-sm mx-auto">
+      <h2 className="text-slate-50 text-3xl font-bold p-4 text-center">
         {currentCategory}
       </h2>
       {currentQuestions.map((q) => (
@@ -88,38 +94,42 @@ const QuestionForm = ({ questions }: Props) => {
           axis={q.data.axis}
           category={q.data.category}
           onInputChange={handleInputChange}
+          key={q.data.question}
         />
       ))}
-      <div class="flex justify-center px-8 flex-wrap">
-        <button
+      <div className="flex justify-center px-8 flex-wrap">
+        <Button
           disabled={currentCategoryIndex === 0}
           onClick={handlePrevious}
-          class={buttonClass}
+          className={buttonClass}
         >
           Previous
-        </button>
+        </Button>
         {currentCategoryIndex != categories.length - 1 && (
-          <button
-            disabled={currentCategoryIndex === categories.length - 1}
+          <Button
+            disabled={
+              !allQuestionsAnsweredForPage ||
+              currentCategoryIndex === categories.length - 1
+            }
             onClick={handleNext}
-            class={buttonClass}
+            className={buttonClass}
           >
             Next
-          </button>
+          </Button>
         )}
         {currentCategoryIndex == categories.length - 1 && (
-          <button
+          <Button
             disabled={!allQuestionsAnswered}
-            type="Submit"
-            class={buttonClass}
+            type="submit"
+            className={buttonClass}
           >
             <a
               href="/results"
-              class={!allQuestionsAnswered ? "pointer-events-none" : ""}
+              className={!allQuestionsAnswered ? "pointer-events-none" : ""}
             >
               Submit Survey
             </a>
-          </button>
+          </Button>
         )}
       </div>
     </div>

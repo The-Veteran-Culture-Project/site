@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "preact/hooks";
+import "@/styles/global.css";
+import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 import annotationPlugin from "chartjs-plugin-annotation";
 
@@ -20,7 +21,7 @@ const getData = () => {
       if (d.axis === "Y") acc.y += d.offset;
       return acc;
     },
-    { x: 0, y: 0 }
+    { x: 0, y: 0 },
   );
 
   console.log(x, y);
@@ -181,8 +182,10 @@ const SurveyResultsChart = () => {
   }, []);
 
   return (
-    <div class="container flex flex-col items-center content-center mx-auto max-h-screen mb-96 min-w-[700px] overflow-scroll">
-      <h2 class="flex text-2xl text-slate-50 p-8 font-bold">Survey Results</h2>
+    <div className="container flex flex-col items-center content-center mx-auto max-h-screen mb-96 min-w-[700px]">
+      <h2 className="flex text-2xl text-slate-50 p-8 font-bold">
+        Survey Results
+      </h2>
       <canvas ref={chartRef}></canvas>
     </div>
   );
