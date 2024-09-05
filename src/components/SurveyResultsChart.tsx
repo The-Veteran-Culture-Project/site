@@ -23,7 +23,20 @@ const getData = () => {
     { x: 0, y: 0 }
   );
 
+  console.log(x, y);
   return [{ x, y }];
+};
+
+const plugin = {
+  id: "customCanvasBackgroundColor",
+  beforeDraw: (chart: any, args: any, options: any) => {
+    const { ctx } = chart;
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = options.color || "#99ffff";
+    ctx.fillRect(0, 0, chart.width, chart.height);
+    ctx.restore();
+  },
 };
 
 const SurveyResultsChart = () => {
@@ -35,18 +48,21 @@ const SurveyResultsChart = () => {
       if (ctx) {
         const data = getData();
         new Chart(ctx, {
+          plugins: [plugin],
           type: "scatter",
           data: {
             datasets: [
               {
                 data,
-                backgroundColor: "#f8fafc",
+                backgroundColor: "#7e22ce",
                 pointRadius: 10,
                 label: "Your Result",
               },
             ],
           },
           options: {
+            maintainAspectRatio: true,
+            aspectRatio: 1,
             scales: {
               x: {
                 type: "linear",
@@ -54,12 +70,12 @@ const SurveyResultsChart = () => {
                 title: {
                   display: true,
                   text: "Negative Feelings Towards Military Experience",
-                  color: "#f1f5f9",
+                  color: "#334155",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
-                  color: "#94a3b8",
+                  color: "#64748b",
                 },
               },
               top: {
@@ -68,12 +84,12 @@ const SurveyResultsChart = () => {
                 title: {
                   display: true,
                   text: "Positive Feelings Towards Military Experience",
-                  color: "#f1f5f9",
+                  color: "#334155",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
-                  color: "#94a3b8",
+                  color: "#64748b",
                 },
               },
               y: {
@@ -82,12 +98,12 @@ const SurveyResultsChart = () => {
                 title: {
                   display: true,
                   text: "Negative Feelings Towards Civilian Life",
-                  color: "#f1f5f9",
+                  color: "#334155",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
-                  color: "#94a3b8",
+                  color: "#64748b",
                 },
               },
               right: {
@@ -96,12 +112,12 @@ const SurveyResultsChart = () => {
                 title: {
                   display: true,
                   text: "Positive Feelings Towards Civilian Life",
-                  color: "#f1f5f9",
+                  color: "#334155",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
-                  color: "#94a3b8",
+                  color: "#64748b",
                 },
               },
             },
@@ -109,49 +125,51 @@ const SurveyResultsChart = () => {
               legend: {
                 display: false,
               },
+              // @ts-ignore
+              customCanvasBackgroundColor: { color: "#e2e8f0" },
               annotation: {
                 annotations: {
                   line1: {
                     type: "line",
                     xMin: 0,
                     xMax: 0,
-                    borderColor: "#a78bfa",
+                    borderColor: "#475569",
                     borderWidth: 3,
                   },
                   line2: {
                     type: "line",
                     yMin: 0,
                     yMax: 0,
-                    borderColor: "#a78bfa",
+                    borderColor: "#475569",
                     borderWidth: 3,
                   },
                   label1: {
                     type: "label",
-                    xValue: -5,
-                    yValue: 5,
+                    xValue: -10,
+                    yValue: 10,
                     content: "Separation",
-                    color: "#94a3b8",
+                    color: "#334155",
                   },
                   label2: {
                     type: "label",
-                    xValue: 5,
-                    yValue: 5,
+                    xValue: 10,
+                    yValue: 10,
                     content: "Integration",
-                    color: "#94a3b8",
+                    color: "#334155",
                   },
                   label3: {
                     type: "label",
-                    xValue: -5,
-                    yValue: -5,
+                    xValue: -10,
+                    yValue: -10,
                     content: "Marginalization",
-                    color: "#94a3b8",
+                    color: "#334155",
                   },
                   label4: {
                     type: "label",
-                    xValue: 5,
-                    yValue: -5,
+                    xValue: 10,
+                    yValue: -10,
                     content: "Assimilation",
-                    color: "#94a3b8",
+                    color: "#334155",
                   },
                 },
               },
@@ -163,9 +181,11 @@ const SurveyResultsChart = () => {
   }, []);
 
   return (
-    <div class="container mx-auto">
-      <h2>Survey Results Chart</h2>
-      <canvas ref={chartRef}></canvas>
+    <div class="container flex flex-col items-center content-center mx-auto max-h-screen mb-96">
+      <h2 class="flex text-2xl text-slate-50 p-8 font-bold">Survey Results</h2>
+      <div class="flex h-svh pb-48 px-4 w-svw mx-auto min-w-80 min-h-80">
+        <canvas ref={chartRef}></canvas>
+      </div>
     </div>
   );
 };
