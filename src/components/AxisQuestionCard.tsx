@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type Props = {
+  questionNumber: number;
   question: string;
   axis: string;
   category: string;
@@ -23,6 +24,7 @@ const choices: { [key: string]: number } = {
 const choiceKeys = Object.keys(choices);
 
 const AxisQuestionCard = ({
+  questionNumber,
   question,
   axis,
   category,
@@ -38,7 +40,7 @@ const AxisQuestionCard = ({
   return (
     <Card className="m-4 flex flex-col flex-1">
       <CardHeader className="flex flex-1">
-        <CardTitle>{question}</CardTitle>
+        <CardTitle>{`${questionNumber}. ${question}`}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1">
         <RadioGroup onValueChange={onInput(question, axis)}>

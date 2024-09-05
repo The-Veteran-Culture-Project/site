@@ -88,16 +88,15 @@ const QuestionForm = ({ questions }: Props) => {
       <h2 className="text-slate-50 text-3xl font-bold p-4 text-center">
         {currentCategory}
       </h2>
-      {currentQuestions.map((q) => (
-        <div className="flex flex-1">
-          <AxisQuestionCard
-            question={q.data.question}
-            axis={q.data.axis}
-            category={q.data.category}
-            onInputChange={handleInputChange}
-            key={q.data.question}
-          />
-        </div>
+      {currentQuestions.map((q, idx) => (
+        <AxisQuestionCard
+          questionNumber={idx + 1}
+          question={q.data.question}
+          axis={q.data.axis}
+          category={q.data.category}
+          onInputChange={handleInputChange}
+          key={q.data.question}
+        />
       ))}
       <div className="flex justify-center px-8 flex-wrap">
         <Button

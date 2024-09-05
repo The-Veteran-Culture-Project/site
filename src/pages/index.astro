@@ -17,19 +17,17 @@ const { title, body, disclaimer } = content;
       class="container mx-auto prose prose-headings:font-display md:prose-xl prose-invert py-6 prose-headings:font-light"
       set:html={marked.parse(body)}
     />
-    <div class="flex sm:m-12 justify-center">
-      <a class="flex" href="/survey"
-        ><Button
-          className="bg-gradient-to-r from-violet-700 to-purple-500 sm:text-3xl text-xl font-bold rounded-lg sm:p-6 p-4 font-display"
-        >
-          TAKE THE SURVEY
-        </Button>
-      </a>
-    </div>
-    <div class="flex justify-center">
-      <p class="flex p-8 text-center text-slate-400 italic max-w-prose">
-        {disclaimer}
-      </p>
+    <div class="flex flex-col m-12 justify-center items-center">
+      <Button
+        className="flex bg-gradient-to-r from-violet-700 to-purple-500 sm:text-3xl text-xl font-bold rounded-lg sm:p-8 font-display p-6 max-w-fit"
+      >
+        <a class="flex" href="/survey">TAKE THE SURVEY </a>
+      </Button>
+      <div class="flex justify-center">
+        <p class="flex p-8 text-center text-slate-400 italic max-w-prose">
+          {disclaimer}
+        </p>
+      </div>
     </div>
   </main>
 </Layout>

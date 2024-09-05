@@ -1,16 +1,26 @@
 import "@/styles/global.css";
-import { useEffect, useRef } from "react";
-import Chart from "chart.js/auto";
-import annotationPlugin from "chartjs-plugin-annotation";
+import {
+  ScatterChart,
+  XAxis,
+  YAxis,
+  Scatter,
+  CartesianGrid,
+  Legend,
+  ReferenceLine,
+  Label,
+} from "recharts";
+import {
+  ChartTooltipContent,
+  ChartTooltip,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 
 import { answersStore } from "../stores/answersStore.ts";
 
-Chart.register(annotationPlugin);
-Chart.defaults.font = {
-  size: 16,
-  weight: "bold",
-  family: "Arial",
-};
+const chartConfig = {} satisfies ChartConfig;
 
 const getData = () => {
   const data = Object.values(answersStore.get());
@@ -28,165 +38,64 @@ const getData = () => {
   return [{ x, y }];
 };
 
-const plugin = {
-  id: "customCanvasBackgroundColor",
-  beforeDraw: (chart: any, args: any, options: any) => {
-    const { ctx } = chart;
-    ctx.save();
-    ctx.globalCompositeOperation = "destination-over";
-    ctx.fillStyle = options.color || "#99ffff";
-    ctx.fillRect(0, 0, chart.width, chart.height);
-    ctx.restore();
-  },
+const renderText = (value: string, entry: any) => {
+  const { color } = entry;
+  return (
+    <span style={{ color }} className="text-lg text-purple">
+      {value}
+    </span>
+  );
+};
+
+const getDomain = (data: Array<{ x: number; y: number }>) => {
+  const xValues = data.map((d) => d.x);
+  const yValues = data.map((d) => d.y);
+
+  const xMin = Math.min(...xValues);
+  const xMax = Math.max(...xValues);
+  const yMin = Math.min(...yValues);
+  const yMax = Math.max(...yValues);
+
+  const domain = [Math.min(xMin, yMin) - 5, Math.max(xMax, yMax) + 5];
+
+  return domain;
 };
 
 const SurveyResultsChart = () => {
-  // const chartRef = useRef<HTMLCanvasElement>(null);
-
-  // useEffect(() => {
-  //   if (chartRef.current) {
-  //     const ctx = chartRef.current.getContext("2d");
-  //     if (ctx) {
-  //       const data = getData();
-  //       new Chart(ctx, {
-  //         plugins: [plugin],
-  //         type: "scatter",
-  //         data: {
-  //           datasets: [
-  //             {
-  //               data,
-  //               backgroundColor: "#7e22ce",
-  //               pointRadius: 10,
-  //               label: "Your Result",
-  //             },
-  //           ],
-  //         },
-  //         options: {
-  //           // maintainAspectRatio: true,
-  //           // aspectRatio: 1,
-  //           scales: {
-  //             x: {
-  //               type: "linear",
-  //               position: "bottom",
-  //               title: {
-  //                 display: true,
-  //                 text: "Negative Feelings Towards Military Experience",
-  //                 color: "#334155",
-  //               },
-  //               min: -40,
-  //               max: 40,
-  //               ticks: {
-  //                 color: "#64748b",
-  //               },
-  //             },
-  //             top: {
-  //               type: "linear",
-  //               position: "top",
-  //               title: {
-  //                 display: true,
-  //                 text: "Positive Feelings Towards Military Experience",
-  //                 color: "#334155",
-  //               },
-  //               min: -40,
-  //               max: 40,
-  //               ticks: {
-  //                 color: "#64748b",
-  //               },
-  //             },
-  //             y: {
-  //               type: "linear",
-  //               position: "left",
-  //               title: {
-  //                 display: true,
-  //                 text: "Negative Feelings Towards Civilian Life",
-  //                 color: "#334155",
-  //               },
-  //               min: -40,
-  //               max: 40,
-  //               ticks: {
-  //                 color: "#64748b",
-  //               },
-  //             },
-  //             right: {
-  //               type: "linear",
-  //               position: "right",
-  //               title: {
-  //                 display: true,
-  //                 text: "Positive Feelings Towards Civilian Life",
-  //                 color: "#334155",
-  //               },
-  //               min: -40,
-  //               max: 40,
-  //               ticks: {
-  //                 color: "#64748b",
-  //               },
-  //             },
-  //           },
-  //           plugins: {
-  //             legend: {
-  //               display: false,
-  //             },
-  //             // @ts-ignore
-  //             customCanvasBackgroundColor: { color: "#e2e8f0" },
-  //             annotation: {
-  //               annotations: {
-  //                 line1: {
-  //                   type: "line",
-  //                   xMin: 0,
-  //                   xMax: 0,
-  //                   borderColor: "#475569",
-  //                   borderWidth: 3,
-  //                 },
-  //                 line2: {
-  //                   type: "line",
-  //                   yMin: 0,
-  //                   yMax: 0,
-  //                   borderColor: "#475569",
-  //                   borderWidth: 3,
-  //                 },
-  //                 label1: {
-  //                   type: "label",
-  //                   xValue: -20,
-  //                   yValue: 20,
-  //                   content: "Separation",
-  //                   color: "#334155",
-  //                 },
-  //                 label2: {
-  //                   type: "label",
-  //                   xValue: 20,
-  //                   yValue: 20,
-  //                   content: "Integration",
-  //                   color: "#334155",
-  //                 },
-  //                 label3: {
-  //                   type: "label",
-  //                   xValue: -20,
-  //                   yValue: -20,
-  //                   content: "Marginalization",
-  //                   color: "#334155",
-  //                 },
-  //                 label4: {
-  //                   type: "label",
-  //                   xValue: 20,
-  //                   yValue: -20,
-  //                   content: "Assimilation",
-  //                   color: "#334155",
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         },
-  //       });
-  //     }
-  //   }
-  // }, []);
-
+  const data = getData();
+  const domain = getDomain(data);
   return (
-    <div className="container flex flex-col items-center content-center mx-auto max-h-screen mb-96 min-w-[700px]">
-      <h2 className="flex text-2xl text-slate-50 p-8 font-bold">
-        Survey Results
-      </h2>
-      {/* <canvas ref={chartRef}></canvas> */}
+    <div className="container mx-auto p-8">
+      <ChartContainer config={chartConfig} className="min-h-[200]px">
+        <ScatterChart>
+          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+          <XAxis
+            tickLine={false}
+            axisLine={false}
+            type="number"
+            tickMargin={8}
+            dataKey="x"
+            name="Civilian"
+            domain={domain}
+          />
+          <YAxis
+            tickLine={false}
+            axisLine={false}
+            type="number"
+            tickMargin={8}
+            dataKey="y"
+            name="Military"
+            domain={domain}
+          />
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent hideLabel />}
+          />
+          <Scatter name="You're Result" data={data} fill="#7e22ce" />
+          <ReferenceLine x={0} stroke="#64748b" strokeWidth="2" />
+          <ReferenceLine y={0} stroke="#64748b" strokeWidth="2" />
+        </ScatterChart>
+      </ChartContainer>
     </div>
   );
 };
