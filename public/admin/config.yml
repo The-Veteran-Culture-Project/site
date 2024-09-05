@@ -68,19 +68,3 @@ collections:
               "Mental Health & Addiction ",
             ],
         }
-  - name: "multiple_choice_questions"
-    label: "Multiple Choice Questions"
-    label_singular: MC Question
-    folder: "src/content/multiChoiceQuestions"
-    create: true
-    description: "Create and edit multiple choice questions"
-    extension: json
-    format: json
-    preview_path: "/questions"
-    identifier_field: question
-    fields:
-      - { label: "Question", name: "question", widget: "text" }
-      - { label: "A", name: "choice_a", widget: "string" }
-      - { label: "B", name: "choice_b", widget: "string" }
-      - { label: "C", name: "choice_c", widget: "string" }
-      - { label: "D", name: "choice_d", widget: "string" }
