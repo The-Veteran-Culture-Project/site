@@ -2,28 +2,38 @@ import type { TargetedEvent } from "preact/compat";
 
 type Props = {
   question: string;
+  axis: string;
+  category: string;
   onInputChange: (question: string, axis: string, offset: number) => void;
 };
 
-const choices = [
-  "Strongly Disagree",
-  "Disagree",
-  "Neutral",
-  "Agree",
-  "Strongly Agree",
-];
+const choices: { [key: string]: number } = {
+  "Strongly Disagree": -2,
+  Disagree: -1,
+  Neutral: 0,
+  Agree: 1,
+  "Strongly Agree": 2,
+};
 
-const AxisQuestionCard = ({ question, onInputChange }: Props) => {
+const choiceKeys = Object.keys(choices);
+
+const AxisQuestionCard = ({
+  question,
+  axis,
+  category,
+  onInputChange,
+}: Props) => {
   const onInput = (event: TargetedEvent<HTMLInputElement>) => {
-    console.log(event.currentTarget.value);
-    onInputChange(question, "x", 0);
+    console.log({ event: event.currentTarget.value, axis, category });
+    const offset = choices[event.currentTarget.value];
+    onInputChange(question, axis, 0);
   };
 
   return (
     <div class="bg-gray-300 m-8 p-4 md:p-8 text-zinc-900 rounded-2xl flex-1 flex-column my-4">
       <h2 class="text-2xl md:text-3xl font-bold pb-4 flex-1">{question}</h2>
       <div class="flex-column">
-        {choices.map((choice) => (
+        {choiceKeys.map((choice) => (
           <div class="flex-1 p-0.5 flex">
             <input
               type="radio"

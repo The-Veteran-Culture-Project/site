@@ -4,7 +4,9 @@ import { answersStore } from "../stores/answersStore.ts";
 import AxisQuestionCard from "./AxisQuestionCard.tsx";
 
 type Props = {
-  questions: Array<{ data: { question: string } }>;
+  questions: Array<{
+    data: { question: string; axis: string; category: string };
+  }>;
 };
 
 const handleInputChange = (question: string, axis: string, offset: number) => {
@@ -25,6 +27,8 @@ const QuestionForm = ({ questions }: Props) => {
       {questions.map((q) => (
         <AxisQuestionCard
           question={q.data.question}
+          axis={q.data.axis}
+          category={q.data.category}
           onInputChange={handleInputChange}
         />
       ))}
