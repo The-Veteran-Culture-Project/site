@@ -12,8 +12,15 @@ Chart.defaults.font = {
 };
 
 const getData = () => {
-  const x = 2;
-  const y = 10;
+  const data = Object.values(answersStore.get());
+  console.log(data);
+  const x = data
+    .filter((d) => d.axis === "X")
+    .reduce((acc, d) => acc + d.offset, 0);
+  const y = data
+    .filter((d) => d.axis === "Y")
+    .reduce((acc, d) => acc + d.offset, 0);
+  console.log(x, y);
   return [{ x, y }];
 };
 

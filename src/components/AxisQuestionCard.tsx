@@ -24,9 +24,8 @@ const AxisQuestionCard = ({
   onInputChange,
 }: Props) => {
   const onInput = (event: TargetedEvent<HTMLInputElement>) => {
-    console.log({ event: event.currentTarget.value, axis, category });
     const offset = choices[event.currentTarget.value];
-    onInputChange(question, axis, 0);
+    onInputChange(question, axis, offset);
   };
 
   return (
