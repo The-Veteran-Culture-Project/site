@@ -23,6 +23,7 @@ const getData = () => {
     { x: 0, y: 0 }
   );
 
+  console.log(x, y);
   return [{ x, y }];
 };
 
@@ -47,6 +48,8 @@ const SurveyResultsChart = () => {
             ],
           },
           options: {
+            maintainAspectRatio: true,
+            aspectRatio: 1,
             scales: {
               x: {
                 type: "linear",
@@ -56,8 +59,8 @@ const SurveyResultsChart = () => {
                   text: "Negative Feelings Towards Military Experience",
                   color: "#f1f5f9",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
                   color: "#94a3b8",
                 },
@@ -70,8 +73,8 @@ const SurveyResultsChart = () => {
                   text: "Positive Feelings Towards Military Experience",
                   color: "#f1f5f9",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
                   color: "#94a3b8",
                 },
@@ -84,8 +87,8 @@ const SurveyResultsChart = () => {
                   text: "Negative Feelings Towards Civilian Life",
                   color: "#f1f5f9",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
                   color: "#94a3b8",
                 },
@@ -98,8 +101,8 @@ const SurveyResultsChart = () => {
                   text: "Positive Feelings Towards Civilian Life",
                   color: "#f1f5f9",
                 },
-                min: -20,
-                max: 20,
+                min: -40,
+                max: 40,
                 ticks: {
                   color: "#94a3b8",
                 },
@@ -163,9 +166,9 @@ const SurveyResultsChart = () => {
   }, []);
 
   return (
-    <div class="container mx-auto">
+    <div class="container mx-auto max-h-screen pt-4 pb-36">
       <h2>Survey Results Chart</h2>
-      <canvas ref={chartRef}></canvas>
+      <canvas class="mx-auto" ref={chartRef}></canvas>
     </div>
   );
 };

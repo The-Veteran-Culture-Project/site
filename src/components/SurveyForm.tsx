@@ -3,12 +3,30 @@ import { useEffect } from "preact/hooks";
 
 import { answersStore } from "../stores/answersStore.ts";
 import AxisQuestionCard from "./AxisQuestionCard.tsx";
-import { use } from "marked";
+
+type question = {
+  data: {
+    question: string;
+    axis: string;
+    category: string;
+  };
+};
 
 type Props = {
-  questions: Array<{
-    data: { question: string; axis: string; category: string };
-  }>;
+  questions: Array<question>;
+};
+
+const buildCategoryMap = (questions: Array<question>) => {
+  return questions.reduce((acc, q) => {
+    const category = q.data.category;
+    if (!acc.has(category)) {
+      acc.set(category, []);
+    }
+
+    acc.get(category).push(q);
+
+    return acc;
+  }, new Map());
 };
 
 const handleInputChange = (question: string, axis: string, offset: number) => {
@@ -20,11 +38,16 @@ const QuestionForm = ({ questions }: Props) => {
     answersStore.set({});
   }, []);
 
+  const categoryMap: Map<string, Array<string>> = questions.reduce((acc, q) => {
+    return acc;
+  }, new Map());
+
   const $answers = useStore(answersStore);
-  console.log($answers);
+
   const allQuestionsAnswered = questions.every(
     (q) => $answers[q.data.question] !== undefined
   );
+
   return (
     <div class="flex flex-col container-sm mx-auto">
       {questions.map((q) => (
