@@ -44,6 +44,30 @@ collections:
         name: footer
         fields:
           - { label: "Center Text", name: "center_text", widget: "string" }
+  - name: "axis_questions"
+    label: "Axis Questions"
+    label_singular: Axis Question
+    folder: "src/content/axisQuestions"
+    create: true
+    description: "Create and edit axis questions"
+    extension: json
+    format: json
+    preview_path: "/questions"
+    identifier_field: question
+    fields:
+      - { label: "Question", name: "question", widget: "text" }
+      - { label: "Axis", name: "axis", widget: "select", options: ["X", "Y"] }
+      - {
+          label: "Category",
+          name: "category",
+          widget: "select",
+          options:
+            [
+              "Civilian & Military Relationships",
+              "Patriotism & Purpose",
+              "Mental Health & Addiction ",
+            ],
+        }
   - name: "multiple_choice_questions"
     label: "Multiple Choice Questions"
     label_singular: MC Question
