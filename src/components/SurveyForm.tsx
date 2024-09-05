@@ -47,17 +47,17 @@ const QuestionForm = ({ questions }: Props) => {
   const $answers = useStore(answersStore);
 
   const allQuestionsAnswered = questions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const categories = Array.from(categoryMap.keys());
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
   const [currentQuestions, setCurrentQuestions] = useState(
-    categoryMap.get(categories[0]) || [],
+    categoryMap.get(categories[0]) || []
   );
   const allQuestionsAnsweredForPage = currentQuestions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const handleNext = () => {
@@ -84,18 +84,20 @@ const QuestionForm = ({ questions }: Props) => {
     "flex flex-1 p-4 m-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold grow justify-center min-w-36";
 
   return (
-    <div className="flex flex-col container-sm mx-auto">
+    <div className="flex flex-col flex-1 container-sm mx-auto">
       <h2 className="text-slate-50 text-3xl font-bold p-4 text-center">
         {currentCategory}
       </h2>
       {currentQuestions.map((q) => (
-        <AxisQuestionCard
-          question={q.data.question}
-          axis={q.data.axis}
-          category={q.data.category}
-          onInputChange={handleInputChange}
-          key={q.data.question}
-        />
+        <div className="flex flex-1">
+          <AxisQuestionCard
+            question={q.data.question}
+            axis={q.data.axis}
+            category={q.data.category}
+            onInputChange={handleInputChange}
+            key={q.data.question}
+          />
+        </div>
       ))}
       <div className="flex justify-center px-8 flex-wrap">
         <Button

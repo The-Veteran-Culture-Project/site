@@ -36,11 +36,11 @@ const AxisQuestionCard = ({
   };
 
   return (
-    <Card className="m-4">
-      <CardHeader>
+    <Card className="m-4 flex flex-col flex-1">
+      <CardHeader className="flex flex-1">
         <CardTitle>{question}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-1">
         <RadioGroup onValueChange={onInput(question, axis)}>
           {choiceKeys.map((choice) => (
             <div
