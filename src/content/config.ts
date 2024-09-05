@@ -11,6 +11,16 @@ const multipleChoiceQuestionsCollection = defineCollection({
   }),
 });
 
+const axisQuestion = defineCollection({
+  type: "data",
+  schema: z.object({
+    question: z.string(),
+    category: z.string(),
+    axis: z.enum(["X", "Y"]),
+  }),
+});
+
 export const collections = {
   multiChoiceQuestions: multipleChoiceQuestionsCollection,
+  axisQuestions: axisQuestion,
 };
