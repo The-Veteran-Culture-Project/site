@@ -20,7 +20,7 @@ const AxisQuestionCard = ({ question, onInputChange }: Props) => {
   };
 
   return (
-    <div class="bg-gray-300 p-4 md:p-8 text-zinc-900 rounded-2xl flex-1 flex-column my-4">
+    <div class="bg-gray-300 m-8 p-4 md:p-8 text-zinc-900 rounded-2xl flex-1 flex-column my-4">
       <h2 class="text-2xl md:text-3xl font-bold pb-4 flex-1">{question}</h2>
       <div class="flex-column">
         {choices.map((choice) => (

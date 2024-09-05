@@ -28,13 +28,13 @@ const QuestionForm = ({ questions }: Props) => {
           onInputChange={handleInputChange}
         />
       ))}
-      <a href="/results">
+      <a href="/results" class="flex justify-center">
         <button
           disabled={!allQuestionsAnswered}
           type="Submit"
-          class="text-yellow-500 text-lg"
+          class="flex p-4 m-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold"
         >
-          Submit
+          Submit Survey
         </button>
       </a>
     </div>
