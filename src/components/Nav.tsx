@@ -4,17 +4,14 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { ModeToggle } from "@/components/ModeToggle";
+import { LinkInfo } from "@/types";
 
-type LinkInfo = {
-  name: string;
-  path: string;
+type Props = {
+  links: LinkInfo[];
 };
 
-const links: LinkInfo[] = [
-  { name: "Home", path: "/" },
-  { name: "About", path: "/about" },
-];
-export const Nav = () => {
+export const Nav = ({ links }: Props) => {
   return (
     <div className="flex text-center">
       <NavigationMenu>
@@ -30,6 +27,7 @@ export const Nav = () => {
           })}
         </NavigationMenuList>
       </NavigationMenu>
+      <ModeToggle />
     </div>
   );
 };

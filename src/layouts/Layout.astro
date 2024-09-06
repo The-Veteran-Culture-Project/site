@@ -1,8 +1,9 @@
 ---
 import "@/styles/global.css";
 
-import { ModeToggle } from "@/components/ModeToggle";
-import { Nav } from "../components/Nav.tsx";
+import { LinkInfo } from "@/types.ts";
+import { Nav } from "@/components/Nav.tsx";
+import { HamburgerNavDrawer } from "@/components/HambergerNavDrawer";
 interface Props {
   title: string;
   isLandingPage: boolean;
@@ -11,9 +12,15 @@ interface Props {
 const { title, isLandingPage } = Astro.props;
 
 const baseheaderStyle = "hover:cursor-pointer m-4 flex flex-auto";
+
 const headerStyle = isLandingPage
   ? `${baseheaderStyle} max-w-96`
   : `${baseheaderStyle} max-w-64`;
+
+const links: LinkInfo[] = [
+  { name: "Home", path: "/" },
+  { name: "About", path: "/about" },
+];
 ---
 
 <script is:inline>
@@ -56,9 +63,7 @@ const headerStyle = isLandingPage
   </head>
   <body class="dark:bg-zinc-950 flex flex-col">
     <div class="flex flex-auto mb-20 mt-4">
-      <div
-        class="flex flex-row flex-wrap justify-between container mx-auto max-w-5xl"
-      >
+      <div class="container flex flex-row flex-wrap justify-between mx-auto">
         <div class={headerStyle}>
           <a href="/" class="flex flex-auto">
             <svg
@@ -77,9 +82,11 @@ const headerStyle = isLandingPage
             >
           </a>
         </div>
-        <div class="flex items-center">
-          <Nav />
-          <ModeToggle client:load />
+        <div class="visible md:invisible flex">
+          <HamburgerNavDrawer links={links} client:load />
+        </div>
+        <div class="invisible md:visible flex items-center">
+          <Nav links={links} client:load />
         </div>
       </div>
     </div>
