@@ -20,10 +20,11 @@ const headerStyle = isLandingPage
 const links: LinkInfo[] = [
   { name: "Home", path: "/" },
   { name: "About", path: "/about" },
+  { name: "Team", path: "/team" },
 ];
 ---
 
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="Home of the Veteran Culture Project." />
@@ -37,7 +38,7 @@ const links: LinkInfo[] = [
       rel="stylesheet"
     />
   </head>
-  <body class="dark:bg-zinc-950 flex flex-col">
+  <body class="flex flex-col">
     <div class="flex flex-auto mb-6 md:mb-20 mt-4">
       <div class="container flex flex-row flex-wrap justify-between mx-auto">
         <div class={headerStyle}>
@@ -67,5 +68,10 @@ const links: LinkInfo[] = [
       </div>
     </div>
     <slot class="flex flex-auto" />
+    <footer class="flex flex-shrink-0 mx-auto">
+      <span class="flex justify-center p-4 text-sm dark:text-slate-100">
+        &copy; {new Date().getFullYear()} The Veteran Culture Project
+      </span>
+    </footer>
   </body>
 </html>

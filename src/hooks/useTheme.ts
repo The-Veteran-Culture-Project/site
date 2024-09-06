@@ -46,7 +46,15 @@ const useTheme = () => {
     };
   }, [theme]);
 
-  return { theme, setTheme };
+  const isDarkMode = useCallback((): boolean => {
+    return (
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    );
+  }, [theme]);
+
+  return { theme, setTheme, isDarkMode };
 };
 
 export default useTheme;

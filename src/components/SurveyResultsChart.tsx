@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   ReferenceLine,
   ReferenceArea,
+  Label,
 } from "recharts";
 import {
   ChartTooltipContent,
@@ -16,11 +17,32 @@ import {
 import { ChartContainer } from "@/components/ui/chart";
 
 import { answersStore } from "../stores/answersStore.ts";
+import useTheme from "@/hooks/useTheme";
 
 const chartConfig = {} satisfies ChartConfig;
 
-const chartStyles = {
-  scatterColor: "#e4e4e7",
+const chartLightStyles = {
+  scatterColor: "#991b1b",
+  quadrantColor: "#756943",
+  axisColor: "#52525b",
+  gridColor: "#52525b",
+  labelStyle: {
+    fill: "#52525b",
+    "font-size": "3vw",
+    "font-weight": "bold",
+  },
+};
+
+const chartDarkStyles = {
+  scatterColor: "#f87171",
+  quadrantColor: "#c3b997",
+  axisColor: "#d4d4d8",
+  gridColor: "#d4d4d8",
+  labelStyle: {
+    fill: "text-primary",
+    "font-size": "3vw",
+    "font-weight": "bold",
+  },
 };
 
 const getData = () => {
@@ -34,7 +56,8 @@ const getData = () => {
     },
     { x: 0, y: 0 }
   );
-  return [{ x, y }];
+  // return [{ x, y }];
+  return [{ x: -5, y: -2 }];
 };
 
 const getDomain = (data: Array<{ x: number; y: number }>) => {
@@ -54,22 +77,43 @@ const getDomain = (data: Array<{ x: number; y: number }>) => {
   return domain;
 };
 
+const getAreaFillForQuadrant = (
+  quadrant: number,
+  point: { x: number; y: number }
+) => {
+  if (quadrant === 1) {
+    return point.x <= 0 && point.y >= 0 ? 0.3 : 0.0;
+  }
+  if (quadrant === 2) {
+    return point.x >= 0 && point.y >= 0 ? 0.3 : 0.0;
+  }
+  if (quadrant === 3) {
+    return point.x >= 0 && point.y <= 0 ? 0.3 : 0.0;
+  }
+  if (quadrant === 4) {
+    return point.x <= 0 && point.y <= 0 ? 0.3 : 0.0;
+  }
+};
+
 const SurveyResultsChart = () => {
   const data = getData();
   const domain = getDomain(data);
+  const { isDarkMode } = useTheme();
+
+  const styles = isDarkMode() ? chartDarkStyles : chartLightStyles;
+
   return (
     <div className="container mx-auto p-8">
-      <ChartContainer
-        config={chartConfig}
-        className="min-h-[200]px bg-zinc-800"
-      >
+      <ChartContainer config={chartConfig} className="min-h-[200]px">
         <ScatterChart>
-          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            opacity={0.4}
+            stroke={styles.gridColor}
+          />
           <ZAxis type="number" dataKey="z" range={[500, 600]} />
           <XAxis
             hide={true}
-            tickLine={false}
-            axisLine={false}
             type="number"
             dataKey="x"
             name="Civilian"
@@ -77,53 +121,56 @@ const SurveyResultsChart = () => {
           />
           <YAxis
             hide={true}
-            tickLine={false}
-            axisLine={false}
             type="number"
             dataKey="y"
             name="Military"
             domain={domain}
           />
-          <ReferenceLine x={0} stroke="#64748b" strokeWidth="2" />
-          <ReferenceLine y={0} stroke="#64748b" strokeWidth="2" />
+          <ReferenceLine x={0} stroke={styles.axisColor} strokeWidth="2" />
+          <ReferenceLine y={0} stroke={styles.axisColor} strokeWidth="2" />
           <ReferenceArea
-            fill="#fde047"
-            fillOpacity={0.1}
+            fill={styles.quadrantColor}
+            fillOpacity={getAreaFillForQuadrant(1, data[0])}
             x1={domain[0]}
             x2={0}
             y1={0}
             y2={domain[1]}
-            label="Separation"
-          />
+          >
+            <Label value="Separation" style={styles.labelStyle} />
+          </ReferenceArea>
           <ReferenceArea
-            fill="#a5b4fc"
-            fillOpacity={0.1}
+            fill={styles.quadrantColor}
+            fillOpacity={getAreaFillForQuadrant(2, data[0])}
             x1={0}
             x2={domain[1]}
             y1={0}
             y2={domain[1]}
-            label="Integration"
             isFront={false}
-          />
+          >
+            <Label value="Integration" style={styles.labelStyle} />
+          </ReferenceArea>
           <ReferenceArea
-            fill="#fca5a5"
-            fillOpacity={0.1}
+            fill={styles.quadrantColor}
+            fillOpacity={getAreaFillForQuadrant(3, data[0])}
             x1={0}
             x2={domain[1]}
             y1={domain[0]}
             y2={0}
-            label="Assimilation"
             style={{ fontSize: "20rem" }}
-          />
+          >
+            <Label value="Assimilation" style={styles.labelStyle} />
+          </ReferenceArea>
           <ReferenceArea
-            fill="#67e8f9"
-            fillOpacity={0.1}
+            fill={styles.quadrantColor}
+            fillOpacity={getAreaFillForQuadrant(4, data[0])}
             x1={domain[0]}
             x2={0}
             y1={domain[0]}
             y2={0}
-            label="Marginalization"
-          />
+            style={{ color: "red" }}
+          >
+            <Label value="Marginalization" style={styles.labelStyle} />
+          </ReferenceArea>
           <ChartTooltip
             cursor={{ strokeDasharray: "3 3" }}
             content={<ChartTooltipContent />}
@@ -131,7 +178,7 @@ const SurveyResultsChart = () => {
           <Scatter
             name="You're Result"
             data={data}
-            fill={chartStyles.scatterColor}
+            fill={styles.scatterColor}
           />
         </ScatterChart>
       </ChartContainer>

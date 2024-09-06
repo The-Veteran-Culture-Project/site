@@ -6,13 +6,11 @@ import Layout from "../layouts/Layout.astro";
 import content from "../content/pages/home.json";
 import { Button } from "@/components/ui/button";
 
-const { title, body, disclaimer } = content;
+const { body, disclaimer } = content;
 ---
 
 <Layout title="The Veteran Culture Project" isLandingPage={true}>
-  <main
-    class="flex flex-col container mx-auto dark:text-slate-100 justify-center px-4"
-  >
+  <main class="flex flex-col flex-1 container mx-auto justify-center px-4">
     <article
       class="container mx-auto prose prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-light prose-zinc"
       set:html={marked.parse(body)}
