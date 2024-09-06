@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 
 import { answersStore } from "../stores/answersStore.ts";
 import AxisQuestionCard from "./AxisQuestionCard.tsx";
-import { SurveyQuestionCard } from "./survey-question-card.tsx";
 import SurveyProgressBar from "./SurveyProgressBar.tsx";
 
 type question = {
@@ -93,22 +92,14 @@ const QuestionForm = ({ questions }: Props) => {
         totalSteps={categories.length}
       />
       {currentQuestions.map((q, idx) => (
-        <div className="flex flex-1">
-          <SurveyQuestionCard
-            question={q.data.question}
-            questionNumber={idx + 1}
-            axis={q.data.axis}
-            onInputChange={handleInputChange}
-          />
-        </div>
-        // <AxisQuestionCard
-        //   questionNumber={idx + 1}
-        //   question={q.data.question}
-        //   axis={q.data.axis}
-        //   category={q.data.category}
-        //   onInputChange={handleInputChange}
-        //   key={q.data.question}
-        // />
+        <AxisQuestionCard
+          questionNumber={idx + 1}
+          question={q.data.question}
+          axis={q.data.axis}
+          category={q.data.category}
+          onInputChange={handleInputChange}
+          key={q.data.question}
+        />
       ))}
       <div className="flex justify-center flex-wrap-reverse min-w-50 py-4">
         {currentCategoryIndex != 0 && (
