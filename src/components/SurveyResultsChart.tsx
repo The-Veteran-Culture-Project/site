@@ -20,7 +20,7 @@ import { answersStore } from "../stores/answersStore.ts";
 const chartConfig = {} satisfies ChartConfig;
 
 const chartStyles = {
-  scatterColor: "blue",
+  scatterColor: "#e4e4e7",
 };
 
 const getData = () => {
@@ -59,7 +59,10 @@ const SurveyResultsChart = () => {
   const domain = getDomain(data);
   return (
     <div className="container mx-auto p-8">
-      <ChartContainer config={chartConfig} className="min-h-[200]px border-4">
+      <ChartContainer
+        config={chartConfig}
+        className="min-h-[200]px bg-zinc-800"
+      >
         <ScatterChart>
           <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
           <ZAxis type="number" dataKey="z" range={[500, 600]} />

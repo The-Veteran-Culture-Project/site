@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 
 import { answersStore } from "../stores/answersStore.ts";
 import AxisQuestionCard from "./AxisQuestionCard.tsx";
+import { SurveyQuestionCard } from "./survey-question-card.tsx";
 import SurveyProgressBar from "./SurveyProgressBar.tsx";
 
 type question = {
@@ -80,7 +81,7 @@ const QuestionForm = ({ questions }: Props) => {
   };
 
   const buttonClass =
-    "flex flex-1 p-6 mx-4 mt-4 text-slate-50 text-xl rounded-lg font-semibold justify-center min-w-36";
+    "flex flex-1 p-6 mx-4 mt-4 text-xl rounded-lg font-semibold justify-center min-w-36";
 
   return (
     <div className="flex flex-col flex-1 container-sm mx-auto">
@@ -92,14 +93,22 @@ const QuestionForm = ({ questions }: Props) => {
         totalSteps={categories.length}
       />
       {currentQuestions.map((q, idx) => (
-        <AxisQuestionCard
-          questionNumber={idx + 1}
-          question={q.data.question}
-          axis={q.data.axis}
-          category={q.data.category}
-          onInputChange={handleInputChange}
-          key={q.data.question}
-        />
+        <div className="flex flex-1">
+          <SurveyQuestionCard
+            question={q.data.question}
+            questionNumber={idx + 1}
+            axis={q.data.axis}
+            onInputChange={handleInputChange}
+          />
+        </div>
+        // <AxisQuestionCard
+        //   questionNumber={idx + 1}
+        //   question={q.data.question}
+        //   axis={q.data.axis}
+        //   category={q.data.category}
+        //   onInputChange={handleInputChange}
+        //   key={q.data.question}
+        // />
       ))}
       <div className="flex justify-center flex-wrap-reverse min-w-50 py-4">
         {currentCategoryIndex != 0 && (
