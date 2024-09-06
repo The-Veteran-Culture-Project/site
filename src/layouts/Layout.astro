@@ -3,6 +3,7 @@ import "@/styles/global.css";
 
 import { ModeToggle } from "@/components/ModeToggle";
 import { Nav } from "../components/Nav.tsx";
+import { HamburgerNavDrawer } from "../components/hamburger-nav-drawer.tsx";
 interface Props {
   title: string;
   isLandingPage: boolean;
@@ -77,7 +78,8 @@ const headerStyle = isLandingPage
             >
           </a>
         </div>
-        <div class="flex items-center">
+        <HamburgerNavDrawer />
+        <div class="invisible md:visible flex items-center">
           <Nav />
           <ModeToggle client:load />
         </div>
