@@ -32,7 +32,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.1",
-    "astro": "^4.15.3",
+    "astro": "^4.15.4",
     "chart.js": "^4.4.3",
     "chartjs-plugin-annotation": "^3.0.1",
     "class-variance-authority": "^0.7.0",
