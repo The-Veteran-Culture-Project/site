@@ -64,3 +64,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+.recharts-label {
+  font-size: 1rem;
+}
+
+.recharts-cartesian-axis-tick-value {
+  font-size: 1rem;
+}

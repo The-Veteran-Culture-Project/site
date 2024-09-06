@@ -17,7 +17,6 @@ import {
 import { ChartContainer } from "@/components/ui/chart";
 
 import { answersStore } from "../stores/answersStore.ts";
-import { X } from "lucide-react";
 
 const chartConfig = {} satisfies ChartConfig;
 
@@ -44,7 +43,10 @@ const getDomain = (data: Array<{ x: number; y: number }>) => {
   const yMin = Math.min(...yValues);
   const yMax = Math.max(...yValues);
 
-  const domain = [Math.min(xMin, yMin) - 5, Math.max(xMax, yMax) + 5];
+  const domain = [
+    Math.min(-10, Math.min(xMin, yMin) - 5),
+    Math.max(10, Math.max(xMax, yMax) + 5),
+  ];
 
   return domain;
 };
@@ -76,11 +78,6 @@ const SurveyResultsChart = () => {
             name="Military"
             domain={domain}
           />
-          <ChartTooltip
-            cursor={{ strokeDasharray: "3 3" }}
-            content={<ChartTooltipContent />}
-          />
-          <Scatter name="You're Result" data={data} fill="#cbd5e1" />
           <ReferenceLine x={0} stroke="#64748b" strokeWidth="2" />
           <ReferenceLine y={0} stroke="#64748b" strokeWidth="2" />
           <ReferenceArea
@@ -100,6 +97,7 @@ const SurveyResultsChart = () => {
             y1={0}
             y2={domain[1]}
             label="Integration"
+            isFront={false}
           />
           <ReferenceArea
             fill="#fca5a5"
@@ -109,6 +107,7 @@ const SurveyResultsChart = () => {
             y1={domain[0]}
             y2={0}
             label="Assimilation"
+            style={{ fontSize: "20rem" }}
           />
           <ReferenceArea
             fill="#67e8f9"
@@ -119,6 +118,11 @@ const SurveyResultsChart = () => {
             y2={0}
             label="Marginalization"
           />
+          <ChartTooltip
+            cursor={{ strokeDasharray: "3 3" }}
+            content={<ChartTooltipContent />}
+          />
+          <Scatter name="You're Result" data={data} fill="#cbd5e1" />
         </ScatterChart>
       </ChartContainer>
     </div>
