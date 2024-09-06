@@ -1,13 +1,8 @@
-import "@/styles/global.css";
 import {
   NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 
 type LinkInfo = {
@@ -21,37 +16,20 @@ const links: LinkInfo[] = [
 ];
 export const Nav = () => {
   return (
-    <div className="flex">
+    <div className="flex text-center">
       <NavigationMenu>
         <NavigationMenuList>
-          <NavigationMenuItem className="flex">
-            {links.map((link) => {
-              return (
-                <NavigationMenuLink className="flex p-4 align-middle">
-                  <a
-                    className="mr-4 sm:ml-4 text-slate-50 hover:text-purple-400"
-                    href={`${link.path}`}
-                  >
-                    {link.name}
-                  </a>
-                </NavigationMenuLink>
-              );
-            })}
-          </NavigationMenuItem>
+          {links.map((link, idx) => {
+            return (
+              <NavigationMenuItem className="flex p-0 m-0" key={idx}>
+                <a className={navigationMenuTriggerStyle()} href={link.path}>
+                  {link.name}
+                </a>
+              </NavigationMenuItem>
+            );
+          })}
         </NavigationMenuList>
       </NavigationMenu>
     </div>
-    // <div className="flex flex-auto text-slate-200 justify-start sm:justify-end m-4 font-bold">
-    //   {links.map((link) => {
-    //     return (
-    //       <a
-    //         className="mr-4 sm:ml-4 hover:text-purple-400"
-    //         href={`${link.path}`}
-    //       >
-    //         {link.name}
-    //       </a>
-    //     );
-    //   })}
-    // </div>
   );
 };

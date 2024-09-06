@@ -1,4 +1,3 @@
-import "@/styles/global.css";
 import {
   ScatterChart,
   XAxis,
@@ -19,6 +18,10 @@ import { ChartContainer } from "@/components/ui/chart";
 import { answersStore } from "../stores/answersStore.ts";
 
 const chartConfig = {} satisfies ChartConfig;
+
+const chartStyles = {
+  scatterColor: "blue",
+};
 
 const getData = () => {
   const data = Object.values(answersStore.get());
@@ -56,7 +59,7 @@ const SurveyResultsChart = () => {
   const domain = getDomain(data);
   return (
     <div className="container mx-auto p-8">
-      <ChartContainer config={chartConfig} className="min-h-[200]px">
+      <ChartContainer config={chartConfig} className="min-h-[200]px border-4">
         <ScatterChart>
           <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
           <ZAxis type="number" dataKey="z" range={[500, 600]} />
@@ -122,7 +125,11 @@ const SurveyResultsChart = () => {
             cursor={{ strokeDasharray: "3 3" }}
             content={<ChartTooltipContent />}
           />
-          <Scatter name="You're Result" data={data} fill="#cbd5e1" />
+          <Scatter
+            name="You're Result"
+            data={data}
+            fill={chartStyles.scatterColor}
+          />
         </ScatterChart>
       </ChartContainer>
     </div>

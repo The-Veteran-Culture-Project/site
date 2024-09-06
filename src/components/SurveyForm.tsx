@@ -1,11 +1,10 @@
-import "@/styles/global.css";
-
 import { useStore } from "@nanostores/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import { answersStore } from "../stores/answersStore.ts";
 import AxisQuestionCard from "./AxisQuestionCard.tsx";
+import SurveyProgressBar from "./SurveyProgressBar.tsx";
 
 type question = {
   data: {
@@ -81,13 +80,17 @@ const QuestionForm = ({ questions }: Props) => {
   };
 
   const buttonClass =
-    "flex flex-1 p-6 mx-4 mt-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold grow justify-center min-w-36";
+    "flex flex-1 p-6 mx-4 mt-4 text-slate-50 text-xl rounded-lg font-semibold justify-center min-w-36";
 
   return (
     <div className="flex flex-col flex-1 container-sm mx-auto">
-      <h2 className="text-slate-50 text-3xl font-bold p-4 text-center">
+      <h2 className="dark:text-slate-50 text-3xl font-bold p-4 text-center">
         {currentCategory}
       </h2>
+      <SurveyProgressBar
+        currentStep={currentCategoryIndex}
+        totalSteps={categories.length}
+      />
       {currentQuestions.map((q, idx) => (
         <AxisQuestionCard
           questionNumber={idx + 1}

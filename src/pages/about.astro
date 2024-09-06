@@ -9,7 +9,7 @@ const { header, body } = content;
 
 <Layout title="The Veteran Culture Project" isLandingPage={false}>
   <main
-    class="flex flex-col container mx-auto text-slate-100 justify-center p-4"
+    class="flex flex-col container mx-auto dark:text-slate-100 justify-center p-4"
   >
     <div class="flex justify-center py-6 text-2xl max-w-prose mx-auto">
       <p class="flex">
@@ -17,7 +17,7 @@ const { header, body } = content;
       </p>
     </div>
     <div
-      class="container mx-auto prose prose-headings:font-display md:prose-xl prose-invert py-6 prose-headings:font-extralight"
+      class="container mx-auto prose prose-zinc prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-extralight"
       set:html={marked.parse(body)}
     />
   </main>

@@ -1,6 +1,8 @@
 ---
-import { Nav } from "../components/Nav.tsx";
 import "@/styles/global.css";
+
+import { ModeToggle } from "@/components/ModeToggle";
+import { Nav } from "../components/Nav.tsx";
 interface Props {
   title: string;
   isLandingPage: boolean;
@@ -13,6 +15,30 @@ const headerStyle = isLandingPage
   ? `${baseheaderStyle} max-w-96`
   : `${baseheaderStyle} max-w-64`;
 ---
+
+<script is:inline>
+  const getThemePreference = () => {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+      return localStorage.getItem("theme");
+    }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  };
+  const isDark = getThemePreference() === "dark";
+  document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+
+  if (typeof localStorage !== "undefined") {
+    const observer = new MutationObserver(() => {
+      const isDark = document.documentElement.classList.contains("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+  }
+</script>
 
 <html lang="en">
   <head>
@@ -28,8 +54,8 @@ const headerStyle = isLandingPage
       rel="stylesheet"
     />
   </head>
-  <body class="bg-zinc-950 flex flex-col">
-    <div class="bg-zinc-900 flex flex-auto">
+  <body class="dark:bg-zinc-950 flex flex-col">
+    <div class="flex flex-auto mb-20 mt-4">
       <div
         class="flex flex-row flex-wrap justify-between container mx-auto max-w-5xl"
       >
@@ -38,7 +64,7 @@ const headerStyle = isLandingPage
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 85.381 17.88631"
-              class="fill-slate-200 min-h-25 min-w-64 sm:min-w-50"
+              class="dark:fill-zinc-200 fill-zinc-900 min-h-25 min-w-64 sm:min-w-50"
               ><g
                 aria-label="The Veteran Culture Project"
                 style='font-size:40px;line-height:.9;font-family:"Iowan Old Style";-inkscape-font-specification:"Iowan Old Style";letter-spacing:-1.29px;white-space:pre'
@@ -51,7 +77,10 @@ const headerStyle = isLandingPage
             >
           </a>
         </div>
-        <Nav />
+        <div class="flex items-center">
+          <Nav />
+          <ModeToggle client:load />
+        </div>
       </div>
     </div>
     <slot class="flex flex-auto" />
