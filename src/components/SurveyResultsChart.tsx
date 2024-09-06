@@ -56,8 +56,7 @@ const getData = () => {
     },
     { x: 0, y: 0 }
   );
-  // return [{ x, y }];
-  return [{ x: -5, y: -2 }];
+  return [{ x, y }];
 };
 
 const getDomain = (data: Array<{ x: number; y: number }>) => {
