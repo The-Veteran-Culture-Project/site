@@ -38,7 +38,7 @@ const AxisQuestionCard = ({
   };
 
   return (
-    <Card className="m-4 flex flex-col flex-1">
+    <Card className="m-4 flex flex-col w-full drop-shadow-md">
       <CardHeader className="flex flex-1">
         <CardTitle>{`${questionNumber}. ${question}`}</CardTitle>
       </CardHeader>
