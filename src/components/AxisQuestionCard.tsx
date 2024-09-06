@@ -37,8 +37,12 @@ const AxisQuestionCard = ({
     onInputChange(question, axis, offset);
   };
 
+  const hasAnswered = $answers[question]?.offset !== undefined;
+
   return (
-    <Card className="m-4 flex flex-col w-full drop-shadow-md">
+    <Card
+      className={`m-4 flex flex-col w-full drop-shadow-md ${hasAnswered ? "bg-muted" : ""}`}
+    >
       <CardHeader className="flex flex-1">
         <CardTitle>{`${questionNumber}. ${question}`}</CardTitle>
       </CardHeader>
