@@ -1,9 +1,9 @@
 ---
 import "@/styles/global.css";
 
-import { LinkInfo } from "@/types.ts";
+import { LinkInfo } from "@/types";
 import { Nav } from "@/components/Nav.tsx";
-import { HamburgerNavDrawer } from "@/components/HambergerNavDrawer";
+import { MobileNavDrawer } from "@/components/MobileNavDrawer";
 interface Props {
   title: string;
   isLandingPage: boolean;
@@ -22,30 +22,6 @@ const links: LinkInfo[] = [
   { name: "About", path: "/about" },
 ];
 ---
-
-<script is:inline>
-  const getThemePreference = () => {
-    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
-      return localStorage.getItem("theme");
-    }
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  };
-  const isDark = getThemePreference() === "dark";
-  document.documentElement.classList[isDark ? "add" : "remove"]("dark");
-
-  if (typeof localStorage !== "undefined") {
-    const observer = new MutationObserver(() => {
-      const isDark = document.documentElement.classList.contains("dark");
-      localStorage.setItem("theme", isDark ? "dark" : "light");
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-  }
-</script>
 
 <html lang="en">
   <head>
@@ -83,7 +59,7 @@ const links: LinkInfo[] = [
           </a>
         </div>
         <div class="md:hidden flex m-4">
-          <HamburgerNavDrawer links={links} client:load />
+          <MobileNavDrawer links={links} client:load />
         </div>
         <div class="hidden md:flex items-center">
           <Nav links={links} client:load />
