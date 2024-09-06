@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { Menu, Sun, Moon } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,27 +9,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Switch } from "@/components/ui/switch";
 import { LinkInfo } from "@/types";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Props = {
   links: LinkInfo[];
 };
-export const HamburgerNavDrawer = ({ links }: Props) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (isDarkMode) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [isDarkMode]);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+export const MobileNavDrawer = ({ links }: Props) => {
   return (
     <Drawer>
       <DrawerTrigger asChild>
@@ -52,16 +38,7 @@ export const HamburgerNavDrawer = ({ links }: Props) => {
                 </a>
               </DrawerClose>
             ))}
-            <div className="flex items-center space-x-2">
-              <Sun className="h-4  w-4" />
-              <Switch
-                id="dark-mode"
-                checked={isDarkMode}
-                onCheckedChange={toggleDarkMode}
-              />
-              <Moon className="h-4 w-4" />
-              <span className="sr-only">Toggle dark mode</span>
-            </div>
+            <ThemeToggle />
           </nav>
         </div>
       </DrawerContent>

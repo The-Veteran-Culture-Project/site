@@ -7,10 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import useTheme from "@/hooks/useTheme"; // Adjust the import path as needed
+import useTheme from "@/hooks/useTheme";
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   return (
     <div className="flex px-4">
       <DropdownMenu>
