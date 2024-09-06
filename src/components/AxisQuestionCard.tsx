@@ -41,10 +41,13 @@ const AxisQuestionCard = ({
 
   return (
     <Card
-      className={`m-4 flex flex-col w-full drop-shadow-md ${hasAnswered ? "bg-muted" : ""}`}
+      className={`m-4 flex flex-col drop-shadow-md ${hasAnswered ? "bg-muted" : ""}`}
     >
-      <CardHeader className="flex flex-1">
-        <CardTitle>{`${questionNumber}. ${question}`}</CardTitle>
+      <CardHeader className="flex flex-row flex-1">
+        <h2 className="text-4xl font-display text-primary mr-4 font-bold">
+          {questionNumber}
+        </h2>
+        <CardTitle className="flex items-center">{question}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1">
         <RadioGroup onValueChange={onInput(question, axis)}>
