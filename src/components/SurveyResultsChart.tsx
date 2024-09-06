@@ -3,22 +3,21 @@ import {
   ScatterChart,
   XAxis,
   YAxis,
+  ZAxis,
   Scatter,
   CartesianGrid,
-  Legend,
   ReferenceLine,
-  Label,
+  ReferenceArea,
 } from "recharts";
 import {
   ChartTooltipContent,
   ChartTooltip,
-  ChartLegend,
-  ChartLegendContent,
   type ChartConfig,
 } from "@/components/ui/chart";
 import { ChartContainer } from "@/components/ui/chart";
 
 import { answersStore } from "../stores/answersStore.ts";
+import { X } from "lucide-react";
 
 const chartConfig = {} satisfies ChartConfig;
 
@@ -33,18 +32,7 @@ const getData = () => {
     },
     { x: 0, y: 0 }
   );
-
-  console.log(x, y);
   return [{ x, y }];
-};
-
-const renderText = (value: string, entry: any) => {
-  const { color } = entry;
-  return (
-    <span style={{ color }} className="text-lg text-purple">
-      {value}
-    </span>
-  );
 };
 
 const getDomain = (data: Array<{ x: number; y: number }>) => {
@@ -69,6 +57,7 @@ const SurveyResultsChart = () => {
       <ChartContainer config={chartConfig} className="min-h-[200]px">
         <ScatterChart>
           <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+          <ZAxis type="number" dataKey="z" range={[500, 600]} />
           <XAxis
             tickLine={false}
             axisLine={false}
@@ -88,12 +77,48 @@ const SurveyResultsChart = () => {
             domain={domain}
           />
           <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
+            cursor={{ strokeDasharray: "3 3" }}
+            content={<ChartTooltipContent />}
           />
-          <Scatter name="You're Result" data={data} fill="#7e22ce" />
+          <Scatter name="You're Result" data={data} fill="#cbd5e1" />
           <ReferenceLine x={0} stroke="#64748b" strokeWidth="2" />
           <ReferenceLine y={0} stroke="#64748b" strokeWidth="2" />
+          <ReferenceArea
+            fill="#fde047"
+            fillOpacity={0.1}
+            x1={domain[0]}
+            x2={0}
+            y1={0}
+            y2={domain[1]}
+            label="Separation"
+          />
+          <ReferenceArea
+            fill="#a5b4fc"
+            fillOpacity={0.1}
+            x1={0}
+            x2={domain[1]}
+            y1={0}
+            y2={domain[1]}
+            label="Integration"
+          />
+          <ReferenceArea
+            fill="#fca5a5"
+            fillOpacity={0.1}
+            x1={0}
+            x2={domain[1]}
+            y1={domain[0]}
+            y2={0}
+            label="Assimilation"
+          />
+          <ReferenceArea
+            fill="#67e8f9"
+            fillOpacity={0.1}
+            x1={domain[0]}
+            x2={0}
+            y1={domain[0]}
+            y2={0}
+            label="Marginalization"
+          />
         </ScatterChart>
       </ChartContainer>
     </div>
