@@ -62,7 +62,7 @@ const links: LinkInfo[] = [
     />
   </head>
   <body class="dark:bg-zinc-950 flex flex-col">
-    <div class="flex flex-auto mb-20 mt-4">
+    <div class="flex flex-auto mb-6 md:mb-20 mt-4">
       <div class="container flex flex-row flex-wrap justify-between mx-auto">
         <div class={headerStyle}>
           <a href="/" class="flex flex-auto">
@@ -82,10 +82,10 @@ const links: LinkInfo[] = [
             >
           </a>
         </div>
-        <div class="visible md:invisible flex">
+        <div class="md:hidden flex m-4">
           <HamburgerNavDrawer links={links} client:load />
         </div>
-        <div class="invisible md:visible flex items-center">
+        <div class="hidden md:flex items-center">
           <Nav links={links} client:load />
         </div>
       </div>
