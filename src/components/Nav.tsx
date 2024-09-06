@@ -24,10 +24,10 @@ export const Nav = () => {
     <div className="flex">
       <NavigationMenu>
         <NavigationMenuList>
-          <NavigationMenuItem>
+          <NavigationMenuItem className="flex">
             {links.map((link) => {
               return (
-                <NavigationMenuLink>
+                <NavigationMenuLink className="flex p-4 align-middle">
                   <a
                     className="mr-4 sm:ml-4 text-slate-50 hover:text-purple-400"
                     href={`${link.path}`}
