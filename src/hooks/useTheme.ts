@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-type Theme = "theme-light" | "dark" | "system";
+type Theme = "light" | "dark";
 
 const useTheme = () => {
   const getInitialTheme = useCallback((): Theme => {
@@ -12,9 +12,9 @@ const useTheme = () => {
       const prefersDarkMode = window.matchMedia(
         "(prefers-color-scheme: dark)"
       ).matches;
-      return prefersDarkMode ? "dark" : "theme-light";
+      return prefersDarkMode ? "dark" : "light";
     }
-    return "theme-light";
+    return "light";
   }, []);
 
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -22,36 +22,13 @@ const useTheme = () => {
   useEffect(() => {
     if (typeof window !== "undefined" && window.localStorage) {
       localStorage.setItem("theme", theme);
-      const isDark =
-        theme === "dark" ||
-        (theme === "system" &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      const isDark = theme === "dark";
       document.documentElement.classList[isDark ? "add" : "remove"]("dark");
     }
   }, [theme]);
 
-  useEffect(() => {
-    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-      if (theme === "system") {
-        const isDark = e.matches;
-        document.documentElement.classList[isDark ? "add" : "remove"]("dark");
-      }
-    };
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    mediaQuery.addEventListener("change", handleSystemThemeChange);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handleSystemThemeChange);
-    };
-  }, [theme]);
-
   const isDarkMode = useCallback((): boolean => {
-    return (
-      theme === "dark" ||
-      (theme === "system" &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches)
-    );
+    return theme === "dark";
   }, [theme]);
 
   return { theme, setTheme, isDarkMode };

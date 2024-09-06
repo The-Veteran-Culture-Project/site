@@ -6,6 +6,6 @@ import { getCollection } from "astro:content";
 const questions = await getCollection("axisQuestions");
 ---
 
-<Layout title="The Veteran Culture Project" isLandingPage={false}>
+<Layout title="Survey - The Veteran Culture Project" isLandingPage={false}>
   <SurveyForm questions={questions} client:load />
 </Layout>
