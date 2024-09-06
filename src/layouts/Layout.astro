@@ -1,5 +1,6 @@
 ---
-import Nav from "../components/Nav.astro";
+import { Nav } from "../components/Nav.tsx";
+import "@/styles/global.css";
 interface Props {
   title: string;
   isLandingPage: boolean;
@@ -9,11 +10,10 @@ const { title, isLandingPage } = Astro.props;
 
 const baseheaderStyle = "hover:cursor-pointer m-4 flex flex-auto";
 const headerStyle = isLandingPage
-  ? `${baseheaderStyle} max-w-120`
+  ? `${baseheaderStyle} max-w-96`
   : `${baseheaderStyle} max-w-64`;
 ---
 
-<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -30,7 +30,9 @@ const headerStyle = isLandingPage
   </head>
   <body class="bg-zinc-950 flex flex-col">
     <div class="bg-zinc-900 flex flex-auto">
-      <div class="flex flex-row flex-wrap container mx-auto max-w-5xl">
+      <div
+        class="flex flex-row flex-wrap justify-between container mx-auto max-w-5xl"
+      >
         <div class={headerStyle}>
           <a href="/" class="flex flex-auto">
             <svg
