@@ -4,15 +4,10 @@ import { Switch } from "@/components/ui/switch";
 import useTheme from "@/hooks/useTheme";
 
 export const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
-
-  const isDarkMode =
-    theme === "dark" ||
-    (theme === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const { theme, setTheme, isDarkMode } = useTheme();
 
   const toggleDarkMode = () => {
-    if (isDarkMode) {
+    if (isDarkMode()) {
       setTheme("theme-light");
     } else {
       setTheme("dark");
@@ -24,7 +19,7 @@ export const ThemeToggle = () => {
       <Sun className="h-4  w-4" />
       <Switch
         id="dark-mode"
-        checked={isDarkMode}
+        checked={isDarkMode()}
         onCheckedChange={toggleDarkMode}
       />
       <Moon className="h-4 w-4" />

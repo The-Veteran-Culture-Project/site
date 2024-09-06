@@ -27,7 +27,6 @@ const AxisQuestionCard = ({
   questionNumber,
   question,
   axis,
-  category,
   onInputChange,
 }: Props) => {
   const $answers = useStore(answersStore);
