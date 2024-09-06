@@ -81,7 +81,7 @@ const QuestionForm = ({ questions }: Props) => {
   };
 
   const buttonClass =
-    "flex flex-1 p-6 m-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold grow justify-center min-w-36";
+    "flex flex-1 p-6 mx-4 mt-4 text-slate-50 text-xl bg-purple-600 rounded-lg disabled:bg-slate-500 disabled:text-slate-800 font-semibold grow justify-center min-w-36";
 
   return (
     <div className="flex flex-col flex-1 container-sm mx-auto">
@@ -98,14 +98,12 @@ const QuestionForm = ({ questions }: Props) => {
           key={q.data.question}
         />
       ))}
-      <div className="flex justify-center px-8 flex-wrap">
-        <Button
-          disabled={currentCategoryIndex === 0}
-          onClick={handlePrevious}
-          className={buttonClass}
-        >
-          Previous
-        </Button>
+      <div className="flex justify-center flex-wrap-reverse min-w-50 py-4">
+        {currentCategoryIndex != 0 && (
+          <Button onClick={handlePrevious} className={buttonClass}>
+            Previous
+          </Button>
+        )}
         {currentCategoryIndex != categories.length - 1 && (
           <Button
             disabled={
@@ -128,7 +126,7 @@ const QuestionForm = ({ questions }: Props) => {
               href="/results"
               className={!allQuestionsAnswered ? "pointer-events-none" : ""}
             >
-              Submit Survey
+              View Results
             </a>
           </Button>
         )}

@@ -56,11 +56,12 @@ const SurveyResultsChart = () => {
   const domain = getDomain(data);
   return (
     <div className="container mx-auto p-8">
-      <ChartContainer config={chartConfig} className="min-h-[200]px p-8">
-        <ScatterChart margin={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+      <ChartContainer config={chartConfig} className="min-h-[200]px">
+        <ScatterChart>
           <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
           <ZAxis type="number" dataKey="z" range={[500, 600]} />
           <XAxis
+            hide={true}
             tickLine={false}
             axisLine={false}
             type="number"
@@ -69,6 +70,7 @@ const SurveyResultsChart = () => {
             domain={domain}
           />
           <YAxis
+            hide={true}
             tickLine={false}
             axisLine={false}
             type="number"
