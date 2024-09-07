@@ -1,6 +1,6 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import SurveyForm from "../components/SurveyForm.tsx";
+import Layout from "@/layouts/Layout.astro";
+import SurveyForm from "@/components/SurveyForm.tsx";
 import { getCollection } from "astro:content";
 
 const questions = await getCollection("axisQuestions");

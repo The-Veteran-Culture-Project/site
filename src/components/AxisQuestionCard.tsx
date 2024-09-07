@@ -1,7 +1,7 @@
 import "@/styles/global.css";
 
 import { useStore } from "@nanostores/react";
-import { answersStore } from "../stores/answersStore";
+import { answersStore } from "@/stores/answersStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 

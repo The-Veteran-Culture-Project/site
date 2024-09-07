@@ -2,9 +2,9 @@ import { useStore } from "@nanostores/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-import { answersStore } from "../stores/answersStore.ts";
-import AxisQuestionCard from "./AxisQuestionCard.tsx";
-import SurveyProgressBar from "./SurveyProgressBar.tsx";
+import { answersStore } from "@/stores/answersStore.ts";
+import AxisQuestionCard from "@/components/AxisQuestionCard.tsx";
+import SurveyProgressBar from "@/components/SurveyProgressBar.tsx";
 
 type question = {
   data: {
@@ -46,17 +46,17 @@ const QuestionForm = ({ questions }: Props) => {
   const $answers = useStore(answersStore);
 
   const allQuestionsAnswered = questions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const categories = Array.from(categoryMap.keys());
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
   const [currentQuestions, setCurrentQuestions] = useState(
-    categoryMap.get(categories[0]) || [],
+    categoryMap.get(categories[0]) || []
   );
   const allQuestionsAnsweredForPage = currentQuestions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const handleNext = () => {

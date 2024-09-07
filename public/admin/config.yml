@@ -75,10 +75,10 @@ collections:
               "Mental Health & Addiction ",
             ],
         }
-  - name: "members"
+  - name: "team_members"
     label: "Team Members"
     label_singular: Team Member
-    folder: "src/content/members"
+    folder: "src/content/teamMembers"
     create: true
     description: "Create and edit team members"
     extension: json

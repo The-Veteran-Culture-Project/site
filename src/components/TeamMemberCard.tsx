@@ -5,15 +5,16 @@ type Props = {
   name: string;
   title: string;
   bio: string;
-  avatarUrl: string;
+  avatar: string;
 };
 
-export const TeamMemberCard = ({ name, title, bio, avatarUrl }: Props) => {
+export const TeamMemberCard = ({ name, title, bio, avatar }: Props) => {
+  console.log(avatar);
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-        <Avatar className="h-16 w-16">
-          <AvatarImage alt={name} src={avatarUrl} />
+        <Avatar className="h-24 w-24">
+          <AvatarImage alt={name} src={avatar} />
           <AvatarFallback>
             {name
               .split(" ")

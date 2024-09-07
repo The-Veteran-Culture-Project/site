@@ -1,49 +1,30 @@
 ---
 import { marked } from "marked";
+import { getCollection } from "astro:content";
 
 import Layout from "@/layouts/Layout.astro";
-import content from "@/content/pages/about.json";
+import content from "@/content/pages/team.json";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
 
-const { header, body } = content;
+const { body } = content;
 
-const members = [
-  {
-    name: "John Doe",
-    title: "Founder",
-    bio: "John is a veteran of the US Army and has been working with veterans for over 20 years.",
-    avatarUrl: "/images/jack-doe.jpg",
-  },
-  {
-    name: "Jane Doe",
-    title: "Co-Founder",
-    bio: "Jane is a veteran of the US Navy and has been working with veterans for over 15 years.",
-    avatarUrl: "/images/jack-doe.jpg",
-  },
-  {
-    name: "Jack Doe",
-    title: "Director of Operations",
-    bio: "Jack is a veteran of the US Air Force and has been working with veterans for over 10 years.",
-    avatarUrl: "/images/jack-doe.jpg",
-  },
-];
+const members = await getCollection("teamMembers");
 ---
 
 <Layout title="Team - The Veteran Culture Project" isLandingPage={false}>
   <main
     class="flex flex-col container mx-auto dark:text-slate-100 justify-center p-4"
   >
-    <div class="flex justify-center py-6 text-2xl max-w-prose mx-auto">
-      <p class="flex">
-        {header}
-      </p>
-    </div>
-    <h2 class="text-3xl font-bold text-center">Members</h2>
+    <h1 class="text-3xl font-bold text-center">Our Team</h1>
+    <div
+      class="container mx-auto prose prose-zinc prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-extralight"
+      set:html={marked.parse(body)}
+    />
     <div class="flex mx-auto">
       {
-        members.map((member) => (
+        members.map((m) => (
           <div class="p-6">
-            <TeamMemberCard {...member} />
+            <TeamMemberCard {...m.data} client:load />
           </div>
         ))
       }
