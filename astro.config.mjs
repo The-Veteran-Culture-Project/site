@@ -20,12 +20,14 @@ export default defineConfig({
   },
   output: "server",
   adapter: cloudflare({
+    imageService: "cloudflare",
     platformProxy: {
       enabled: true,
     },
     routes: {
       extend: {
-        include: ["pages/*", "/lib/*"],
+        exclude: ["content/*"],
+        include: ["pages/*", "/lib/*", "/components/*"],
       },
     },
   }),

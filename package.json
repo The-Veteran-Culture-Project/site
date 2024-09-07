@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "dev:remote": "astro dev --remote",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro build --remote",
     "build:remote": "astro check && astro build --remote",
     "preview": "astro preview",
     "astro": "astro",
