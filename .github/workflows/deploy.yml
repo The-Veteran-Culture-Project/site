@@ -18,7 +18,7 @@ jobs:
           node-version-file: "package.json"
           cache: "npm"
       - name: Install
-        run: npm install
+        run: npm ci
       - name: Update Token Placeholder
         run: sed -i "s/PLACEHOLDER/${ASTRO_STUDIO_APP_TOKEN}/" astro.config.mjs
       - name: Build
