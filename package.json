@@ -15,7 +15,7 @@
     "astro": "astro",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "npx eslint --ext .js,.jsx,.ts,.tsx ."
+    "lint": "npx eslint ."
   },
   "dependencies": {
     "@astrojs/check": "^0.9.3",
