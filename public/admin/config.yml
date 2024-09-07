@@ -86,8 +86,8 @@ collections:
     preview_path: "/team"
     identifier_field: name
     fields:
-      - { label: "Name", name: "name", widget: "text" }
-      - { label: "Title", name: "title", widget: "text" }
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Title", name: "title", widget: "string" }
       - { label: "Bio", name: "bio", widget: "text" }
       - {
           label: "Avatar",
