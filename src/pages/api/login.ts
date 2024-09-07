@@ -5,8 +5,7 @@ import { db, User, eq } from "astro:db";
 import type { APIContext } from "astro";
 
 export async function POST(context: APIContext): Promise<Response> {
-  const formData = await context.request.formData();
-  const username = formData.get("username");
+  const { username, password } = await context.request.json();
   if (
     typeof username !== "string" ||
     username.length < 3 ||
@@ -17,7 +16,6 @@ export async function POST(context: APIContext): Promise<Response> {
       status: 400,
     });
   }
-  const password = formData.get("password");
   if (
     typeof password !== "string" ||
     password.length < 6 ||
@@ -68,5 +66,5 @@ export async function POST(context: APIContext): Promise<Response> {
     sessionCookie.attributes
   );
 
-  return context.redirect("/dashboard");
+  return new Response(null, {});
 }
