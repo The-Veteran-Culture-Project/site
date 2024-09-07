@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { LoginDialog } from "@/components/LoginDialog.tsx";
 
 const { body, disclaimer } = content;
-const onLoginSuccess = () => {
-  if (Astro.locals.user) Astro.redirect("/survey");
-};
+const buttonStyle =
+  "flex sm:text-3xl text-xl font-bold rounded-lg sm:p-8 font-display p-6 max-w-fit";
+
+const user = !!Astro.locals.user;
 ---
 
 <Layout title="The Veteran Culture Project" isLandingPage={true}>
@@ -20,16 +21,18 @@ const onLoginSuccess = () => {
       set:html={marked.parse(body)}
     />
     <div class="flex flex-col m-12 justify-center items-center">
-      <LoginDialog
-        buttonText="Take Survey"
-        onLoginSuccess={onLoginSuccess}
-        client:load
-      />
-      <Button
-        className="flex sm:text-3xl text-xl font-bold rounded-lg sm:p-8 font-display p-6 max-w-fit"
-      >
-        <a class="flex" href="/survey">TAKE THE SURVEY</a>
-      </Button>
+      <div class={`${user ? "hidden" : "flex"}`}>
+        <LoginDialog
+          buttonText="TAKE THE SURVEY"
+          buttonStyle={buttonStyle}
+          client:load
+        />
+      </div>
+      <div class={`${user ? "flex" : "hidden"}`}>
+        <Button className={buttonStyle}>
+          <a class="flex" href="/survey">TAKE THE SURVEY</a>
+        </Button>
+      </div>
       <div class="flex justify-center">
         <p class="flex p-8 text-center italic max-w-prose">
           {disclaimer}

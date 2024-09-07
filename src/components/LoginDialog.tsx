@@ -14,10 +14,10 @@ import { Label } from "@/components/ui/label";
 
 type Props = {
   buttonText: string;
-  onLoginSuccess: () => void;
+  buttonStyle?: string;
 };
 
-export const LoginDialog = ({ buttonText, onLoginSuccess }: Props) => {
+export const LoginDialog = ({ buttonText, buttonStyle }: Props) => {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -44,14 +44,12 @@ export const LoginDialog = ({ buttonText, onLoginSuccess }: Props) => {
       if (response.ok) {
         setMessage({ text: "Login successful", type: "success" });
         setOpen(false);
-        onLoginSuccess();
-        // You might want to redirect the user or update the app state here
+        window.location.href = "/survey";
       } else {
         setMessage({ text: "Login failed", type: "error" });
       }
     } catch (error) {
       setMessage({ text: "An error occurred", type: "error" });
-      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -60,13 +58,14 @@ export const LoginDialog = ({ buttonText, onLoginSuccess }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">{buttonText}</Button>
+        <Button className={buttonStyle}>{buttonText}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Login</DialogTitle>
-          <DialogDescription>
-            Enter your credentials to log in to your account.
+          <DialogTitle className="text-3xl pb-4">Login</DialogTitle>
+          <DialogDescription className="font-display">
+            While in beta we have protected the survey with a simple login. To
+            participate please enter the details provided to you.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
