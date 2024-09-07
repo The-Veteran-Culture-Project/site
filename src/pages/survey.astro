@@ -3,6 +3,11 @@ import Layout from "@/layouts/Layout.astro";
 import SurveyForm from "@/components/SurveyForm.tsx";
 import { getCollection } from "astro:content";
 
+const user = Astro.locals.user;
+
+if (!user) {
+  return Astro.redirect("/");
+}
 const questions = await getCollection("axisQuestions");
 ---
 
