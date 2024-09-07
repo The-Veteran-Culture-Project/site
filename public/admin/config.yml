@@ -90,8 +90,14 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Bio", name: "bio", widget: "text" }
       - {
-          label: "Avatar",
+          label: "Civilian Picture",
           name: "avatar",
+          widget: "image",
+          allow_multiple: false,
+        }
+      - {
+          label: "Military Picture",
+          name: "avatar2",
           widget: "image",
           allow_multiple: false,
         }
