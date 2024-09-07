@@ -18,11 +18,6 @@ export default defineConfig({
   security: {
     checkOrigin: true,
   },
-  vite: {
-    optimizeDeps: {
-      exclude: ["oslo"],
-    },
-  },
   output: "server",
   adapter: cloudflare({
     platformProxy: {
