@@ -11,7 +11,7 @@
     "start": "astro dev",
     "build": "astro build",
     "build:remote": "astro build --remote",
-    "check": "astro build --remote",
+    "check": "astro check",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",
