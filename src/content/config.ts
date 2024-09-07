@@ -16,6 +16,7 @@ const teamMembers = defineCollection({
     title: z.string(),
     bio: z.string(),
     avatar: z.string(),
+    avatar2: z.string().optional(),
   }),
 });
 

@@ -24,12 +24,12 @@ export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
     >
       <CardHeader className="flex flex-row items-center gap-4 space-y-0">
         <div
-          className="relative h-24 w-24"
+          className="relative h-32 w-32"
           role="img"
           aria-label={`Avatar of ${name}`}
         >
           <Avatar
-            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-24 w-24 ${
+            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-32 w-32 ${
               isHovering ? "opacity-0" : "opacity-100"
             }`}
           >
@@ -42,7 +42,7 @@ export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
             </AvatarFallback>
           </Avatar>
           <Avatar
-            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-24 w-24 ${
+            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-32 w-32 ${
               isHovering ? "opacity-100" : "opacity-0"
             }`}
           >
