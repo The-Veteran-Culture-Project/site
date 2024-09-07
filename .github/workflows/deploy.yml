@@ -19,7 +19,7 @@ jobs:
       - name: Install
         run: npm install
       - name: Build
-        run: npm run build --remote
+        run: npm run build:remote
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
