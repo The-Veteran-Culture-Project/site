@@ -42,7 +42,7 @@ export async function onRequest(context) {
           accept: "application/json",
         },
         body: JSON.stringify({ client_id, client_secret, code }),
-      }
+      },
     );
     const result = await response.json();
     if (result.error) {
