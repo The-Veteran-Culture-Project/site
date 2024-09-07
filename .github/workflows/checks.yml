@@ -2,6 +2,9 @@ name: PR Checks
 
 on: push
 
+env:
+  ASTRO_DATABASE_FILE: "./database.db"
+
 jobs:
   build:
     name: Run PR Checks
@@ -18,5 +21,7 @@ jobs:
         run: npm run lint
       - name: Format
         run: npm run format:check
-      - name: Astro Preview
-        run: npm run preview
+      - name: Astro Check
+        run: npm run check
+      - name: Astro Build
+        run: npm run build
