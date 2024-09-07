@@ -20,7 +20,9 @@ const members = await getCollection("teamMembers");
       class="container mx-auto prose prose-zinc prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-extralight"
       set:html={marked.parse(body)}
     />
-    <div class="flex items-stretch mx-auto h-full flex-wrap justify-center">
+    <div
+      class="flex items-stretch mx-auto gap-6 h-full flex-wrap justify-center"
+    >
       {members.map((m) => <TeamMemberCard {...m.data} client:load />)}
     </div>
   </main>

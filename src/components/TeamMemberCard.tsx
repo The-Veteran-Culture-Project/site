@@ -18,18 +18,18 @@ export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
 
   return (
     <Card
-      className="w-full max-w-md flex flex-grow flex-col m-6 drop-shadow-md transition-all duration-300 ease-in-out hover:shadow-xl hover:bg-muted"
+      className="w-full max-w-md flex flex-grow flex-col drop-shadow-md transition-all duration-300 ease-in-out hover:shadow-xl hover:bg-muted"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <CardHeader className="flex flex-row items-center gap-4 space-y-0">
         <div
-          className="relative h-32 w-32"
+          className="relative h-24 w-24 md:h-32 md:w-32"
           role="img"
           aria-label={`Avatar of ${name}`}
         >
           <Avatar
-            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-32 w-32 ${
+            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-24 w-24 md:h-32 md:w-32 ${
               isHovering ? "opacity-0" : "opacity-100"
             }`}
           >
@@ -42,7 +42,7 @@ export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
             </AvatarFallback>
           </Avatar>
           <Avatar
-            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-32 w-32 ${
+            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-24 w-24 md:h-32 md:w-32 ${
               isHovering ? "opacity-100" : "opacity-0"
             }`}
           >
