@@ -54,12 +54,12 @@ const getData = () => {
       if (d.axis === "Y") acc.y += d.offset;
       return acc;
     },
-    { x: 0, y: 0 },
+    { x: 0, y: 0 }
   );
   return [{ x, y }];
 };
 
-const getDomain = (data: Array<{ x: number; y: number }>) => {
+const getDomain = (data: { x: number; y: number }[]) => {
   const xValues = data.map((d) => d.x);
   const yValues = data.map((d) => d.y);
 
@@ -78,7 +78,7 @@ const getDomain = (data: Array<{ x: number; y: number }>) => {
 
 const getAreaFillForQuadrant = (
   quadrant: number,
-  point: { x: number; y: number },
+  point: { x: number; y: number }
 ) => {
   if (quadrant === 1) {
     return point.x <= 0 && point.y >= 0 ? 0.3 : 0.0;

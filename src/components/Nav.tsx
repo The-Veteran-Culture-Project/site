@@ -7,9 +7,9 @@ import {
 import { ModeToggle } from "@/components/ModeToggle";
 import { LinkInfo } from "@/types";
 
-type Props = {
+interface Props {
   links: LinkInfo[];
-};
+}
 
 export const Nav = ({ links }: Props) => {
   return (

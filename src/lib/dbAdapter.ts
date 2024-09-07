@@ -32,7 +32,7 @@ export class AstroDBAdapter implements Adapter {
   }
 
   public async getSessionAndUser(
-    sessionId: string,
+    sessionId: string
   ): Promise<[session: DatabaseSession | null, user: DatabaseUser | null]> {
     const result = await this.db
       .select({
@@ -42,7 +42,7 @@ export class AstroDBAdapter implements Adapter {
       .from(this.sessionTable)
       .innerJoin(
         this.userTable,
-        eq(this.sessionTable.userId, this.userTable.id),
+        eq(this.sessionTable.userId, this.userTable.id)
       )
       .where(eq(this.sessionTable.id, sessionId))
       .get();
@@ -78,7 +78,7 @@ export class AstroDBAdapter implements Adapter {
 
   public async updateSessionExpiration(
     sessionId: string,
-    expiresAt: Date,
+    expiresAt: Date
   ): Promise<void> {
     await this.db
       .update(this.sessionTable)
@@ -96,6 +96,7 @@ export class AstroDBAdapter implements Adapter {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformIntoDatabaseSession(raw: any): DatabaseSession {
   const { id, userId, expiresAt, ...attributes } = raw;
   return {
@@ -106,6 +107,7 @@ function transformIntoDatabaseSession(raw: any): DatabaseSession {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformIntoDatabaseUser(raw: any): DatabaseUser {
   const { id, ...attributes } = raw;
   return {

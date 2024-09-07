@@ -1,10 +1,10 @@
 import { persistentAtom } from "@nanostores/persistent";
 
-export type AnswerItem = {
+export interface AnswerItem {
   axis: string;
   offset: number;
-};
+}
 
-export const answersStore = persistentAtom<{
-  [key: string]: { axis: string; offset: number };
-}>("answers", {}, { encode: JSON.stringify, decode: JSON.parse });
+export const answersStore = persistentAtom<
+  Record<string, { axis: string; offset: number }>
+>("answers", {}, { encode: JSON.stringify, decode: JSON.parse });

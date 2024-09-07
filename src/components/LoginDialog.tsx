@@ -12,10 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Props = {
+interface Props {
   buttonText: string;
   buttonStyle?: string;
-};
+}
 
 export const LoginDialog = ({ buttonText, buttonStyle }: Props) => {
   const [open, setOpen] = useState(false);
@@ -50,6 +50,7 @@ export const LoginDialog = ({ buttonText, buttonStyle }: Props) => {
       }
     } catch (error) {
       setMessage({ text: "An error occurred", type: "error" });
+      console.log(error);
     } finally {
       setIsLoading(false);
     }

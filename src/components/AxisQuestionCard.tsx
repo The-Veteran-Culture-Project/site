@@ -5,15 +5,15 @@ import { answersStore } from "@/stores/answersStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-type Props = {
+interface Props {
   questionNumber: number;
   question: string;
   axis: string;
   category: string;
   onInputChange: (question: string, axis: string, offset: number) => void;
-};
+}
 
-const choices: { [key: string]: number } = {
+const choices: Record<string, number> = {
   "Strongly Disagree": -2,
   Disagree: -1,
   Neutral: 0,
