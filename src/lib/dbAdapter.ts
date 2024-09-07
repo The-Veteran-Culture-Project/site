@@ -1,13 +1,17 @@
 import { eq, lte } from "astro:db";
 
-import type { Database, Table } from "@astrojs/db/runtime";
+import type { Database } from "@astrojs/db/runtime";
 import type { Adapter, DatabaseSession, DatabaseUser, UserId } from "lucia";
+import { User, Session } from "astro:db";
+
+type SessionTable = typeof Session;
+type UserTable = typeof User;
 
 export class AstroDBAdapter implements Adapter {
   private db: Database;
 
-  private sessionTable: SessionTable;
-  private userTable: UserTable;
+  private sessionTable: typeof Session;
+  private userTable: typeof User;
 
   constructor(db: Database, sessionTable: SessionTable, userTable: UserTable) {
     this.db = db;
@@ -109,72 +113,3 @@ function transformIntoDatabaseUser(raw: any): DatabaseUser {
     attributes,
   };
 }
-
-export type UserTable = Table<
-  any,
-  {
-    id: {
-      type: UserIdColumnType;
-      schema: {
-        unique: false;
-        deprecated: any;
-        name: any;
-        collection: any;
-        primaryKey: true;
-      };
-    };
-  }
->;
-
-export type SessionTable = Table<
-  any,
-  {
-    id: {
-      type: "text";
-      schema: {
-        unique: false;
-        deprecated: any;
-        name: any;
-        collection: any;
-        primaryKey: true;
-      };
-    };
-    expiresAt: {
-      type: "date";
-      schema: {
-        optional: false;
-        unique: false;
-        deprecated: any;
-        name: any;
-        collection: any;
-      };
-    };
-    userId: {
-      type: UserIdColumnType;
-      schema: {
-        unique: false;
-        deprecated: false;
-        name: any;
-        collection: any;
-        primaryKey: false;
-        optional: false;
-        references: {
-          type: UserIdColumnType;
-          schema: {
-            unique: false;
-            deprecated: false;
-            name: any;
-            collection: any;
-            primaryKey: true;
-          };
-        };
-      };
-    };
-  }
->;
-
-type UserIdColumnType = UserId extends string
-  ? "text"
-  : UserId extends number
-    ? "number"
-    : never;

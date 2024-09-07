@@ -1,5 +1,4 @@
 import { lucia } from "./lib/auth";
-import { verifyRequestOrigin } from "lucia";
 import { defineMiddleware } from "astro:middleware";
 
 export const onRequest = defineMiddleware(async (context, next) => {
