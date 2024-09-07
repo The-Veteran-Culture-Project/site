@@ -12,9 +12,9 @@ import {
 import { LinkInfo } from "@/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-type Props = {
+interface Props {
   links: LinkInfo[];
-};
+}
 
 export const MobileNavDrawer = ({ links }: Props) => {
   return (

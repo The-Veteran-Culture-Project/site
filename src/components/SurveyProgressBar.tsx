@@ -1,9 +1,9 @@
 import { Progress } from "@/components/ui/progress";
 
-type Props = {
+interface Props {
   currentStep: number;
   totalSteps: number;
-};
+}
 
 const SurveyProgressBar = ({ currentStep, totalSteps }: Props) => {
   const progress = (currentStep / totalSteps) * 100;

@@ -96,6 +96,7 @@ export class AstroDBAdapter implements Adapter {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformIntoDatabaseSession(raw: any): DatabaseSession {
   const { id, userId, expiresAt, ...attributes } = raw;
   return {
@@ -106,6 +107,7 @@ function transformIntoDatabaseSession(raw: any): DatabaseSession {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformIntoDatabaseUser(raw: any): DatabaseUser {
   const { id, ...attributes } = raw;
   return {

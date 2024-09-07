@@ -1,0 +1,27 @@
+name: PR Checks
+
+on: push
+
+env:
+  ASTRO_DATABASE_FILE: "./database.db"
+
+jobs:
+  build:
+    name: Run PR Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "npm"
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Format
+        run: npm run format:check
+      - name: Astro Check
+        run: npm run check
+      - name: Astro Build
+        run: npm run build

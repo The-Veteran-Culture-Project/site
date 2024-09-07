@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-type Props = {
+interface Props {
   name: string;
   title: string;
   bio: string;
   avatar: string;
   avatar2?: string;
-};
+}
 
 export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
   const [isHovering, setIsHovering] = useState(false);

@@ -1,4 +1,4 @@
-export type LinkInfo = {
+export interface LinkInfo {
   name: string;
   path: string;
-};
+}

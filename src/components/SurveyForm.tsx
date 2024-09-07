@@ -6,19 +6,19 @@ import { answersStore } from "@/stores/answersStore.ts";
 import AxisQuestionCard from "@/components/AxisQuestionCard.tsx";
 import SurveyProgressBar from "@/components/SurveyProgressBar.tsx";
 
-type question = {
+interface question {
   data: {
     question: string;
     axis: string;
     category: string;
   };
-};
+}
 
-type Props = {
-  questions: Array<question>;
-};
+interface Props {
+  questions: question[];
+}
 
-const buildCategoryMap = (questions: Array<question>) => {
+const buildCategoryMap = (questions: question[]) => {
   return questions.reduce((acc, q) => {
     const category = q.data.category;
     if (!acc.has(category)) {
@@ -28,7 +28,7 @@ const buildCategoryMap = (questions: Array<question>) => {
     acc.get(category)?.push(q);
 
     return acc;
-  }, new Map<string, Array<question>>());
+  }, new Map<string, question[]>());
 };
 
 const handleInputChange = (question: string, axis: string, offset: number) => {

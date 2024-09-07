@@ -59,7 +59,7 @@ const getData = () => {
   return [{ x, y }];
 };
 
-const getDomain = (data: Array<{ x: number; y: number }>) => {
+const getDomain = (data: { x: number; y: number }[]) => {
   const xValues = data.map((d) => d.x);
   const yValues = data.map((d) => d.y);
 
