@@ -10,7 +10,7 @@ const useTheme = () => {
         return savedTheme;
       }
       const prefersDarkMode = window.matchMedia(
-        "(prefers-color-scheme: dark)"
+        "(prefers-color-scheme: dark)",
       ).matches;
       return prefersDarkMode ? "dark" : "light";
     }

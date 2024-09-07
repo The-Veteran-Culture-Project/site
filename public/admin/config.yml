@@ -84,9 +84,14 @@ collections:
     extension: json
     format: json
     preview_path: "/team"
-    identifier_field: name 
+    identifier_field: name
     fields:
       - { label: "Name", name: "name", widget: "text" }
       - { label: "Title", name: "title", widget: "text" }
       - { label: "Bio", name: "bio", widget: "text" }
-      - { label: "Avatar", name: "avatar", widget: "image", allow_multiple: false }
+      - {
+          label: "Avatar",
+          name: "avatar",
+          widget: "image",
+          allow_multiple: false,
+        }
