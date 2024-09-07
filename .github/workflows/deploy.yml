@@ -27,4 +27,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=site --branch ${{ github.ref_name }} --define ASTRO_STUDIO_APP_TOKEN=${{ env.ASTRO_STUDIO_APP_TOKEN }}
+          command: pages deploy dist --project-name=site --branch ${{ github.ref_name }} --binding ASTRO_STUDIO_APP_TOKEN=${{ env.ASTRO_STUDIO_APP_TOKEN }}
