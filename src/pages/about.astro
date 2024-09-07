@@ -1,10 +1,32 @@
 ---
 import { marked } from "marked";
 
-import Layout from "../layouts/Layout.astro";
-import content from "../content/pages/about.json";
+import Layout from "@/layouts/Layout.astro";
+import content from "@/content/pages/about.json";
+import { TeamMemberCard } from "@/components/TeamMemberCard";
 
 const { header, body } = content;
+
+const members = [
+  {
+    name: "John Doe",
+    title: "Founder",
+    bio: "John is a veteran of the US Army and has been working with veterans for over 20 years.",
+    avatarUrl: "/images/jack-doe.jpg",
+  },
+  {
+    name: "Jane Doe",
+    title: "Co-Founder",
+    bio: "Jane is a veteran of the US Navy and has been working with veterans for over 15 years.",
+    avatarUrl: "/images/jack-doe.jpg",
+  },
+  {
+    name: "Jack Doe",
+    title: "Director of Operations",
+    bio: "Jack is a veteran of the US Air Force and has been working with veterans for over 10 years.",
+    avatarUrl: "/images/jack-doe.jpg",
+  },
+];
 ---
 
 <Layout title="About - The Veteran Culture Project" isLandingPage={false}>
@@ -16,9 +38,15 @@ const { header, body } = content;
         {header}
       </p>
     </div>
-    <div
-      class="container mx-auto prose prose-zinc prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-extralight"
-      set:html={marked.parse(body)}
-    />
+    <h2 class="text-3xl font-bold text-center">Members</h2>
+    <div class="flex mx-auto">
+      {
+        members.map((member) => (
+          <div class="p-6">
+            <TeamMemberCard {...member} />
+          </div>
+        ))
+      }
+    </div>
   </main>
 </Layout>

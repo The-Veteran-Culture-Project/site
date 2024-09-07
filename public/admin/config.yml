@@ -1,7 +1,7 @@
 publish_mode: editorial_workflow
 
-media_folder: "src/assets/images"
-public_folder: "src/assets/images"
+media_folder: "public/assets/images"
+public_folder: "public/assets/images"
 
 backend:
   name: github
@@ -32,6 +32,13 @@ collections:
         description: "Content for the site about page"
         fields:
           - { label: "Header", name: "header", widget: "string" }
+          - { label: "Body", name: "body", widget: "markdown" }
+      - file: "src/content/pages/team.json"
+        label: Team
+        name: team
+        preview_path: "/team"
+        description: "Content for the site team page"
+        fields:
           - { label: "Body", name: "body", widget: "markdown" }
   - name: Layouts
     label: Layouts
@@ -68,3 +75,18 @@ collections:
               "Mental Health & Addiction ",
             ],
         }
+  - name: "members"
+    label: "Team Members"
+    label_singular: Team Member
+    folder: "src/content/members"
+    create: true
+    description: "Create and edit team members"
+    extension: json
+    format: json
+    preview_path: "/team"
+    identifier_field: name 
+    fields:
+      - { label: "Name", name: "name", widget: "text" }
+      - { label: "Title", name: "title", widget: "text" }
+      - { label: "Bio", name: "bio", widget: "text" }
+      - { label: "Avatar", name: "avatar", widget: "image", allow_multiple: false }
