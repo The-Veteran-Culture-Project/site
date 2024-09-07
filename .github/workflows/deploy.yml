@@ -19,9 +19,7 @@ jobs:
       - name: Install
         run: npm install --force
       - name: Update Token Placeholder
-        run: |
-          TOKEN_ESCAPED=$(printf '%s\n' "${{ env.ASTRO_STUDIO_APP_TOKEN }}" | sed 's/[&/\]/\\&/g')
-          sed -i '' "s|\"PLACEHOLDER\"|\"$TOKEN_ESCAPED\"|" astro.config.mjs
+        run: sed -i '' 's/"PLACEHOLDER"/"'"$ASTRO_STUDIO_APP_TOKEN"'"/' astro.config.mjs
       - name: Build
         run: npm run build:remote
       - name: Deploy
