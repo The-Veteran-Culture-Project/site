@@ -23,6 +23,11 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["astro:db"],
     },
+    define: {
+      "process.env.ASTRO_STUDIO_APP_TOKEN": JSON.stringify(
+        "2cb35d291538f2374269346d7dad53d6a1a0e381:gbait2oe8iuyu0xmu4c73i23os5r:gbait2oe8iuyu0xmu4c73i23os5r"
+      ),
+    },
   },
   adapter: cloudflare({
     imageService: "cloudflare",
