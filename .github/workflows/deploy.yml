@@ -17,7 +17,7 @@ jobs:
           node-version-file: "package.json"
           cache: "npm"
       - name: Install
-        run: npm install
+        run: npm install --force
       - name: Build
         run: npm run build:remote
       - name: Deploy
