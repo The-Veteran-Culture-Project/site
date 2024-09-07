@@ -1,10 +1,10 @@
-name: Deploy Pages Site
+name: PR Checks
 
 on: push
 
 jobs:
   build:
-    name: Build and Deploy to Cloudflare
+    name: Run PR Checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
