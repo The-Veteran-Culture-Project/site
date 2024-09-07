@@ -2,9 +2,6 @@ name: PR Checks
 
 on: push
 
-env:
-  ASTRO_DB_FILE: /dev/null
-
 jobs:
   build:
     name: Run PR Checks
@@ -21,5 +18,5 @@ jobs:
         run: npm run lint
       - name: Format
         run: npm run format:check
-      - name: Build
-        run: npm run build
+      - name: Astro Preview
+        run: npm run preview

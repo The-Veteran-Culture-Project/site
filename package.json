@@ -10,7 +10,7 @@
     "dev:remote": "astro dev --remote",
     "start": "astro dev",
     "build": "astro check && astro build --remote",
-    "preview": "astro preview",
+    "preview": "astro check && astro preview",
     "astro": "astro",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
