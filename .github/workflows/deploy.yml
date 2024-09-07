@@ -18,9 +18,8 @@ jobs:
           cache: "npm"
       - name: Install
         run: npm install --force
-      - name: Write Env File
-        run: echo "ASTRO_STUDIO_APP_TOKEN=${{ env.ASTRO_STUDIO_APP_TOKEN }}" >> .env
-      - run: cat .env
+      - name: Update Token Placeholder
+        run: sed -i '' 's/"PLACEHOLDER"/"'"${{ env.ASTRO_STUDIO_APP_TOKEN }}"'"/' astro.config.mjs
       - name: Build
         run: npm run build:remote
       - name: Deploy
