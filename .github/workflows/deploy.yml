@@ -18,6 +18,8 @@ jobs:
           cache: "npm"
       - name: Install
         run: npm install --force
+      - name: Write Env File
+        run: echo "ASTRO_STUDIO_APP_TOKEN=${{ env.ASTRO_STUDIO_APP_TOKEN }}" >> .env
       - name: Build
         run: npm run build:remote
       - name: Deploy
