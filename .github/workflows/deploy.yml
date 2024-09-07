@@ -7,6 +7,7 @@ env:
 
 jobs:
   build:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     name: Build and Deploy to Cloudflare
     environment: cloudflare
     runs-on: ubuntu-latest
