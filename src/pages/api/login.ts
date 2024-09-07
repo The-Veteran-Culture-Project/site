@@ -1,5 +1,5 @@
 import { lucia } from "@/lib/auth";
-import { db, User, eq } from "astro:db";
+import { db, SurveyUser, eq } from "astro:db";
 
 import type { APIContext } from "astro";
 
@@ -27,8 +27,8 @@ export async function POST(context: APIContext): Promise<Response> {
 
   const existingUser = await db
     .select()
-    .from(User)
-    .where(eq(User.username, username.toLowerCase()))
+    .from(SurveyUser)
+    .where(eq(SurveyUser.username, username.toLowerCase()))
     .get();
   if (!existingUser) {
     // NOTE:
@@ -44,7 +44,7 @@ export async function POST(context: APIContext): Promise<Response> {
       status: 400,
     });
   }
-
+  console.log(existingUser.password);
   const validPassword = password === existingUser.password;
   console.log(password, existingUser.password);
 
@@ -59,7 +59,7 @@ export async function POST(context: APIContext): Promise<Response> {
   context.cookies.set(
     sessionCookie.name,
     sessionCookie.value,
-    sessionCookie.attributes,
+    sessionCookie.attributes
   );
 
   return new Response(null, {});

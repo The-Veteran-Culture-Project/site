@@ -1,7 +1,7 @@
-import { db, User } from "astro:db";
+import { db, SurveyUser } from "astro:db";
 
 export default async function seed() {
-  await db.insert(User).values([
+  await db.insert(SurveyUser).values([
     {
       id: "123456",
       username: "test",

@@ -2,16 +2,16 @@ import { eq, lte } from "astro:db";
 
 import type { Database } from "@astrojs/db/runtime";
 import type { Adapter, DatabaseSession, DatabaseUser, UserId } from "lucia";
-import { User, Session } from "astro:db";
+import { SurveyUser, Session } from "astro:db";
 
 type SessionTable = typeof Session;
-type UserTable = typeof User;
+type UserTable = typeof SurveyUser;
 
 export class AstroDBAdapter implements Adapter {
   private db: Database;
 
-  private sessionTable: typeof Session;
-  private userTable: typeof User;
+  private sessionTable: SessionTable;
+  private userTable: UserTable;
 
   constructor(db: Database, sessionTable: SessionTable, userTable: UserTable) {
     this.db = db;
@@ -32,7 +32,7 @@ export class AstroDBAdapter implements Adapter {
   }
 
   public async getSessionAndUser(
-    sessionId: string,
+    sessionId: string
   ): Promise<[session: DatabaseSession | null, user: DatabaseUser | null]> {
     const result = await this.db
       .select({
@@ -42,7 +42,7 @@ export class AstroDBAdapter implements Adapter {
       .from(this.sessionTable)
       .innerJoin(
         this.userTable,
-        eq(this.sessionTable.userId, this.userTable.id),
+        eq(this.sessionTable.userId, this.userTable.id)
       )
       .where(eq(this.sessionTable.id, sessionId))
       .get();
@@ -78,7 +78,7 @@ export class AstroDBAdapter implements Adapter {
 
   public async updateSessionExpiration(
     sessionId: string,
-    expiresAt: Date,
+    expiresAt: Date
   ): Promise<void> {
     await this.db
       .update(this.sessionTable)

@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "dev:remote": "astro dev --remote",
     "start": "astro dev",
     "build": "astro check && astro build",
     "build:remote": "astro check && astro build --remote",

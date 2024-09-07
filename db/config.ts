@@ -1,6 +1,6 @@
 import { defineDb, defineTable, column } from "astro:db";
 
-const User = defineTable({
+const SurveyUser = defineTable({
   columns: {
     id: column.text({ primaryKey: true }),
     username: column.text({ unique: true }),
@@ -13,14 +13,14 @@ const Session = defineTable({
     id: column.text({ primaryKey: true }),
     expiresAt: column.date(),
     userId: column.text({
-      references: () => User.columns.id,
+      references: () => SurveyUser.columns.id,
     }),
   },
 });
 
 export default defineDb({
   tables: {
-    User,
+    SurveyUser,
     Session,
   },
 });
