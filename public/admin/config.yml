@@ -1,7 +1,7 @@
 publish_mode: editorial_workflow
 
 media_folder: "public/assets/images"
-public_folder: "public/assets/images"
+public_folder: "/assets/images"
 
 backend:
   name: github
