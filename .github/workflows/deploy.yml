@@ -22,7 +22,7 @@ jobs:
       - name: Update Token Placeholder
         run: sed -i "s/PLACEHOLDER/${ASTRO_STUDIO_APP_TOKEN}/" astro.config.mjs
       - name: Build
-        run: npm run build:remote
+        run: npm run build
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:

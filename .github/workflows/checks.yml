@@ -2,6 +2,9 @@ name: PR Checks
 
 on: push
 
+env:
+  ASTRO_DB_FILE: /dev/null
+
 jobs:
   build:
     name: Run PR Checks
