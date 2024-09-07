@@ -61,5 +61,5 @@ export default {
       },
     },
   },
-  plugins: [typography(), tailwindcssAnimate()],
+  plugins: [typography(), tailwindcssAnimate],
 };
