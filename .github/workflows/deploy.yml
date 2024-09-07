@@ -19,7 +19,7 @@ jobs:
       - name: Install
         run: npm install --force
       - name: Update Token Placeholder
-        run: sed -i '' 's/"PLACEHOLDER"/"'"$ASTRO_STUDIO_APP_TOKEN"'"/' astro.config.mjs
+        run: sed -i "s/PLACEHOLDER/${ASTRO_STUDIO_APP_TOKEN}/" astro.config.mjs
       - name: Build
         run: npm run build:remote
       - name: Deploy
