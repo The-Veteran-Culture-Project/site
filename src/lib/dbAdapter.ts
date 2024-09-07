@@ -32,7 +32,7 @@ export class AstroDBAdapter implements Adapter {
   }
 
   public async getSessionAndUser(
-    sessionId: string
+    sessionId: string,
   ): Promise<[session: DatabaseSession | null, user: DatabaseUser | null]> {
     const result = await this.db
       .select({
@@ -42,7 +42,7 @@ export class AstroDBAdapter implements Adapter {
       .from(this.sessionTable)
       .innerJoin(
         this.userTable,
-        eq(this.sessionTable.userId, this.userTable.id)
+        eq(this.sessionTable.userId, this.userTable.id),
       )
       .where(eq(this.sessionTable.id, sessionId))
       .get();
@@ -78,7 +78,7 @@ export class AstroDBAdapter implements Adapter {
 
   public async updateSessionExpiration(
     sessionId: string,
-    expiresAt: Date
+    expiresAt: Date,
   ): Promise<void> {
     await this.db
       .update(this.sessionTable)
