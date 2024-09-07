@@ -7,13 +7,13 @@ import type { APIContext } from "astro";
 
 export async function POST(context: APIContext): Promise<Response> {
   const formData = await context.request.formData();
-  const email = (formData.get("email") as string).trim();
+  const username = (formData.get("username") as string).trim();
 
   if (
-    typeof email !== "string" ||
-    email.length < 3 ||
-    email.length > 255 ||
-    !/.+@.+\..+/.test(email)
+    typeof username !== "string" ||
+    username.length < 3 ||
+    username.length > 255 ||
+    !/^[a-z0-9_-]+$/.test(username)
   ) {
     return new Response("Invalid email", {
       status: 400,
@@ -43,7 +43,7 @@ export async function POST(context: APIContext): Promise<Response> {
   // TODO: check if username is already used
   await db.insert(User).values({
     id: userId,
-    email: email.toLowerCase(),
+    username: username.toLowerCase(),
     hashed_password: hashedPassword,
   });
 

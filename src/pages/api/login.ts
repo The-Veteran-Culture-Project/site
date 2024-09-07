@@ -6,12 +6,12 @@ import type { APIContext } from "astro";
 
 export async function POST(context: APIContext): Promise<Response> {
   const formData = await context.request.formData();
-  const email = formData.get("email");
+  const username = formData.get("username");
   if (
-    typeof email !== "string" ||
-    email.length < 3 ||
-    email.length > 31 ||
-    !/.+@.+\..+/.test(email)
+    typeof username !== "string" ||
+    username.length < 3 ||
+    username.length > 31 ||
+    !/^[a-z0-9_-]+$/.test(username)
   ) {
     return new Response("Invalid email", {
       status: 400,
@@ -31,7 +31,7 @@ export async function POST(context: APIContext): Promise<Response> {
   const existingUser = await db
     .select()
     .from(User)
-    .where(eq(User.email, email.toLowerCase()))
+    .where(eq(User.username, username.toLowerCase()))
     .get();
   if (!existingUser) {
     // NOTE:
