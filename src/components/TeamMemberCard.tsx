@@ -18,7 +18,7 @@ export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
 
   return (
     <Card
-      className="w-full max-w-md flex flex-grow flex-col m-6 drop-shadow-md transition-all duration-300 ease-in-out hover:shadow-lg hover:bg-muted"
+      className="w-full max-w-md flex flex-grow flex-col m-6 drop-shadow-md transition-all duration-300 ease-in-out hover:shadow-xl hover:bg-muted"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
