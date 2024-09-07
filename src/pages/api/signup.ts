@@ -1,13 +1,10 @@
-import { lucia } from "@/lib/auth";
-import { generateId } from "lucia";
+import { generateIdFromEntropySize } from "lucia";
 import { hash } from "@node-rs/argon2";
-import { db, User } from "astro:db";
 
 import type { APIContext } from "astro";
 
 export async function POST(context: APIContext): Promise<Response> {
-  const formData = await context.request.formData();
-  const username = (formData.get("username") as string).trim();
+  const { username, password } = await context.request.json();
 
   if (
     typeof username !== "string" ||
@@ -15,11 +12,10 @@ export async function POST(context: APIContext): Promise<Response> {
     username.length > 255 ||
     !/^[a-z0-9_-]+$/.test(username)
   ) {
-    return new Response("Invalid email", {
+    return new Response("Invalid username", {
       status: 400,
     });
   }
-  const password = formData.get("password");
 
   if (
     typeof password !== "string" ||
@@ -31,7 +27,7 @@ export async function POST(context: APIContext): Promise<Response> {
     });
   }
 
-  const userId = generateId(15);
+  const userId = generateIdFromEntropySize(20);
   const hashedPassword = await hash(password, {
     memoryCost: 19456,
     timeCost: 2,
@@ -40,20 +36,5 @@ export async function POST(context: APIContext): Promise<Response> {
   });
   console.log("hashedPassword", hashedPassword);
 
-  // TODO: check if username is already used
-  await db.insert(User).values({
-    id: userId,
-    username: username.toLowerCase(),
-    hashed_password: hashedPassword,
-  });
-
-  const session = await lucia.createSession(userId, {});
-  const sessionCookie = lucia.createSessionCookie(session.id);
-  context.cookies.set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
-
-  return context.redirect("/");
+  return new Response(JSON.stringify({ hashedPassword, userId }), {});
 }

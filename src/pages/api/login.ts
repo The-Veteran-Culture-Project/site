@@ -12,7 +12,7 @@ export async function POST(context: APIContext): Promise<Response> {
     username.length > 31 ||
     !/^[a-z0-9_-]+$/.test(username)
   ) {
-    return new Response("Invalid email", {
+    return new Response("Invalid username", {
       status: 400,
     });
   }

@@ -2,6 +2,9 @@ name: Deploy Pages Site
 
 on: push
 
+env:
+  ASTRO_STUDIO_APP_TOKEN: ${{ secrets.ASTRO_STUDIO_APP_TOKEN }}
+
 jobs:
   build:
     name: Build and Deploy to Cloudflare
@@ -15,7 +18,11 @@ jobs:
           cache: "npm"
       - name: Install
         run: npm install
-      - name: Build
+      - name: Build on Main
+        if: github.ref_name == 'main'
+        run: npm run build:remote
+      - name: Build on Other Branches
+        if: github.ref_name != 'main'
         run: npm run build
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
