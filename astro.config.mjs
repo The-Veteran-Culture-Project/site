@@ -19,16 +19,15 @@ export default defineConfig({
     checkOrigin: true,
   },
   output: "server",
+  vite: {
+    optimizeDeps: {
+      exclude: ["astro:db"],
+    },
+  },
   adapter: cloudflare({
     imageService: "cloudflare",
     platformProxy: {
       enabled: true,
-    },
-    routes: {
-      extend: {
-        exclude: ["content/*"],
-        include: ["pages/*", "/lib/*", "/components/*"],
-      },
     },
   }),
 });
