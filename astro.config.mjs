@@ -25,7 +25,7 @@ export default defineConfig({
     },
     routes: {
       extend: {
-        include: ["/*"],
+        include: ["pages/*", "/lib/*"],
       },
     },
   }),
