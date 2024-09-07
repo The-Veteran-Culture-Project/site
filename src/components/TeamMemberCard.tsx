@@ -11,7 +11,7 @@ type Props = {
 export const TeamMemberCard = ({ name, title, bio, avatar }: Props) => {
   console.log(avatar);
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md flex flex-grow flex-col m-6">
       <CardHeader className="flex flex-row items-center gap-4 space-y-0">
         <Avatar className="h-24 w-24">
           <AvatarImage alt={name} src={avatar} />
