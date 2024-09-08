@@ -9,7 +9,7 @@ export async function POST(context: APIContext): Promise<Response> {
     typeof username !== "string" ||
     username.length < 3 ||
     username.length > 31 ||
-    !/^[a-z0-9_-]+$/.test(username)
+    !/^[A-Za-z0-9_-]+$/.test(username)
   ) {
     return new Response("Invalid username", {
       status: 400,
