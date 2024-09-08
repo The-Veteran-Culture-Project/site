@@ -44,9 +44,7 @@ export async function POST(context: APIContext): Promise<Response> {
       status: 400,
     });
   }
-  console.log(existingUser.password);
   const validPassword = password === existingUser.password;
-  console.log(password, existingUser.password);
 
   if (!validPassword) {
     return new Response("Incorrect username or password", {
