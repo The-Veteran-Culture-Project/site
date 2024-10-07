@@ -19,7 +19,7 @@
     "lint": "npx eslint ."
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.3",
+    "@astrojs/check": "^0.9.4",
     "@astrojs/cloudflare": "^11.1.0",
     "@astrojs/db": "^0.14.1",
     "@astrojs/react": "^3.6.2",
