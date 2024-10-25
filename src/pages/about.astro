@@ -1,10 +1,14 @@
 ---
 import { marked } from "marked";
+import { getCollection } from "astro:content";
 
 import Layout from "@/layouts/Layout.astro";
 import content from "@/content/pages/about.json";
+import { TeamMemberCard } from "@/components/TeamMemberCard";
 
-const { header, body } = content;
+const { body } = content;
+
+const members = await getCollection("teamMembers");
 ---
 
 <Layout title="About - The Veteran Culture Project" isLandingPage={false}>
@@ -12,14 +16,14 @@ const { header, body } = content;
     class="flex flex-col container mx-auto dark:text-slate-100 justify-center p-4"
   >
     <h1 class="text-3xl font-bold text-center">About Us</h1>
-    <div class="flex justify-center py-6 text-2xl max-w-prose mx-auto">
-      <p class="flex">
-        {header}
-      </p>
-    </div>
     <div
       class="container mx-auto prose prose-zinc prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-extralight"
       set:html={marked.parse(body)}
     />
+    <div
+      class="flex items-stretch mx-auto gap-6 h-full flex-wrap justify-center"
+    >
+      {members.map((m) => <TeamMemberCard {...m.data} client:load />)}
+    </div>
   </main>
 </Layout>

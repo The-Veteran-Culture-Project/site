@@ -1,0 +1,25 @@
+---
+import { marked } from "marked";
+
+import Layout from "@/layouts/Layout.astro";
+import content from "@/content/pages/research.json";
+
+const { header, body } = content;
+---
+
+<Layout title="Research - The Veteran Culture Project" isLandingPage={false}>
+  <main
+    class="flex flex-col container mx-auto dark:text-slate-100 justify-center p-4"
+  >
+    <h1 class="text-3xl font-bold text-center">Research</h1>
+    <div class="flex justify-center py-6 text-2xl max-w-prose mx-auto">
+      <p class="flex">
+        {header}
+      </p>
+    </div>
+    <div
+      class="container mx-auto prose prose-zinc prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-extralight"
+      set:html={marked.parse(body)}
+    />
+  </main>
+</Layout>
