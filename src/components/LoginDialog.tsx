@@ -45,8 +45,6 @@ export const LoginDialog = (
         body: JSON.stringify({ username, password }),
       });
 
-      console.log(response);
-
       if (response.ok) {
         setMessage({ text: "Login successful", type: "success" });
         setOpen(false);
