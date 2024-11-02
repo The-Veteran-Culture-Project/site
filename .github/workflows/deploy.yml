@@ -20,8 +20,8 @@ jobs:
           cache: "npm"
       - name: Install
         run: npm ci
-      - name: Update Token Placeholder
-        run: sed -i "s/PLACEHOLDER/${ASTRO_STUDIO_APP_TOKEN}/" astro.config.mjs
+      # - name: Update Token Placeholder
+      #   run: sed -i "s/PLACEHOLDER/${ASTRO_STUDIO_APP_TOKEN}/" astro.config.mjs
       - name: Build
         run: npm run build:remote
       - name: Deploy
