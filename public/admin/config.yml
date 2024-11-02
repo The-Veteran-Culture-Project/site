@@ -40,6 +40,21 @@ collections:
         description: "Content for the site about page"
         fields:
           - { label: "Body", name: "body", widget: "markdown" }
+      - file: "src/content/pages/results.json"
+        label: Results
+        name: results
+        preview_path: "/results"
+        description: "Content for survey results page"
+        fields:
+          - { label: "Separation", name: "separation", widget: "markdown" }
+          - { label: "Separation", name: "separation", widget: "markdown" }
+          - { label: "Integration", name: "integration", widget: "markdown" }
+          - { label: "Assimilation", name: "assimilation", widget: "markdown" }
+          - {
+              label: "Marginalization",
+              name: "marginalization",
+              widget: "markdown",
+            }
   - name: Layouts
     label: Layouts
     description: "Edit the layout of the site"
