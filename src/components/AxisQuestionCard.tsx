@@ -16,7 +16,6 @@ interface Props {
 const choices: Record<string, number> = {
   "Strongly Disagree": -2,
   Disagree: -1,
-  Neutral: 0,
   Agree: 1,
   "Strongly Agree": 2,
 };
@@ -60,7 +59,9 @@ const AxisQuestionCard = ({
                 checked={$answers[question]?.offset === choices[choice]}
                 id={`${question}-${choice}`}
               />
-              <label htmlFor={choice}>{choice}</label>
+              <label className="min-w-64" htmlFor={`${question}-${choice}`}>
+                {choice}
+              </label>
             </div>
           ))}
         </RadioGroup>

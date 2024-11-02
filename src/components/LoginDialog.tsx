@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const LoginDialog = (
-  { buttonText, buttonStyle }: Props = { buttonText: "Login" }
+  { buttonText, buttonStyle }: Props = { buttonText: "Login" },
 ) => {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");

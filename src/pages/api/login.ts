@@ -44,7 +44,7 @@ export async function POST(context: APIContext): Promise<Response> {
       JSON.stringify({ message: "Incorrect username or password!" }),
       {
         status: 400,
-      }
+      },
     );
   }
   const validPassword = password === existingUser.password;
@@ -54,7 +54,7 @@ export async function POST(context: APIContext): Promise<Response> {
       JSON.stringify({ message: "Incorrect username or password" }),
       {
         status: 400,
-      }
+      },
     );
   }
 
@@ -63,7 +63,7 @@ export async function POST(context: APIContext): Promise<Response> {
   context.cookies.set(
     sessionCookie.name,
     sessionCookie.value,
-    sessionCookie.attributes
+    sessionCookie.attributes,
   );
 
   return new Response(null, {});

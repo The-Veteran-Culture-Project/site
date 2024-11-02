@@ -86,8 +86,8 @@ const QuestionForm = ({ questions }: Props) => {
     <div className="flex flex-col flex-1 container-sm mx-auto">
       <h2 className="text-3xl font-bold p-4 text-center">{currentCategory}</h2>
       <SurveyProgressBar
-        currentStep={currentCategoryIndex}
-        totalSteps={categories.length}
+        currentStep={currentCategoryIndex + 1}
+        totalSteps={categories.length + 1}
       />
       {currentQuestions.map((q, idx) => (
         <AxisQuestionCard
