@@ -28,7 +28,7 @@ const chartLightStyles = {
   gridColor: "#52525b",
   labelStyle: {
     fill: "#52525b",
-    fontSize: "3vw",
+    fontSize: "2.5vw",
     fontWeight: "bold",
   },
 };
@@ -40,7 +40,7 @@ const chartDarkStyles = {
   gridColor: "#d4d4d8",
   labelStyle: {
     fill: "text-primary",
-    fontSize: "3vw",
+    fontSize: "2.5vw",
     fontWeight: "bold",
   },
 };
@@ -77,21 +77,21 @@ const getDomain = (data: { x: number; y: number }[]) => {
   return domain;
 };
 
+type Quadrant = 1 | 2 | 3 | 4;
+
 const getAreaFillForQuadrant = (
-  quadrant: number,
+  quadrant: Quadrant,
   point: { x: number; y: number },
 ) => {
-  if (quadrant === 1) {
-    return point.x <= 0 && point.y >= 0 ? 0.3 : 0.0;
-  }
-  if (quadrant === 2) {
-    return point.x >= 0 && point.y >= 0 ? 0.3 : 0.0;
-  }
-  if (quadrant === 3) {
-    return point.x >= 0 && point.y <= 0 ? 0.3 : 0.0;
-  }
-  if (quadrant === 4) {
-    return point.x <= 0 && point.y <= 0 ? 0.3 : 0.0;
+  switch (quadrant) {
+    case 1:
+      return point.x <= 0 && point.y >= 0 ? 0.3 : 0.0;
+    case 2:
+      return point.x >= 0 && point.y >= 0 ? 0.3 : 0.0;
+    case 3:
+      return point.x >= 0 && point.y <= 0 ? 0.3 : 0.0;
+    case 4:
+      return point.x <= 0 && point.y <= 0 ? 0.3 : 0.0;
   }
 };
 
@@ -103,8 +103,8 @@ const SurveyResultsChart = () => {
   const styles = isDarkMode() ? chartDarkStyles : chartLightStyles;
 
   return (
-    <div className="container mx-auto p-8">
-      <ChartContainer config={chartConfig} className="min-h-[200]px">
+    <div className="container max-w-[1000px] mx-auto p-8">
+      <ChartContainer config={chartConfig} className="min-h-[200px]">
         <ScatterChart>
           <CartesianGrid
             strokeDasharray="3 3"
