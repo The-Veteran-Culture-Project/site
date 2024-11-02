@@ -10,7 +10,7 @@ const SurveyUser = defineTable({
 
 const Survey = defineTable({
   columns: {
-    id: column.text({ primaryKey: true }),
+    id: column.text({ primaryKey: true, nullable: false }),
     takenAt: column.date(),
     answers: column.json(),
     x_offset: column.number(),
