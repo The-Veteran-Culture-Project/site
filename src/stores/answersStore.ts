@@ -9,5 +9,5 @@ export interface AnswerItem {
 export const answersStore = persistentAtom<Record<string, AnswerItem>>(
   "answers",
   {},
-  { encode: JSON.stringify, decode: JSON.parse }
+  { encode: JSON.stringify, decode: JSON.parse },
 );
