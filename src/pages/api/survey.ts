@@ -43,11 +43,14 @@ export async function POST(context: APIContext): Promise<Response> {
       })
       .execute();
 
+    const headers = new Headers();
+    headers.append("Set-Cookie", `survey_id=${uuid}; Path=/; HttpOnly`);
+
     return new Response(
       JSON.stringify({ message: "Success", survey_id: uuid }),
       {
         status: 201,
-        headers: { "Content-Type": "application/json" },
+        headers,
       }
     );
   } catch (error) {
