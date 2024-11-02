@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const LoginDialog = (
-  { buttonText, buttonStyle }: Props = { buttonText: "Login" },
+  { buttonText, buttonStyle }: Props = { buttonText: "Login" }
 ) => {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
@@ -45,12 +45,15 @@ export const LoginDialog = (
         body: JSON.stringify({ username, password }),
       });
 
+      console.log(response);
+
       if (response.ok) {
         setMessage({ text: "Login successful", type: "success" });
         setOpen(false);
         window.location.href = "/survey";
       } else {
         const errorData = await response.json();
+        console.log(errorData);
         setMessage({
           text: errorData.message || "Login failed",
           type: "error",

@@ -7,11 +7,11 @@ export async function POST(context: APIContext): Promise<Response> {
   const { username, password } = await context.request.json();
   if (
     typeof username !== "string" ||
-    username.length <= 3 ||
+    username.length < 3 ||
     username.length > 31 ||
     !/^[A-Za-z0-9_-]+$/.test(username)
   ) {
-    return new Response("Invalid username", {
+    return new Response(JSON.stringify({ message: "Invalid username" }), {
       status: 400,
     });
   }
@@ -20,7 +20,7 @@ export async function POST(context: APIContext): Promise<Response> {
     password.length < 6 ||
     password.length > 255
   ) {
-    return new Response("Invalid password", {
+    return new Response(JSON.stringify({ message: "Invalid password" }), {
       status: 400,
     });
   }
@@ -40,16 +40,22 @@ export async function POST(context: APIContext): Promise<Response> {
     // Since protecting against this is non-trivial,
     // it is crucial your implementation is protected against brute-force attacks with login throttling etc.
     // If usernames are public, you may outright tell the user that the username is invalid.
-    return new Response("Incorrect username or password", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ message: "Incorrect username or password!" }),
+      {
+        status: 400,
+      }
+    );
   }
   const validPassword = password === existingUser.password;
 
   if (!validPassword) {
-    return new Response("Incorrect username or password", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ message: "Incorrect username or password" }),
+      {
+        status: 400,
+      }
+    );
   }
 
   const session = await lucia.createSession(existingUser.id, {});
