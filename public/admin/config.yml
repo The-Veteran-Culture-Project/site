@@ -47,7 +47,6 @@ collections:
         description: "Content for survey results page"
         fields:
           - { label: "Separation", name: "separation", widget: "markdown" }
-          - { label: "Separation", name: "separation", widget: "markdown" }
           - { label: "Integration", name: "integration", widget: "markdown" }
           - { label: "Assimilation", name: "assimilation", widget: "markdown" }
           - {
