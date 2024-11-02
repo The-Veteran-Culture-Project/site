@@ -13,6 +13,7 @@ export async function POST(context: APIContext): Promise<Response> {
   ) {
     return new Response(JSON.stringify({ message: "Invalid username" }), {
       status: 400,
+      headers: { "Content-Type": "application/json" },
     });
   }
   if (
@@ -22,6 +23,7 @@ export async function POST(context: APIContext): Promise<Response> {
   ) {
     return new Response(JSON.stringify({ message: "Invalid password" }), {
       status: 400,
+      headers: { "Content-Type": "application/json" },
     });
   }
 
@@ -44,6 +46,7 @@ export async function POST(context: APIContext): Promise<Response> {
       JSON.stringify({ message: "Incorrect username or password!" }),
       {
         status: 400,
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
@@ -54,6 +57,7 @@ export async function POST(context: APIContext): Promise<Response> {
       JSON.stringify({ message: "Incorrect username or password" }),
       {
         status: 400,
+        headers: { "Content-Type": "application/json" },
       },
     );
   }

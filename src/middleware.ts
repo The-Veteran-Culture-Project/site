@@ -3,6 +3,8 @@ import { defineMiddleware } from "astro:middleware";
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const sessionId = context.cookies.get(lucia.sessionCookieName)?.value ?? null;
+  const surveyId = context.cookies.get("survey_id")?.value ?? null;
+
   if (!sessionId) {
     context.locals.user = null;
     context.locals.session = null;
@@ -28,5 +30,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
   context.locals.session = session;
   context.locals.user = user;
+  context.locals.surveyId = surveyId;
   return next();
 });

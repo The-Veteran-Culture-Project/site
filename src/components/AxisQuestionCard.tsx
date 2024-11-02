@@ -51,7 +51,7 @@ const AxisQuestionCard = ({
         <RadioGroup onValueChange={onInput(question, axis)}>
           {choiceKeys.map((choice) => (
             <div
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 hover:bg-muted p-2 rounded-md"
               key={`${question}-${choice}`}
             >
               <RadioGroupItem
@@ -59,7 +59,10 @@ const AxisQuestionCard = ({
                 checked={$answers[question]?.offset === choices[choice]}
                 id={`${question}-${choice}`}
               />
-              <label className="min-w-64" htmlFor={`${question}-${choice}`}>
+              <label
+                className="min-w-64 cursor-pointer"
+                htmlFor={`${question}-${choice}`}
+              >
                 {choice}
               </label>
             </div>

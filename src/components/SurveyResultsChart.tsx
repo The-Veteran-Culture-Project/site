@@ -28,8 +28,8 @@ const chartLightStyles = {
   gridColor: "#52525b",
   labelStyle: {
     fill: "#52525b",
-    "font-size": "3vw",
-    "font-weight": "bold",
+    fontSize: "3vw",
+    fontWeight: "bold",
   },
 };
 
@@ -40,13 +40,14 @@ const chartDarkStyles = {
   gridColor: "#d4d4d8",
   labelStyle: {
     fill: "text-primary",
-    "font-size": "3vw",
-    "font-weight": "bold",
+    fontSize: "3vw",
+    fontWeight: "bold",
   },
 };
 
 const getData = () => {
   const data = Object.values(answersStore.get());
+  console.log(data);
 
   const { x, y } = data.reduce(
     (acc, d) => {
