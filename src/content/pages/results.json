@@ -1,1 +1,6 @@
-{}
+{
+  "separation": "Text explaining your findings with pros/cons in this category",
+  "integration": "Text explaining your findings with pros/cons in this category",
+  "assimilation": "Text explaining your findings with pros/cons in this category",
+  "marginalization": "Text explaining your findings with pros/cons in this category"
+}
