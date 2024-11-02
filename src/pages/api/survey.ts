@@ -51,7 +51,7 @@ export async function POST(context: APIContext): Promise<Response> {
       {
         status: 201,
         headers,
-      }
+      },
     );
   } catch (error) {
     console.error("Error inserting survey", error);
