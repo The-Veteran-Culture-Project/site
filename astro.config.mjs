@@ -22,10 +22,8 @@ export default defineConfig({
       exclude: ["astro:db"],
     },
     define: {
-      "process.env.ASTRO_DB_APP_TOKEN": JSON.stringify("PLACEHOLDER"),
-      "process.env.ASTRO_DB_REMOTE_URL": JSON.stringify(
-        "libsql://vcpsite-onnenon.turso.io"
-      ),
+      "process.env.ASTRO_DB_APP_TOKEN": JSON.stringify("TOKEN_PLACEHOLDER"),
+      "process.env.ASTRO_DB_REMOTE_URL": JSON.stringify("URL_PLACEHOLDER"),
     },
   },
   adapter: cloudflare({
