@@ -1,10 +1,11 @@
-name: Deploy Pages Site
+name: Deploy Pages Site Non Prod
 
-on: push
+on:
+  push:
+    branches-ignore:
+      - main
 
 env:
-  # ASTRO_DB_APP_TOKEN: ${{ github.ref_name == 'main' && secrets.PROD_ASTRO_DB_APP_TOKEN || secrets.ASTRO_DB_APP_TOKEN }}
-  # ASTRO_DB_REMOTE_URL: ${{ github.ref_name == 'main' && secrets.PROD_ASTRO_DB_REMOTE_URL || secrets.ASTRO_DB_REMOTE_URL }}
   ASTRO_DB_APP_TOKEN: ${{ secrets.ASTRO_DB_APP_TOKEN }}
   ASTRO_DB_REMOTE_URL: ${{ secrets.ASTRO_DB_REMOTE_URL }}
 
