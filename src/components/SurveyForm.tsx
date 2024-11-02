@@ -49,17 +49,17 @@ const QuestionForm = ({ questions }: Props) => {
   const $answers = useStore(answersStore);
 
   const allQuestionsAnswered = questions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const categories = Array.from(categoryMap.keys());
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
   const [currentQuestions, setCurrentQuestions] = useState(
-    categoryMap.get(categories[0]) || [],
+    categoryMap.get(categories[0]) || []
   );
   const allQuestionsAnsweredForPage = currentQuestions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const handleNext = () => {
@@ -92,7 +92,7 @@ const QuestionForm = ({ questions }: Props) => {
         if (d.axis === "Y") acc.y_offset += d.offset;
         return acc;
       },
-      { x_offset: 0, y_offset: 0 },
+      { x_offset: 0, y_offset: 0 }
     );
 
     const payload = {
@@ -126,8 +126,8 @@ const QuestionForm = ({ questions }: Props) => {
     "flex flex-1 p-6 mx-4 mt-4 text-xl rounded-lg font-semibold justify-center min-w-36";
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="flex flex-col flex-1 container-sm mx-auto">
+    <div className="flex flex-col flex-1 container-sm mx-auto">
+      <form onSubmit={handleSubmit}>
         <h2 className="text-3xl font-bold p-4 text-center">
           {currentCategory}
         </h2>
@@ -173,8 +173,8 @@ const QuestionForm = ({ questions }: Props) => {
             </Button>
           )}
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 
