@@ -6,5 +6,5 @@ export interface AnswerItem {
 }
 
 export const answersStore = persistentAtom<
-  Record<string, { axis: string; offset: number }>
+  Record<string, { axis: string; offset: number; question: string }>
 >("answers", {}, { encode: JSON.stringify, decode: JSON.parse });

@@ -28,8 +28,8 @@ const chartLightStyles = {
   gridColor: "#52525b",
   labelStyle: {
     fill: "#52525b",
-    "font-size": "3vw",
-    "font-weight": "bold",
+    fontSize: "3vw",
+    fontWeight: "bold",
   },
 };
 
@@ -40,13 +40,14 @@ const chartDarkStyles = {
   gridColor: "#d4d4d8",
   labelStyle: {
     fill: "text-primary",
-    "font-size": "3vw",
-    "font-weight": "bold",
+    fontSize: "3vw",
+    fontWeight: "bold",
   },
 };
 
 const getData = () => {
   const data = Object.values(answersStore.get());
+  console.log(data);
 
   const { x, y } = data.reduce(
     (acc, d) => {
@@ -54,7 +55,7 @@ const getData = () => {
       if (d.axis === "Y") acc.y += d.offset;
       return acc;
     },
-    { x: 0, y: 0 },
+    { x: 0, y: 0 }
   );
   return [{ x, y }];
 };
@@ -78,7 +79,7 @@ const getDomain = (data: { x: number; y: number }[]) => {
 
 const getAreaFillForQuadrant = (
   quadrant: number,
-  point: { x: number; y: number },
+  point: { x: number; y: number }
 ) => {
   if (quadrant === 1) {
     return point.x <= 0 && point.y >= 0 ? 0.3 : 0.0;

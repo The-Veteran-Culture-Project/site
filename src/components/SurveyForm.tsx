@@ -33,7 +33,10 @@ const buildCategoryMap = (questions: question[]) => {
 
 const handleInputChange = (question: string, axis: string, offset: number) => {
   console.log(question, axis, offset);
-  answersStore.set({ ...answersStore.get(), [question]: { axis, offset } });
+  answersStore.set({
+    ...answersStore.get(),
+    [question]: { axis, offset, question },
+  });
 };
 
 const QuestionForm = ({ questions }: Props) => {
@@ -46,17 +49,17 @@ const QuestionForm = ({ questions }: Props) => {
   const $answers = useStore(answersStore);
 
   const allQuestionsAnswered = questions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const categories = Array.from(categoryMap.keys());
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [currentCategory, setCurrentCategory] = useState(categories[0]);
   const [currentQuestions, setCurrentQuestions] = useState(
-    categoryMap.get(categories[0]) || [],
+    categoryMap.get(categories[0]) || []
   );
   const allQuestionsAnsweredForPage = currentQuestions.every(
-    (q) => $answers[q.data.question] !== undefined,
+    (q) => $answers[q.data.question] !== undefined
   );
 
   const handleNext = () => {

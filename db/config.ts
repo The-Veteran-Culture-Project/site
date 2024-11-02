@@ -8,6 +8,19 @@ const SurveyUser = defineTable({
   },
 });
 
+const Survey = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    takenAt: column.date(),
+    answers: column.json(),
+    x_offset: column.number(),
+    y_offset: column.number(),
+    surveyUser: column.text({
+      references: () => SurveyUser.columns.id,
+    }),
+  },
+});
+
 const Session = defineTable({
   columns: {
     id: column.text({ primaryKey: true }),
@@ -20,6 +33,7 @@ const Session = defineTable({
 
 export default defineDb({
   tables: {
+    Survey,
     SurveyUser,
     Session,
   },
