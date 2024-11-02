@@ -7,7 +7,7 @@ export async function POST(context: APIContext): Promise<Response> {
   const { username, password } = await context.request.json();
   if (
     typeof username !== "string" ||
-    username.length < 3 ||
+    username.length <= 3 ||
     username.length > 31 ||
     !/^[A-Za-z0-9_-]+$/.test(username)
   ) {
@@ -57,7 +57,7 @@ export async function POST(context: APIContext): Promise<Response> {
   context.cookies.set(
     sessionCookie.name,
     sessionCookie.value,
-    sessionCookie.attributes,
+    sessionCookie.attributes
   );
 
   return new Response(null, {});
