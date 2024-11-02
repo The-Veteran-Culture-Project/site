@@ -38,6 +38,7 @@ jobs:
           command: pages deploy dist --project-name=site --branch stage
 
   build_prod:
+    needs: build_stage
     name: Build and Deploy to Cloudflare
     environment: cloudflare
     runs-on: ubuntu-latest
