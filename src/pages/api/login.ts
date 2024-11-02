@@ -47,7 +47,7 @@ export async function POST(context: APIContext): Promise<Response> {
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      },
+      }
     );
   }
   const validPassword = password === existingUser.password;
@@ -58,7 +58,7 @@ export async function POST(context: APIContext): Promise<Response> {
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
-      },
+      }
     );
   }
 
@@ -67,7 +67,7 @@ export async function POST(context: APIContext): Promise<Response> {
   context.cookies.set(
     sessionCookie.name,
     sessionCookie.value,
-    sessionCookie.attributes,
+    sessionCookie.attributes
   );
 
   return new Response(null, {});
