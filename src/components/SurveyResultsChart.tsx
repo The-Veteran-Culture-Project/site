@@ -55,7 +55,7 @@ const getData = () => {
       if (d.axis === "Y") acc.y += d.offset;
       return acc;
     },
-    { x: 0, y: 0 }
+    { x: 0, y: 0 },
   );
   return [{ x, y }];
 };
@@ -81,7 +81,7 @@ type Quadrant = 1 | 2 | 3 | 4;
 
 const getAreaFillForQuadrant = (
   quadrant: Quadrant,
-  point: { x: number; y: number }
+  point: { x: number; y: number },
 ) => {
   switch (quadrant) {
     case 1:
