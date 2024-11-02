@@ -21,9 +21,9 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["astro:db"],
     },
-    define: {
-      "process.env.ASTRO_STUDIO_APP_TOKEN": JSON.stringify("PLACEHOLDER"),
-    },
+    // define: {
+    //   "process.env.ASTRO_STUDIO_APP_TOKEN": JSON.stringify("PLACEHOLDER"),
+    // },
   },
   adapter: cloudflare({
     imageService: "cloudflare",
