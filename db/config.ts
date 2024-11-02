@@ -21,6 +21,16 @@ const Survey = defineTable({
   },
 });
 
+const DemographicInfo = defineTable({
+  columns: {
+    id: column.number({ primaryKey: true, autoIncrement: true }),
+    data: column.json(),
+    surveyId: column.text({
+      references: () => Survey.columns.id,
+    }),
+  },
+});
+
 const Session = defineTable({
   columns: {
     id: column.text({ primaryKey: true }),
@@ -36,5 +46,6 @@ export default defineDb({
     Survey,
     SurveyUser,
     Session,
+    DemographicInfo,
   },
 });
