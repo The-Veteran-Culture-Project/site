@@ -3,7 +3,8 @@ name: Deploy Pages Site
 on: push
 
 env:
-  ASTRO_STUDIO_APP_TOKEN: ${{ github.ref_name == 'main' && secrets.ASTRO_STUDIO_APP_TOKEN  || secrets.NONPROD_ASTRO_STUDIO_APP_TOKEN }}
+  ASTRO_DB_APP_TOKEN: ${{ github.ref_name == 'main' && secrets.PROD_ASTRO_DB_APP_TOKEN || secrets.ASTRO_DB_APP_TOKEN }}
+  ASTRO_DB_REMOTE_URL: ${{ github.ref_name == 'main' && secrets.PROD_ASTRO_DB_REMOTE_URL || secrets.ASTRO_DB_REMOTE_URL }}
 
 jobs:
   build:
@@ -19,8 +20,8 @@ jobs:
           cache: "npm"
       - name: Install
         run: npm ci
-      - name: Update Token Placeholder
-        run: sed -i "s/PLACEHOLDER/${ASTRO_STUDIO_APP_TOKEN}/" astro.config.mjs
+      # - name: Update Token Placeholder
+      #   run: sed -i "s/PLACEHOLDER/${ASTRO_STUDIO_APP_TOKEN}/" astro.config.mjs
       - name: Build
         run: npm run build:remote
       - name: Deploy
