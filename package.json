@@ -39,7 +39,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-switch": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
-    "astro": "^4.16.7",
+    "astro": "^4.16.9",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucia": "^3.2.2",
