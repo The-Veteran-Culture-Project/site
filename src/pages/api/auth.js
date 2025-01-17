@@ -1,4 +1,4 @@
-export async function onRequest(context) {
+export async function get(context) {
   const {
     request, // same as existing Worker API
     env, // same as existing Worker API
@@ -18,7 +18,7 @@ export async function onRequest(context) {
     redirectUrl.searchParams.set("scope", "repo user");
     redirectUrl.searchParams.set(
       "state",
-      crypto.getRandomValues(new Uint8Array(12)).join(""),
+      crypto.getRandomValues(new Uint8Array(12)).join("")
     );
     return Response.redirect(redirectUrl.href, 301);
   } catch (error) {
