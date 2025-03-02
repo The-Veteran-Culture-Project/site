@@ -1,4 +1,3 @@
-// @ts-ignore - No need for TypeScript checking in this file
 export async function GET({ request, locals, redirect }) {
   const client_id = import.meta.env.GITHUB_CLIENT_ID || locals.runtime.env.GITHUB_CLIENT_ID;
 

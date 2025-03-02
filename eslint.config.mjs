@@ -8,6 +8,17 @@ export default tseslint.config(
   ...tseslint.configs.stylistic,
   ...eslintPluginAstro.configs.recommended,
   {
+    languageOptions: {
+      globals: {
+        // Add browser and Node.js globals needed for API routes
+        URL: "readonly",
+        Response: "readonly",
+        Request: "readonly",
+        fetch: "readonly",
+        console: "readonly",
+        crypto: "readonly"
+      }
+    },
     rules: {
       // override/add rules settings here, such as:
       // "astro/no-set-html-directive": "error"

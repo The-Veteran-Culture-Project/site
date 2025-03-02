@@ -1,4 +1,3 @@
-// @ts-ignore - No need for TypeScript checking in this file
 function renderBody(status, content) {
   const html = `
     <script>
@@ -19,7 +18,7 @@ function renderBody(status, content) {
 export async function GET({ request, locals }) {
   const client_id = import.meta.env.GITHUB_CLIENT_ID || locals.runtime.env.GITHUB_CLIENT_ID;
   const client_secret = import.meta.env.GITHUB_CLIENT_SECRET || locals.runtime.env.GITHUB_CLIENT_SECRET;
-  
+
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get("code");
