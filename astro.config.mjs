@@ -18,13 +18,13 @@ export default defineConfig({
   },
   output: "server",
   vite: {
-    // optimizeDeps: {
-    //   exclude: ["astro:db"],
-    // },
-    // define: {
-    //   "process.env.ASTRO_DB_APP_TOKEN": JSON.stringify("TOKEN_PLACEHOLDER"),
-    //   "process.env.ASTRO_DB_REMOTE_URL": JSON.stringify("URL_PLACEHOLDER"),
-    // },
+    optimizeDeps: {
+      exclude: ["astro:db"],
+    },
+    define: {
+      "process.env.ASTRO_DB_APP_TOKEN": JSON.stringify("TOKEN_PLACEHOLDER"),
+      "process.env.ASTRO_DB_REMOTE_URL": JSON.stringify("URL_PLACEHOLDER"),
+    },
     resolve: {
       // Use react-dom/server.edge instead of react-dom/server.browser for React 19.
       // Without this, MessageChannel from node:worker_threads needs to be polyfilled.
