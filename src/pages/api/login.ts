@@ -75,7 +75,7 @@ export async function POST(context: APIContext): Promise<Response> {
   } catch (error) {
     console.log(error);
     console.log(`token ${process.env.ASTRO_DB_APP_TOKEN}`);
-    console.log(`remote url ${process.env.ASRO_DB_REMOTE_URL}`);
+    console.log(`remote url ${process.env.ASTRO_DB_REMOTE_URL}`);
     return new Response(
       JSON.stringify({ message: "An error occurred" }),
       {
