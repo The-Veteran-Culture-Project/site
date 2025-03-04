@@ -16,8 +16,8 @@ export default tseslint.config(
         Request: "readonly",
         fetch: "readonly",
         console: "readonly",
-        crypto: "readonly"
-      }
+        crypto: "readonly",
+      },
     },
     rules: {
       // override/add rules settings here, such as:

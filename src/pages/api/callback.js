@@ -16,8 +16,11 @@ function renderBody(status, content) {
 }
 
 export async function GET({ request, locals }) {
-  const client_id = import.meta.env.GITHUB_CLIENT_ID || locals.runtime.env.GITHUB_CLIENT_ID;
-  const client_secret = import.meta.env.GITHUB_CLIENT_SECRET || locals.runtime.env.GITHUB_CLIENT_SECRET;
+  const client_id =
+    import.meta.env.GITHUB_CLIENT_ID || locals.runtime.env.GITHUB_CLIENT_ID;
+  const client_secret =
+    import.meta.env.GITHUB_CLIENT_SECRET ||
+    locals.runtime.env.GITHUB_CLIENT_SECRET;
 
   try {
     const url = new URL(request.url);
@@ -32,7 +35,7 @@ export async function GET({ request, locals }) {
           accept: "application/json",
         },
         body: JSON.stringify({ client_id, client_secret, code }),
-      }
+      },
     );
     const result = await response.json();
     if (result.error) {
