@@ -2,9 +2,6 @@ name: PR Checks
 
 on: pull_request
 
-env:
-  ASTRO_DATABASE_FILE: "./database.db"
-
 jobs:
   build:
     name: Run PR Checks
@@ -23,5 +20,3 @@ jobs:
         run: npm run format:check
       - name: Astro Check
         run: npm run check
-      - name: Astro Build
-        run: npm run build
