@@ -21,9 +21,9 @@ export default defineConfig({
     optimizeDeps: {
       exclude: ["astro:db"],
     },
-    ssr: {
-      external: ["@libsql/client"],
-    },
+    // ssr: {
+    //   external: ["@libsql/client"],
+    // },
     define: {
       "process.env.ASTRO_DB_APP_TOKEN": JSON.stringify("TOKEN_PLACEHOLDER"),
       "process.env.ASTRO_DB_REMOTE_URL": JSON.stringify("URL_PLACEHOLDER"),
