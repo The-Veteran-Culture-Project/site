@@ -6,12 +6,13 @@ import cloudflare from "@astrojs/cloudflare";
 import db from "@astrojs/db";
 
 export default defineConfig({
-  integrations: [tailwindcss(), react(), db()],
+  integrations: [react(), db()],
   security: {
     checkOrigin: true,
   },
   output: "server",
   vite: {
+    plugins: [tailwindcss()],
     optimizeDeps: {
       exclude: ["astro:db"],
     },
