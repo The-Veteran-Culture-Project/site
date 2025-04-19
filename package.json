@@ -24,7 +24,7 @@
     "@astrojs/db": "^0.14.11",
     "@astrojs/react": "^4.2.4",
     "@astrojs/tailwind": "^6.0.2",
-    "@hookform/resolvers": "^3.9.1",
+    "@hookform/resolvers": "^5.0.1",
     "@nanostores/persistent": "^0.10.2",
     "@nanostores/react": "^0.8.0",
     "@radix-ui/react-avatar": "^1.1.6",
