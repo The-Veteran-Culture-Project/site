@@ -3,6 +3,13 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     groups:
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+      astro:
+        patterns:
+          - "@astrojs/*"
+          - "astro"
       dev-dependencies:
         patterns:
           - "@eslint/js"
