@@ -1,18 +1,12 @@
 import { defineConfig } from "astro/config";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import cloudflare from "@astrojs/cloudflare";
 
 import db from "@astrojs/db";
 
 export default defineConfig({
-  integrations: [
-    tailwind({
-      applyBaseStyles: false,
-    }),
-    react(),
-    db(),
-  ],
+  integrations: [tailwindcss(), react(), db()],
   security: {
     checkOrigin: true,
   },
