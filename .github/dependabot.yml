@@ -2,8 +2,33 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
+    groups:
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+      astro:
+        patterns:
+          - "@astrojs/*"
+          - "astro"
+      dev-dependencies:
+        patterns:
+          - "@eslint/js"
+          - "@tailwindcss/typography"
+          - "@types/eslint__js"
+          - "eslint"
+          - "eslint-plugin-astro"
+          - "prettier"
+          - "prettier-plugin-astro"
+          - "typescript"
+          - "typescript-eslint"
+      minor-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
     schedule:
-      interval: "daily"
+      interval: "monthly"
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -11,7 +36,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "monthly"
     commit-message:
       prefix: "chore"
       include: "scope"
