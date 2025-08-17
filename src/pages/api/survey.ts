@@ -3,19 +3,17 @@ import { z } from "zod";
 import { db, Survey } from "astro:db";
 
 const surveySchema = z.object({
-  answers: z.record(z.string(), z.any()), // Adjust the schema as per your requirements
+  answers: z.record(z.string(), z.any()),
   x_offset: z.number(),
   y_offset: z.number(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  veteranStatus: z.enum(["Active Military", "Veteran", "Civilian"]),
 });
 
 export async function POST(context: APIContext): Promise<Response> {
-  const user = context.locals.user;
-
-  if (!user) {
-    return new Response(JSON.stringify({ message: "Unauthorized" }), {
-      status: 401,
-    });
-  }
+  // Removed user authentication check to allow survey submission for all users
   try {
     const info = await context.request.json();
     const validationResult = surveySchema.safeParse(info);
@@ -27,7 +25,8 @@ export async function POST(context: APIContext): Promise<Response> {
       });
     }
 
-    const { answers, x_offset, y_offset } = validationResult.data;
+
+    const { answers, x_offset, y_offset, firstName, lastName, email, veteranStatus } = validationResult.data;
 
     const uuid = crypto.randomUUID();
 
@@ -38,7 +37,10 @@ export async function POST(context: APIContext): Promise<Response> {
         answers,
         x_offset,
         y_offset,
-        surveyUser: user.id,
+        firstName,
+        lastName,
+        email,
+        veteranStatus,
         takenAt: new Date(),
       })
       .execute();

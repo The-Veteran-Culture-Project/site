@@ -15,8 +15,13 @@ const Survey = defineTable({
     answers: column.json(),
     x_offset: column.number(),
     y_offset: column.number(),
+    firstName: column.text(),
+    lastName: column.text(),
+    email: column.text(),
+    veteranStatus: column.text(),
     surveyUser: column.text({
       references: () => SurveyUser.columns.id,
+      optional: true,
     }),
   },
 });

@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { UserInfoDialog } from "@/components/UserInfoDialog.tsx";
 
 import { answersStore } from "@/stores/answersStore.ts";
 import AxisQuestionCard from "@/components/AxisQuestionCard.tsx";
@@ -82,10 +83,15 @@ const QuestionForm = ({ questions }: Props) => {
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    console.log("submitting answers", $answers);
-    event.preventDefault();
+  const [showUserInfo, setShowUserInfo] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    veteranStatus: "",
+  });
 
+  const handleUserInfoSubmit = async (info: typeof userInfo) => {
     const { x_offset, y_offset } = Object.values($answers).reduce(
       (acc, d) => {
         if (d.axis === "X") acc.x_offset += d.offset;
@@ -99,6 +105,7 @@ const QuestionForm = ({ questions }: Props) => {
       answers: $answers,
       x_offset,
       y_offset,
+      ...info,
     };
 
     try {
@@ -112,7 +119,6 @@ const QuestionForm = ({ questions }: Props) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         window.location.href = "/results";
       } else {
         console.error("Failed to submit survey");
@@ -127,7 +133,7 @@ const QuestionForm = ({ questions }: Props) => {
 
   return (
     <div className="flex flex-col flex-1 container-sm mx-auto">
-      <form onSubmit={handleSubmit}>
+  <form onSubmit={(e) => { e.preventDefault(); setShowUserInfo(true); }}>
         <h2 className="text-3xl font-bold p-4 text-center">
           {currentCategory}
         </h2>
@@ -171,6 +177,15 @@ const QuestionForm = ({ questions }: Props) => {
             >
               View Results
             </Button>
+          )}
+          {showUserInfo && (
+            <UserInfoDialog
+              buttonText="Confirm"
+              buttonStyle="text-xl font-bold p-6"
+              open={showUserInfo}
+              onClose={() => setShowUserInfo(false)}
+              onSubmit={handleUserInfoSubmit}
+            />
           )}
         </div>
       </form>

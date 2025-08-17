@@ -21,18 +21,9 @@ const user = Astro.locals.user;
       set:html={marked.parse(body)}
     />
     <div class="flex flex-col m-12 justify-center items-center">
-      <div class={`${user ? "hidden" : "flex"}`}>
-        <LoginDialog
-          buttonText="TAKE THE SURVEY"
-          buttonStyle={buttonStyle}
-          client:load
-        />
-      </div>
-      <div class={`${user ? "flex" : "hidden"}`}>
-        <Button className={buttonStyle}>
-          <a class="flex" href="/survey">TAKE THE SURVEY</a>
-        </Button>
-      </div>
+      <Button className={buttonStyle}>
+        <a class="flex" href="/survey">TAKE THE SURVEY</a>
+      </Button>
       <div class="flex justify-center">
         <p class="flex p-8 text-center italic max-w-prose">
           {disclaimer}

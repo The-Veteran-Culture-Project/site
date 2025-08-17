@@ -32,41 +32,29 @@ export async function POST(context: APIContext): Promise<Response> {
       .select()
       .from(SurveyUser)
       .where(eq(SurveyUser.username, username.toLowerCase()))
-      .get();
-    if (!existingUser) {
-      // NOTE:
-      // Returning immediately allows malicious actors to figure out valid usernames from response times,
-      // allowing them to only focus on guessing passwords in brute-force attacks.
-      // As a preventive measure, you may want to hash passwords even for invalid usernames.
-      // However, valid usernames can be already be revealed with the signup page among other methods.
-      // It will also be much more resource intensive.
-      // Since protecting against this is non-trivial,
-      // it is crucial your implementation is protected against brute-force attacks with login throttling etc.
-      // If usernames are public, you may outright tell the user that the username is invalid.
-      return new Response(
-        JSON.stringify({ message: "Incorrect username or password!" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
-    const validPassword = password === existingUser.password;
+          const { firstName, lastName, email, veteranStatus } = await context.request.json();
+          if (
+            typeof firstName !== "string" || firstName.length < 1 ||
+            typeof lastName !== "string" || lastName.length < 1 ||
+            typeof email !== "string" || !email.includes("@") ||
+            typeof veteranStatus !== "string" || !["Active Military", "Veteran", "Civilian"].includes(veteranStatus)
+          ) {
+            return new Response(JSON.stringify({ message: "Invalid input" }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
 
-    if (!validPassword) {
-      return new Response(
-        JSON.stringify({ message: "Incorrect username or password" }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
+          // Optionally, save user info to database here
+          // await db.insert(SurveyUser).values({ firstName, lastName, email, veteranStatus });
 
-    const session = await lucia.createSession(existingUser.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    context.cookies.set(
-      sessionCookie.name,
+          // Set a session or cookie if needed
+          // ...
+
+          return new Response(JSON.stringify({ message: "Info submitted!" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
       sessionCookie.value,
       sessionCookie.attributes,
     );
