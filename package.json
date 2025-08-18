@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/cloudflare": "^12.5.0",
+    "@astrojs/cloudflare": "^12.6.4",
     "@astrojs/db": "^0.14.11",
     "@astrojs/react": "^4.3.0",
     "@hookform/resolvers": "^3.9.1",
@@ -39,7 +39,7 @@
     "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-toast": "^1.2.10",
     "@tailwindcss/vite": "^4.1.4",
-    "astro": "^5.7.4",
+    "astro": "^5.12.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucia": "^3.2.2",
@@ -53,6 +53,7 @@
     "tailwindcss": "^4.1.4",
     "vaul": "^1.1.2",
     "veteran-culture-project": "file:",
+    "vite": "^7.1.2",
     "zod": "^3.24.3"
   },
   "devDependencies": {

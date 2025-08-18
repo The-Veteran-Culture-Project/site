@@ -18,6 +18,16 @@ export default defineConfig({
     },
     define: {
       "process.env.ASTRO_DB_APP_TOKEN": JSON.stringify("TOKEN_PLACEHOLDER"),
+    },
+    server: {
+      fs: {
+        strict: true,
+        allow: ['./'],
+        deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**'],
+      },
+      host: false, // Disable host option for security
+    },
+    define: {
       "process.env.ASTRO_DB_REMOTE_URL": JSON.stringify("URL_PLACEHOLDER"),
     },
     resolve: {
