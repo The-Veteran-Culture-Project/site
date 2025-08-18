@@ -9,25 +9,52 @@ import { LoginDialog } from "@/components/LoginDialog.tsx";
 
 const { body, disclaimer } = content;
 const buttonStyle =
-  "flex sm:text-3xl text-xl font-bold rounded-lg sm:p-8 font-display p-6 max-w-fit";
+  "flex text-lg sm:text-xl font-semibold rounded-lg p-4 sm:p-6 font-display max-w-fit";
 
 const user = Astro.locals.user;
 ---
 
-<Layout title="The Veteran Culture Project" isLandingPage={true}>
-  <main class="flex flex-col flex-1 container mx-auto justify-center px-4">
-    <article
-      class="container mx-auto prose prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-light prose-zinc"
-      set:html={marked.parse(body)}
-    />
-    <div class="flex flex-col m-12 justify-center items-center">
-      <Button className={buttonStyle}>
-        <a class="flex" href="/survey">TAKE THE SURVEY</a>
-      </Button>
-      <div class="flex justify-center">
-        <p class="flex p-8 text-center italic max-w-prose">
-          {disclaimer}
-        </p>
+<Layout>
+  <main class="min-h-[calc(100vh-9rem)] flex flex-col items-center justify-center">
+    <div class="container px-4 py-12 md:py-16">
+      <div class="max-w-3xl mx-auto space-y-8">
+        {/* Hero Section */}
+        <div class="text-center space-y-6">
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-100 tracking-tight mb-4">
+            The Veteran Culture Project
+          </h1>
+          <h2 class="text-xl md:text-2xl lg:text-3xl font-medium text-primary tracking-tight">
+            Understanding the Veteran Experience
+          </h2>
+          <h3 class="text-lg md:text-xl lg:text-2xl font-medium text-zinc-300">
+            An online assessment that aligns Veterans on a military and civilian culture matrix.
+          </h3>
+        </div>
+
+        {/* CTA Section */}
+        <div class="flex flex-col items-center space-y-6 pt-8">
+          <div class="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800 max-w-2xl w-full">
+            <div class="text-center space-y-4 mb-8">
+              <h3 class="text-2xl font-semibold text-white">Ready to Share Your Experience?</h3>
+              <p class="text-zinc-300">Your perspective matters. Take our assessment to help bridge the gap between military and civilian cultures.</p>
+            </div>
+            <div class="flex justify-center">
+              <Button
+                className="text-xl px-10 py-6 rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform duration-200"
+              >
+                <a href="/survey" class="flex items-center space-x-3">
+                  <span>Start the Assessment</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </a>
+              </Button>
+            </div>
+          </div>
+          <p class="text-sm text-zinc-400 text-center max-w-xl italic">
+            {disclaimer}
+          </p>
+        </div>
       </div>
     </div>
   </main>

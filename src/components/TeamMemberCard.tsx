@@ -18,22 +18,26 @@ export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
 
   return (
     <Card
-      className="w-full max-w-md flex grow flex-col drop-shadow-md transition-all duration-300 ease-in-out hover:shadow-xl hover:bg-muted"
+      className="w-full bg-zinc-900/50 border-zinc-800 hover:bg-zinc-900/80 transition-colors"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+      <CardHeader className="flex flex-col items-center text-center space-y-4">
         <div
-          className="relative h-24 w-24 md:h-32 md:w-32"
+          className="relative h-40 w-40 md:h-48 md:w-48 rounded-full overflow-hidden"
           role="img"
           aria-label={`Avatar of ${name}`}
         >
           <Avatar
-            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-24 w-24 md:h-32 md:w-32 ${
-              isHovering ? "opacity-0" : "opacity-100"
+            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-40 w-40 md:h-48 md:w-48 ${
+              isHovering && avatar2 ? "opacity-0" : "opacity-100"
             }`}
           >
-            <AvatarImage alt={`${name}'s primary avatar`} src={avatar} />
+            <AvatarImage 
+              alt={`${name}'s primary avatar`} 
+              src={avatar}
+              className="object-cover w-full h-full"
+            />
             <AvatarFallback>
               {name
                 .split(" ")
@@ -41,27 +45,33 @@ export function TeamMemberCard({ name, title, bio, avatar, avatar2 }: Props) {
                 .join("")}
             </AvatarFallback>
           </Avatar>
-          <Avatar
-            className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-24 w-24 md:h-32 md:w-32 ${
-              isHovering ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <AvatarImage alt={`${name}'s secondary avatar`} src={avatar2} />
-            <AvatarFallback>
-              {name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </AvatarFallback>
-          </Avatar>
+          {avatar2 && (
+            <Avatar
+              className={`absolute inset-0 transition-opacity duration-300 ease-in-out h-40 w-40 md:h-48 md:w-48 ${
+                !isHovering ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <AvatarImage 
+                alt={`${name}'s secondary avatar`} 
+                src={avatar2}
+                className="object-cover w-full h-full"
+              />
+              <AvatarFallback>
+                {name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
+              </AvatarFallback>
+            </Avatar>
+          )}
         </div>
-        <div className="flex flex-col">
-          <h2 className="text-2xl font-bold">{name}</h2>
-          <p className="text-md text-muted-foreground font-semibold">{title}</p>
+        <div className="flex flex-col space-y-1 pt-2">
+          <h3 className="text-xl font-semibold text-zinc-100">{name}</h3>
+          <p className="text-primary font-medium">{title}</p>
         </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground font-display">{bio}</p>
+      <CardContent className="pb-6">
+        <p className="text-zinc-300 leading-relaxed text-center">{bio}</p>
       </CardContent>
     </Card>
   );

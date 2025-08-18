@@ -1,0 +1,48 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { Button } from "@/components/ui/button";
+import SurveyProgressBar from "@/components/SurveyProgressBar.tsx";
+
+const buttonClass =
+  "flex flex-1 p-6 mx-4 mt-4 text-xl rounded-lg font-semibold justify-center min-w-36";
+---
+
+<Layout title="Survey - Linear Data 1" isLandingPage={false}>
+  <div class="flex flex-col flex-1 container-sm mx-auto">
+    <form>
+      <h2 class="text-3xl font-bold p-4 text-center">
+        Before & After Service
+      </h2>
+      <SurveyProgressBar currentStep={2} totalSteps={7} />
+
+      <div class="flex flex-col gap-6 py-6">
+        <div>
+          <label class="block font-semibold mb-2">Q5. Placeholder Linear Field 1</label>
+          <input type="text" class="w-full p-2 border rounded" />
+        </div>
+        <div>
+          <label class="block font-semibold mb-2">Q6. Placeholder Linear Field 2</label>
+          <input type="text" class="w-full p-2 border rounded" />
+        </div>
+        <!-- Add more fields as needed -->
+      </div>
+
+      <div class="flex justify-center flex-wrap-reverse min-w-50 py-4">
+        <Button className={buttonClass}>
+          <a href="/survey" onclick="sessionStorage.setItem('scrollToTop', 'true');">Previous</a>
+        </Button>
+        <Button className={buttonClass}>
+          <a href="/survey/linear2" onclick="sessionStorage.setItem('scrollToTop', 'true');">Next</a>
+        </Button>
+      </div>
+    </form>
+  </div>
+  
+  <script>
+    // Scroll to top if coming from another survey page
+    if (sessionStorage.getItem('scrollToTop') === 'true') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      sessionStorage.removeItem('scrollToTop');
+    }
+  </script>
+</Layout>

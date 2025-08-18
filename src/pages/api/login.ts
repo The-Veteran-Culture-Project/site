@@ -55,9 +55,10 @@ export async function POST(context: APIContext): Promise<Response> {
             status: 200,
             headers: { "Content-Type": "application/json" },
           });
-      sessionCookie.value,
-      sessionCookie.attributes,
-    );
+    // If you need to set a cookie, define sessionCookie here or remove these lines.
+    // Example:
+    // const sessionCookie = { value: "your-session-value", attributes: { /* cookie attributes */ } };
+    // Otherwise, remove the lines below.
 
     return new Response(null, {});
   } catch (error) {

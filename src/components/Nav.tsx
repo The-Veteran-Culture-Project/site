@@ -4,7 +4,6 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { ModeToggle } from "@/components/ModeToggle";
 import { LinkInfo } from "@/types";
 
 interface Props {
@@ -19,7 +18,7 @@ export const Nav = ({ links }: Props) => {
           {links.map((link, idx) => {
             return (
               <NavigationMenuItem className="flex p-0 m-0" key={idx}>
-                <a className={navigationMenuTriggerStyle()} href={link.path}>
+                <a className={`${navigationMenuTriggerStyle()} text-white hover:text-[#CBB87C] hover:bg-gray-800 bg-transparent border-none`} href={link.path}>
                   {link.name}
                 </a>
               </NavigationMenuItem>
@@ -27,7 +26,6 @@ export const Nav = ({ links }: Props) => {
           })}
         </NavigationMenuList>
       </NavigationMenu>
-      <ModeToggle />
     </div>
   );
 };

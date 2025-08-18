@@ -1,9 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@plugin '@tailwindcss/typography';
+/* Typography plugin should be configured in tailwind.config.js, not with @plugin here */
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* Removed invalid @custom-variant at-rule */
 
 :root {
   --background: hsl(0 0% 100%);
@@ -61,10 +61,120 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
+  }
+  html {
+    background-color: var(--background);
+    color: var(--foreground);
+    transition: none !important;
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
+    transition: none !important;
+  }
+}
+
+/* Prevent flashing and smooth transitions */
+h1, h2, h3, h4, h5, h6 {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Disable all animations and transitions for survey elements */
+[data-astro-rerun] * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.survey-title {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Prevent landing page flashing */
+main article h2, main article h3 {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Landing page specific anti-flash styles */
+.landing-content {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+.landing-title-static {
+  font-size: 1.125rem !important; /* text-lg */
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+@media (min-width: 640px) {
+  .landing-title-static {
+    font-size: 1.25rem !important; /* text-xl */
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-title-static {
+    font-size: 1.5rem !important; /* text-2xl */
+  }
+}
+
+.landing-subtitle-static {
+  font-size: 1rem !important; /* text-base */
+  opacity: 1 !important;
+  visibility: visible !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+@media (min-width: 640px) {
+  .landing-subtitle-static {
+    font-size: 1.125rem !important; /* text-lg */
+  }
+}
+
+/* Override prose heading sizes globally - limit maximum sizes */
+.prose h1:not([class*="text-"]) {
+  font-size: 2.25rem !important; /* text-3xl */
+  font-weight: 600 !important;
+}
+
+.prose h2:not([class*="text-"]) {
+  font-size: 1.875rem !important; /* text-2xl */
+  font-weight: 600 !important;
+}
+
+.prose h3:not([class*="text-"]) {
+  font-size: 1.5rem !important; /* text-xl */
+  font-weight: 500 !important;
+}
+
+.prose h4:not([class*="text-"]) {
+  font-size: 1.25rem !important; /* text-lg */
+  font-weight: 500 !important;
+}
+
+/* Responsive adjustments for prose headings */
+@media (max-width: 640px) {
+  .prose h1:not([class*="text-"]) {
+    font-size: 1.875rem !important; /* text-2xl on mobile */
+  }
+  
+  .prose h2:not([class*="text-"]) {
+    font-size: 1.5rem !important; /* text-xl on mobile */
+  }
+  
+  .prose h3:not([class*="text-"]) {
+    font-size: 1.25rem !important; /* text-lg on mobile */
   }
 }
 
@@ -76,8 +186,7 @@
   font-size: 1rem;
 }
 
-@theme inline {
-  --font-*: initial;
+:root {
   --font-display: Roboto, system-ui, sans-serif;
   --font-sans: Open Sans, system-ui, sans-serif;
   --font-static: Bebas Neue, system-ui, sans-serif;

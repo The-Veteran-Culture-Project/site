@@ -11,19 +11,22 @@ const { body } = content;
 const members = await getCollection("teamMembers");
 ---
 
-<Layout title="About - The Veteran Culture Project" isLandingPage={false}>
-  <main
-    class="flex flex-col container mx-auto dark:text-slate-100 justify-center p-4"
-  >
-    <h1 class="text-3xl font-bold text-center">About Us</h1>
-    <div
-      class="container mx-auto prose prose-zinc prose-headings:font-display md:prose-xl dark:prose-invert py-6 prose-headings:font-extralight"
-      set:html={marked.parse(body)}
-    />
-    <div
-      class="flex items-stretch mx-auto gap-6 h-full flex-wrap justify-center"
-    >
-      {members.map((m) => <TeamMemberCard {...m.data} client:load />)}
+<Layout title="About - The Veteran Culture Project">
+  <main class="min-h-[calc(100vh-9rem)] py-12">
+    <div class="container px-4 mx-auto">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center space-y-6 mb-12">
+          <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-zinc-100 tracking-tight">
+            About Us
+          </h1>
+        </div>
+        <div class="prose prose-lg dark:prose-invert mx-auto mb-16">
+          <div class="space-y-6 text-zinc-300" set:html={marked.parse(body)} />
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {members.map((m) => <TeamMemberCard {...m.data} client:load />)}
+        </div>
+      </div>
     </div>
   </main>
 </Layout>

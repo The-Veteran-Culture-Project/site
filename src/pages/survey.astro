@@ -1,12 +1,4 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import SurveyForm from "@/components/SurveyForm.tsx";
-import { getCollection } from "astro:content";
-
-// Removed user authentication redirect so all users can access the survey
-const questions = await getCollection("axisQuestions");
+// Redirect to the first step of the survey
+return Astro.redirect("/survey/1");
 ---
-
-<Layout title="Survey - The Veteran Culture Project" isLandingPage={false}>
-  <SurveyForm questions={questions} client:load />
-</Layout>

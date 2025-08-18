@@ -1,0 +1,12 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SurveyStepThree from "@/components/SurveyStepThree.tsx";
+import { getCollection } from "astro:content";
+
+const questions = await getCollection("axisQuestions");
+const categoryQuestions = questions.filter(q => q.data.category === "Civilian & Military Relationships");
+---
+
+<Layout title="Survey Step 3 - The Veteran Culture Project" isLandingPage={false}>
+  <SurveyStepThree questions={categoryQuestions} client:only="react" />
+</Layout>

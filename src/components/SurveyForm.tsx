@@ -1,7 +1,7 @@
 import { useStore } from "@nanostores/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserInfoDialog } from "@/components/UserInfoDialog.tsx";
+// ...existing imports...
 
 import { answersStore } from "@/stores/answersStore.ts";
 import AxisQuestionCard from "@/components/AxisQuestionCard.tsx";
@@ -18,6 +18,17 @@ interface question {
 interface Props {
   questions: question[];
 }
+
+// Map category names to neutral display labels
+const getCategoryDisplayName = (category: string): string => {
+  const categoryMap: Record<string, string> = {
+    "Patriotism & Purpose": "Before & After Service",
+    "Mental Health & Addiction": "Wellbeing & Challenges", 
+    "Mental Health & Addiction ": "Wellbeing & Challenges", // Handle trailing space variant
+    "Civilian & Military Relationships": "Life with Others",
+  };
+  return categoryMap[category] || category;
+};
 
 const buildCategoryMap = (questions: question[]) => {
   return questions.reduce((acc, q) => {
@@ -83,59 +94,17 @@ const QuestionForm = ({ questions }: Props) => {
     }
   };
 
-  const [showUserInfo, setShowUserInfo] = useState(false);
-  const [userInfo, setUserInfo] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    veteranStatus: "",
-  });
 
-  const handleUserInfoSubmit = async (info: typeof userInfo) => {
-    const { x_offset, y_offset } = Object.values($answers).reduce(
-      (acc, d) => {
-        if (d.axis === "X") acc.x_offset += d.offset;
-        if (d.axis === "Y") acc.y_offset += d.offset;
-        return acc;
-      },
-      { x_offset: 0, y_offset: 0 },
-    );
-
-    const payload = {
-      answers: $answers,
-      x_offset,
-      y_offset,
-      ...info,
-    };
-
-    try {
-      const response = await fetch("/api/survey", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        window.location.href = "/results";
-      } else {
-        console.error("Failed to submit survey");
-      }
-    } catch (error) {
-      console.error("Error submitting survey:", error);
-    }
-  };
+// ...existing code...
 
   const buttonClass =
     "flex flex-1 p-6 mx-4 mt-4 text-xl rounded-lg font-semibold justify-center min-w-36";
 
   return (
     <div className="flex flex-col flex-1 container-sm mx-auto">
-  <form onSubmit={(e) => { e.preventDefault(); setShowUserInfo(true); }}>
+  <form onSubmit={(e) => e.preventDefault()}>
         <h2 className="text-3xl font-bold p-4 text-center">
-          {currentCategory}
+          {getCategoryDisplayName(currentCategory)}
         </h2>
         <SurveyProgressBar
           currentStep={currentCategoryIndex + 1}
@@ -172,21 +141,13 @@ const QuestionForm = ({ questions }: Props) => {
           {currentCategoryIndex == categories.length - 1 && (
             <Button
               disabled={!allQuestionsAnswered}
-              type="submit"
+              onClick={() => window.location.href = "/survey/demographics"}
               className={buttonClass}
             >
-              View Results
+              Next
             </Button>
           )}
-          {showUserInfo && (
-            <UserInfoDialog
-              buttonText="Confirm"
-              buttonStyle="text-xl font-bold p-6"
-              open={showUserInfo}
-              onClose={() => setShowUserInfo(false)}
-              onSubmit={handleUserInfoSubmit}
-            />
-          )}
+          {/* UserInfoDialog removed. No user info or API logic remains here. */}
         </div>
       </form>
     </div>

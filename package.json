@@ -22,7 +22,7 @@
     "@astrojs/check": "^0.9.4",
     "@astrojs/cloudflare": "^12.5.0",
     "@astrojs/db": "^0.14.11",
-    "@astrojs/react": "^4.2.4",
+    "@astrojs/react": "^4.3.0",
     "@hookform/resolvers": "^3.9.1",
     "@nanostores/persistent": "^0.10.2",
     "@nanostores/react": "^0.8.0",
