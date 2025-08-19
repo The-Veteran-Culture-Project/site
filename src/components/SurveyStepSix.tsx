@@ -62,11 +62,20 @@ export default function SurveyStepSix() {
       const demographics = $answers.demographics;
       const va_benefits = $answers.va_benefits;
       
-      // Prepare the survey data object
+      // Get the most up-to-date contact info from the store
+      const latestContact = (answersStore.get().contact ?? {}) as ContactAnswers;
+      
+      console.log("SUBMITTING WITH CONTACT:", latestContact);
+      console.log("Subscribe:", latestContact.subscribe, "Type:", typeof latestContact.subscribe);
+      console.log("Story opt-in:", latestContact.story_opt_in, "Type:", typeof latestContact.story_opt_in);
+      
+      // Prepare the survey data object with explicit boolean values
       const surveyData = {
-        first_name: contact.first_name || "",
-        last_name: contact.last_name || "",
-        email: contact.email || "",
+        first_name: latestContact.first_name || "",
+        last_name: latestContact.last_name || "",
+        email: latestContact.email || "",
+        subscribe: latestContact.subscribe === true,
+        story_opt_in: latestContact.story_opt_in === true,
         military_score: militaryScore,
         civilian_score: civilianScore,
         strategy: strategy,

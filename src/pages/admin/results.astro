@@ -26,12 +26,61 @@ try {
 }
 
 // Fetch survey results from the database
-const results = await db.select().from(SurveyResponses)
+const rawResults = await db.select().from(SurveyResponses)
   .orderBy(desc(SurveyResponses.created_at))
   .all();
 
+console.log("Raw results from database:", rawResults);
+
+// Parse the JSON strings for demographics and va_benefits
+const results = rawResults.map(result => {
+  // Log each raw result before processing
+  console.log("Processing raw result:", result);
+  console.log("Raw subscribe value:", result.subscribe, "Type:", typeof result.subscribe);
+  console.log("Raw story_opt_in value:", result.story_opt_in, "Type:", typeof result.story_opt_in);
+  
+  // Helper function to safely parse JSON or return empty object
+  const safeParseJSON = (value) => {
+    if (!value) return {};
+    if (typeof value === 'object') return value;
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      console.error('Error parsing JSON:', e, 'Value:', value);
+      return {};
+    }
+  };
+
+  // Convert boolean values explicitly
+  const processed = {
+    ...result,
+    // Force boolean values to be true booleans
+    subscribe: result.subscribe === 1 || String(result.subscribe) === "1" || String(result.subscribe) === "true",
+    story_opt_in: result.story_opt_in === 1 || String(result.story_opt_in) === "1" || String(result.story_opt_in) === "true",
+    demographics: safeParseJSON(result.demographics),
+    va_benefits: safeParseJSON(result.va_benefits)
+  };
+  
+  // Log the processed result
+  console.log("Processed result:", processed);
+  console.log("Processed subscribe:", processed.subscribe, "Type:", typeof processed.subscribe);
+  console.log("Processed story_opt_in:", processed.story_opt_in, "Type:", typeof processed.story_opt_in);
+  
+  return processed;
+});
+
 console.log("Survey results count:", results.length);
-console.log("First result (if exists):", results[0] ? JSON.stringify(results[0]) : "No results");
+if (results.length > 0) {
+  const firstResult = results[0];
+  console.log("First result ID:", firstResult.id);
+  console.log("Subscribe raw value:", firstResult.subscribe);
+  console.log("Subscribe type:", typeof firstResult.subscribe);
+  console.log("Story opt-in raw value:", firstResult.story_opt_in);
+  console.log("Story opt-in type:", typeof firstResult.story_opt_in);
+  console.log("First result (if exists):", JSON.stringify(firstResult));
+} else {
+  console.log("No results");
+}
 
 // User is authenticated, proceed with rendering
 ---
@@ -41,9 +90,15 @@ console.log("First result (if exists):", results[0] ? JSON.stringify(results[0])
     <div class="max-w-7xl mx-auto">
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-white">Survey Results Admin View</h1>
-        <a href="/admin/logout" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
-          Log out
-        </a>
+        <div class="flex gap-4">
+          <a href="/admin/logout" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+            Log out
+          </a>
+        </div>
+      </div>
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-white">Total results: {results.length}</p>
+        <p class="text-gray-400 text-sm">Use the "Download CSV" button to export all survey data</p>
       </div>
       <ResultsTable client:load initialResults={results} />
     </div>

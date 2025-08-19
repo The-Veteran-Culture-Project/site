@@ -16,16 +16,43 @@ export default function ContactOptInForm() {
 
   // Auto-save contact data on change
   useEffect(() => {
-    answersStore.set({
-      ...answersStore.get(),
-      contact: {
+    // Use setTimeout to ensure the state has been updated
+    setTimeout(() => {
+      console.log("Setting subscribe:", subscribe, "storyOptIn:", storyOptIn);
+      console.log("Types:", typeof subscribe, typeof storyOptIn);
+      
+      // Get the current store state
+      const currentStore = answersStore.get();
+      console.log("Current store state:", currentStore);
+      
+      // Create a new contact object with TRUE booleans (not string "true" or number 1)
+      const updatedContact = {
         first_name: firstName,
         last_name: lastName,
         email,
-        subscribe,
-        story_opt_in: storyOptIn,
-      },
-    });
+        subscribe: subscribe === true, // Force true boolean
+        story_opt_in: storyOptIn === true, // Force true boolean
+      };
+      
+      console.log("Updated contact object:", updatedContact);
+      
+      // Update the store with the new contact object
+      answersStore.set({
+        ...currentStore,
+        contact: updatedContact,
+      });
+    }, 0);
+  
+    
+    // Verify the store was updated correctly
+    const newStore = answersStore.get();
+    console.log("Store after update:", newStore);
+    console.log("Contact in store:", newStore.contact);
+    if (newStore.contact) {
+      const contactData = newStore.contact as ContactAnswers;
+      console.log("Subscribe in store:", contactData.subscribe, "Type:", typeof contactData.subscribe);
+      console.log("Story opt-in in store:", contactData.story_opt_in, "Type:", typeof contactData.story_opt_in);
+    }
   }, [firstName, lastName, email, subscribe, storyOptIn]);
 
   const validateEmail = (email: string) => {
@@ -119,8 +146,32 @@ export default function ContactOptInForm() {
         <label className="flex items-start gap-2 text-white">
           <input 
             type="checkbox" 
-            checked={subscribe} 
-            onChange={(e) => setSubscribe(e.target.checked)} 
+            defaultChecked={subscribe} 
+            onChange={(e) => {
+              const isChecked = e.target.checked;
+              console.log("Newsletter checkbox changed to:", isChecked);
+              setSubscribe(isChecked);
+              
+              // SPECIAL DIRECT STORE UPDATE
+              answersStore.set({
+                ...answersStore.get(),
+                contact: {
+                  ...((answersStore.get().contact as ContactAnswers) || {}),
+                  first_name: firstName,
+                  last_name: lastName,
+                  email,
+                  subscribe: isChecked,
+                  story_opt_in: storyOptIn
+                }
+              });
+              
+              // Verify the store was updated
+              const updatedStore = answersStore.get();
+              const updatedContact = updatedStore.contact as ContactAnswers;
+              console.log("⭐ STORE AFTER SUBSCRIBE UPDATE:", 
+                updatedContact.subscribe, 
+                typeof updatedContact.subscribe);
+            }} 
             className="mt-1 accent-[#CBB87C]"
           />
           <span>
@@ -132,8 +183,32 @@ export default function ContactOptInForm() {
         <label className="flex items-start gap-2 text-white">
           <input 
             type="checkbox" 
-            checked={storyOptIn} 
-            onChange={(e) => setStoryOptIn(e.target.checked)} 
+            defaultChecked={storyOptIn} 
+            onChange={(e) => {
+              const isChecked = e.target.checked;
+              console.log("Story share checkbox changed to:", isChecked);
+              setStoryOptIn(isChecked);
+              
+              // SPECIAL DIRECT STORE UPDATE
+              answersStore.set({
+                ...answersStore.get(),
+                contact: {
+                  ...((answersStore.get().contact as ContactAnswers) || {}),
+                  first_name: firstName,
+                  last_name: lastName,
+                  email,
+                  subscribe,
+                  story_opt_in: isChecked
+                }
+              });
+              
+              // Verify the store was updated
+              const updatedStore = answersStore.get();
+              const updatedContact = updatedStore.contact as ContactAnswers;
+              console.log("⭐ STORE AFTER STORY OPT-IN UPDATE:", 
+                updatedContact.story_opt_in, 
+                typeof updatedContact.story_opt_in);
+            }} 
             className="mt-1 accent-[#CBB87C]" 
           />
           <span>

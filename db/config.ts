@@ -26,6 +26,8 @@ const SurveyResponses = defineTable({
     first_name: column.text(),
     last_name: column.text(),
     email: column.text(),
+    subscribe: column.boolean({ default: false }),
+    story_opt_in: column.boolean({ default: false }),
     military_score: column.number(),
     civilian_score: column.number(),
     strategy: column.text(),

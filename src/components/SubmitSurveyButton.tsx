@@ -54,17 +54,39 @@ export function SubmitSurveyButton() {
       const demographics = store.demographics;
       const va_benefits = store.va_benefits;
       
-      // Prepare the survey data object
+      console.log("FULL STORE:", JSON.stringify(store, null, 2));
+      console.log("Contact from store:", JSON.stringify(contact, null, 2));
+      console.log("Raw subscribe value:", contact.subscribe);
+      console.log("Raw story_opt_in value:", contact.story_opt_in);
+      console.log("Type of subscribe:", typeof contact.subscribe);
+      console.log("Type of story_opt_in:", typeof contact.story_opt_in);
+      
+      // Force the values to be true booleans using simple but explicit conversion
+      // First stringify, then check truthy content, then convert back to boolean
+      const subscribeStr = String(contact.subscribe).toLowerCase();
+      const storyOptInStr = String(contact.story_opt_in).toLowerCase();
+      
+      const subscribeValue = subscribeStr === 'true' || subscribeStr === '1';
+      const storyOptInValue = storyOptInStr === 'true' || storyOptInStr === '1';
+      
+      console.log("Processed subscribe value:", subscribeValue);
+      console.log("Processed story_opt_in value:", storyOptInValue);
+      
+      // Prepare the survey data object - forcing true booleans (not 1 or "true")
       const surveyData = {
         first_name: contact.first_name || "",
         last_name: contact.last_name || "",
         email: contact.email || "",
+        subscribe: subscribeValue === true, // Force a true boolean
+        story_opt_in: storyOptInValue === true, // Force a true boolean
         military_score: militaryScore,
         civilian_score: civilianScore,
         strategy: strategy,
         demographics: demographics || {},
         va_benefits: va_benefits || {}
       };
+      
+      console.log("Survey data being submitted:", JSON.stringify(surveyData, null, 2));
       
       // Submit the data to the API
       const response = await fetch('/api/submit-survey', {

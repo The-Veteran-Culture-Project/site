@@ -9,6 +9,8 @@ const surveySubmissionSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
+  subscribe: z.boolean().optional().default(false),
+  story_opt_in: z.boolean().optional().default(false),
   
   // Survey scores
   military_score: z.number(),
@@ -67,6 +69,25 @@ export const POST: APIRoute = async ({ request }) => {
 
     const validatedData = validationResult.data;
     
+    // Convert boolean values correctly for SQLite
+    // Super explicit conversion checking all possible truthy values
+    const subscribeStr = String(validatedData.subscribe).toLowerCase();
+    const storyOptInStr = String(validatedData.story_opt_in).toLowerCase();
+    
+    // Use string comparison to avoid type issues
+    const isSubscribe = validatedData.subscribe === true || 
+                       subscribeStr === "true" || 
+                       subscribeStr === "1";
+                       
+    const isStoryOptIn = validatedData.story_opt_in === true || 
+                        storyOptInStr === "true" || 
+                        storyOptInStr === "1";
+    
+    console.log("API: Saving subscribe:", isSubscribe, "story_opt_in:", isStoryOptIn);
+    console.log("Raw subscribe value:", validatedData.subscribe, "Type:", typeof validatedData.subscribe);
+    console.log("Raw story_opt_in value:", validatedData.story_opt_in, "Type:", typeof validatedData.story_opt_in);
+    console.log("String versions:", subscribeStr, storyOptInStr);
+    
     // Save the survey response to the database
     const response = await db.insert(SurveyResponses).values({
       id: randomUUID(),
@@ -74,6 +95,8 @@ export const POST: APIRoute = async ({ request }) => {
       first_name: validatedData.first_name,
       last_name: validatedData.last_name,
       email: validatedData.email,
+      subscribe: isSubscribe,
+      story_opt_in: isStoryOptIn,
       military_score: validatedData.military_score,
       civilian_score: validatedData.civilian_score,
       strategy: validatedData.strategy,
