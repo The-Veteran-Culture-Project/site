@@ -1,0 +1,51 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { ResultsTable } from "@/components/admin/ResultsTable";
+import { lucia } from "@/lib/auth";
+import { db, desc, SurveyResponses } from 'astro:db';
+
+// Check authentication
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+// Validate session
+try {
+  const session = await lucia.validateSession(sessionId);
+  if (session.fresh) {
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+  }
+  if (!session.user) {
+    return Astro.redirect("/admin/login");
+  }
+} catch (e) {
+  Astro.cookies.delete(lucia.sessionCookieName, { path: "/" });
+  return Astro.redirect("/admin/login");
+}
+
+// Fetch survey results from the database
+const results = await db.select().from(SurveyResponses)
+  .orderBy(desc(SurveyResponses.created_at))
+  .all();
+
+console.log("Survey results count:", results.length);
+console.log("First result (if exists):", results[0] ? JSON.stringify(results[0]) : "No results");
+
+// User is authenticated, proceed with rendering
+---
+
+<Layout title="Admin - Survey Results" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-white">Survey Results Admin View</h1>
+        <a href="/admin/logout" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
+          Log out
+        </a>
+      </div>
+      <ResultsTable client:load initialResults={results} />
+    </div>
+  </div>
+</Layout>

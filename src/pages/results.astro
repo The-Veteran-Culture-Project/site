@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import SurveyResultsChart from "@/components/SurveyResultsChart.tsx";
 import { StrategyDisplay } from "@/components/StrategyDisplay";
+import { ResetSurveyButton } from "@/components/ResetSurveyButton";
 ---
 
 <Layout title="Results - The Veteran Culture Project" isLandingPage={false}>
@@ -19,6 +20,10 @@ import { StrategyDisplay } from "@/components/StrategyDisplay";
       <div class="space-y-6">
         <h2 class="text-2xl font-bold text-zinc-100 text-center">Understanding Your Results</h2>
         <StrategyDisplay client:load />
+      </div>
+
+      <div class="flex justify-center">
+        <ResetSurveyButton client:load />
       </div>
     </div>
   </div>

@@ -28,9 +28,25 @@ export default function ContactOptInForm() {
     });
   }, [firstName, lastName, email, subscribe, storyOptIn]);
 
+  const validateEmail = (email: string) => {
+    // Email validation with common TLDs
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[com|edu|org|net|gov|mil|biz|info|io|co|uk|us|ca]+)$/i;
+    return emailRegex.test(email);
+  };
+
   const validate = () => {
-    if (!email) {
-      setEmailError('Email is required.');
+    if (!firstName || !lastName || !email) {
+      setEmailError('All required fields must be filled out.');
+      return false;
+    }
+    if (!validateEmail(email)) {
+      if (!email.includes('@')) {
+        setEmailError('Email must include @');
+      } else if (!email.includes('.')) {
+        setEmailError('Email must include a domain (e.g., .com)');
+      } else {
+        setEmailError('Please enter a valid email ending (e.g., .com, .edu, .org)');
+      }
       return false;
     }
     setEmailError('');
@@ -41,33 +57,63 @@ export default function ContactOptInForm() {
     <div className="flex flex-col gap-6">
       <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
         <div>
-          <label className="block font-semibold mb-2 text-white">First Name</label>
+          <label className="block font-semibold mb-2 text-white">
+            First Name <span className="text-white ml-1">*</span>
+          </label>
           <input 
-            type="text" 
+            type="text"
+            required 
             value={firstName} 
             onChange={(e) => setFirstName(e.target.value)} 
-            className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors" 
+            className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors"
           />
         </div>
         <div>
-          <label className="block font-semibold mb-2 text-white">Last Name</label>
+          <label className="block font-semibold mb-2 text-white">
+            Last Name <span className="text-white ml-1">*</span>
+          </label>
           <input 
-            type="text" 
+            type="text"
+            required 
             value={lastName} 
             onChange={(e) => setLastName(e.target.value)} 
-            className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors" 
+            className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors"
           />
         </div>
         <div>
-          <label className="block font-semibold mb-2 text-white">Email *</label>
+                    <label className="block font-semibold mb-2 text-white">
+            Email <span className="text-white ml-1">*</span>
+          </label>
           <input 
             type="email" 
+            required
             value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors" 
-            required 
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setEmail(newValue);
+              if (newValue) {
+                if (!newValue.includes('@')) {
+                  setEmailError('Email must include @');
+                } else if (!newValue.includes('.')) {
+                  setEmailError('Email must include a domain (e.g., .com)');
+                } else if (!validateEmail(newValue)) {
+                  setEmailError('Please enter a valid email ending (e.g., .com, .edu, .org)');
+                } else {
+                  setEmailError('');
+                }
+              } else {
+                setEmailError('');
+              }
+            }} 
+            className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors"
           />
-          {emailError && <p className="text-red-400 mt-1 text-sm">{emailError}</p>}
+          <span className="text-sm text-gray-400 block mt-1">{
+            !email ? 'Please enter a valid email address (e.g., name@example.com)' :
+            !email.includes('@') ? 'Add @ to continue' :
+            !email.includes('.') ? 'Add domain to continue (e.g., .com)' :
+            !validateEmail(email) ? 'Add valid domain ending (e.g., .com, .edu, .org)' :
+            'Email format is valid ✓'
+          }</span>
         </div>
 
         <label className="flex items-start gap-2 text-white">
@@ -76,12 +122,10 @@ export default function ContactOptInForm() {
             checked={subscribe} 
             onChange={(e) => setSubscribe(e.target.checked)} 
             className="mt-1 accent-[#CBB87C]"
-            required 
           />
           <span>
-            Subscribe to updates about the final project and future Veteran Culture research.
-            <br />
-            <span className="text-sm text-gray-400">You'll receive a few emails about the film, survey findings, and how to stay involved.</span>
+            Would you like to receive updates about the final project and future Veteran Culture research?
+            <span className="text-sm text-gray-400 block mt-1">You will receive updates about the film, survey findings, and how to stay involved</span>
           </span>
         </label>
 
@@ -94,18 +138,14 @@ export default function ContactOptInForm() {
           />
           <span>
             I'd like to share my story for research or potential inclusion in the documentary.
-            <br />
-            <span className="text-sm text-gray-400">We may contact you for a follow-up interview if interested. This is optional.</span>
+            <span className="text-sm text-gray-400 block mt-1">We may contact you for a follow-up interview if interested. This is optional</span>
           </span>
         </label>
 
       </form>
       
       <p className="text-sm text-gray-400 text-center mt-6 max-w-prose mx-auto">
-        <strong>Your responses are anonymous and confidential.</strong> 
-        {" "}The data collected will be used for research, advocacy, and creative storytelling purposes. 
-        {" "}Aggregated results may be published in reports or included in the upcoming documentary. 
-        {" "}Individual responses will never be published or shared without your explicit permission.
+        (Your responses are anonymous and confidential. The data collected will be used for research, advocacy, and creative storytelling purposes. Aggregated results may be published in reports or included in the upcoming documentary. Individual responses will never be published or shared without your explicit permission.)
       </p>
     </div>
   );

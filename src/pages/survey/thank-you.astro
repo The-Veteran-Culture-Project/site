@@ -1,0 +1,11 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SurveyThankYou from "@/components/SurveyThankYou.tsx";
+import SurveyPageLayout from "@/components/SurveyPageLayout.tsx";
+---
+
+<Layout title="Thank You - The Veteran Culture Project" isLandingPage={false}>
+  <SurveyPageLayout client:load>
+    <SurveyThankYou client:load />
+  </SurveyPageLayout>
+</Layout>

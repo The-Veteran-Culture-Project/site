@@ -1,73 +1,44 @@
+import type { APIRoute } from "astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import bcrypt from "bcryptjs";
 import { lucia } from "@/lib/auth";
-import { db, SurveyUser, eq } from "astro:db";
 
-import type { APIContext } from "astro";
-
-export async function POST(context: APIContext): Promise<Response> {
+export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   try {
-    const { username, password } = await context.request.json();
-    if (
-      typeof username !== "string" ||
-      username.length < 3 ||
-      username.length > 31 ||
-      !/^[A-Za-z0-9_-]+$/.test(username)
-    ) {
-      return new Response(JSON.stringify({ message: "Invalid username" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    if (
-      typeof password !== "string" ||
-      password.length < 6 ||
-      password.length > 255
-    ) {
-      return new Response(JSON.stringify({ message: "Invalid password" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    console.log("Login API: Processing login request");
+    const formData = await request.formData();
+    const username = formData.get("username")?.toString();
+    const password = formData.get("password")?.toString();
+    
+    console.log(`Login API: Received login attempt for username: ${username}`);
+
+    if (!username || !password) {
+      console.log("Login API: Missing credentials");
+      return new Response("Missing credentials", { status: 400 });
     }
 
-    const existingUser = await db
-      .select()
-      .from(SurveyUser)
-      .where(eq(SurveyUser.username, username.toLowerCase()))
-          const { firstName, lastName, email, veteranStatus } = await context.request.json();
-          if (
-            typeof firstName !== "string" || firstName.length < 1 ||
-            typeof lastName !== "string" || lastName.length < 1 ||
-            typeof email !== "string" || !email.includes("@") ||
-            typeof veteranStatus !== "string" || !["Active Military", "Veteran", "Civilian"].includes(veteranStatus)
-          ) {
-            return new Response(JSON.stringify({ message: "Invalid input" }), {
-              status: 400,
-              headers: { "Content-Type": "application/json" },
-            });
-          }
+  const user = await db.select().from(SurveyUser).where(eq(SurveyUser.username, username)).get();
 
-          // Optionally, save user info to database here
-          // await db.insert(SurveyUser).values({ firstName, lastName, email, veteranStatus });
-
-          // Set a session or cookie if needed
-          // ...
-
-          return new Response(JSON.stringify({ message: "Info submitted!" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
-    // If you need to set a cookie, define sessionCookie here or remove these lines.
-    // Example:
-    // const sessionCookie = { value: "your-session-value", attributes: { /* cookie attributes */ } };
-    // Otherwise, remove the lines below.
-
-    return new Response(null, {});
-  } catch (error) {
-    console.log(error);
-    console.log(`token ${process.env.ASTRO_DB_APP_TOKEN}`);
-    console.log(`remote url ${process.env.ASTRO_DB_REMOTE_URL}`);
-    return new Response(JSON.stringify({ message: "An error occurred" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return new Response("Invalid username or password", { status: 401 });
   }
-}
+
+  const session = await lucia.createSession(user.id, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+
+  cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+
+    console.log("Login API: Session created, redirecting to results page");
+    // ✅ Final working redirect
+    return redirect("/admin/results", 302);
+  } catch (error) {
+    console.error("Login API: Error during login process", error);
+    return new Response("Server error during login", { status: 500 });
+  }
+};
+
+// Make TypeScript happy by defining a GET handler that redirects to login page
+export const GET: APIRoute = async ({ redirect }) => {
+  return redirect("/admin/login");
+};

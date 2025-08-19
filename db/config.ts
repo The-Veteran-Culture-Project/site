@@ -1,38 +1,11 @@
 import { defineDb, defineTable, column } from "astro:db";
+import bcrypt from "bcryptjs";
 
 const SurveyUser = defineTable({
   columns: {
     id: column.text({ primaryKey: true }),
     username: column.text({ unique: true }),
     password: column.text(),
-  },
-});
-
-const Survey = defineTable({
-  columns: {
-    id: column.text({ primaryKey: true, nullable: false }),
-    takenAt: column.date(),
-    answers: column.json(),
-    x_offset: column.number(),
-    y_offset: column.number(),
-    firstName: column.text(),
-    lastName: column.text(),
-    email: column.text(),
-    veteranStatus: column.text(),
-    surveyUser: column.text({
-      references: () => SurveyUser.columns.id,
-      optional: true,
-    }),
-  },
-});
-
-const DemographicInfo = defineTable({
-  columns: {
-    id: column.number({ primaryKey: true, autoIncrement: true }),
-    data: column.json(),
-    surveyId: column.text({
-      references: () => Survey.columns.id,
-    }),
   },
 });
 
@@ -46,11 +19,25 @@ const Session = defineTable({
   },
 });
 
+const SurveyResponses = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    created_at: column.date({ default: new Date() }),
+    first_name: column.text(),
+    last_name: column.text(),
+    email: column.text(),
+    military_score: column.number(),
+    civilian_score: column.number(),
+    strategy: column.text(),
+    demographics: column.json(),
+    va_benefits: column.json(),
+  },
+});
+
 export default defineDb({
   tables: {
-    Survey,
     SurveyUser,
     Session,
-    DemographicInfo,
+    SurveyResponses,
   },
 });

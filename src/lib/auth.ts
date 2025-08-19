@@ -8,6 +8,8 @@ export const lucia = new Lucia(adapter, {
   sessionCookie: {
     attributes: {
       secure: import.meta.env.PROD,
+      sameSite: "lax",
+      path: "/",
     },
   },
   getUserAttributes: (attributes) => {
@@ -16,6 +18,9 @@ export const lucia = new Lucia(adapter, {
     };
   },
 });
+
+// IMPORTANT! Required for Astro middleware support
+export type Auth = typeof lucia;
 
 declare module "lucia" {
   interface Register {

@@ -15,11 +15,11 @@ export function determineStrategy(answers: Record<string, any>) {
       console.log('Valid answer found:', { key, axis: answer.axis, offset: answer.offset });
       
       if (answer.axis === 'X') {
-        militaryScore += answer.offset;
-        console.log('Added to military score:', { key, offset: answer.offset, newTotal: militaryScore });
-      } else if (answer.axis === 'Y') {
         civilianScore += answer.offset;
         console.log('Added to civilian score:', { key, offset: answer.offset, newTotal: civilianScore });
+      } else if (answer.axis === 'Y') {
+        militaryScore += answer.offset;
+        console.log('Added to military score:', { key, offset: answer.offset, newTotal: militaryScore });
       }
     } else {
       console.log('Skipping invalid answer:', { key, value });

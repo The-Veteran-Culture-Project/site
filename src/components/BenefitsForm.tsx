@@ -76,10 +76,25 @@ export default function BenefitsForm() {
   };
 
   const validate = () => {
-    if (!hasApplied || !benefitsUsed.length || !hasDisabilityRating || !disabilityRating || !comfortDelay || !decisionTime || !impactPayments) {
-      setFormError('Please answer all required questions.');
+    const requiredFields = [
+      { value: hasApplied, name: 'VA benefits application' },
+      { value: benefitsUsed.length > 0, name: 'Benefits used' },
+      { value: hasDisabilityRating, name: 'Disability rating status' },
+      { value: hasDisabilityRating === 'No' || disabilityRating, name: 'Disability rating percentage' },
+      { value: comfortDelay, name: 'Application comfort level' },
+      { value: decisionTime, name: 'Decision timeline' },
+      { value: impactPayments, name: 'Impact assessment' }
+    ];
+
+    const missingFields = requiredFields
+      .filter(field => !field.value)
+      .map(field => field.name);
+
+    if (missingFields.length > 0) {
+      setFormError(`Please answer all required questions: ${missingFields.join(', ')}`);
       return false;
     }
+
     setFormError('');
     return true;
   };
@@ -87,8 +102,11 @@ export default function BenefitsForm() {
   return (
     <form className="flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
       {/* Q1: Have you applied */}
+                {/* Q1: Have you applied */}
       <div>
-        <label className="font-semibold block mb-2 text-white">Have you applied for VA benefits? <span className="text-white">*</span></label>
+        <label className="font-semibold block mb-2 text-white">
+          Have you applied for VA benefits? <span className="text-white ml-1">*</span>
+        </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
             <input type="radio" name="has_applied" value="Yes" checked={hasApplied === 'Yes'} onChange={handleRadio(setHasApplied, 'has_applied')} className="accent-[#CBB87C] scale-110" />
@@ -101,7 +119,9 @@ export default function BenefitsForm() {
         </div>
       </div>          {/* Q2: Benefits used */}
           <div>
-            <label className="font-semibold block mb-2 text-white">Which VA benefits have you used? <span className="text-white">*</span></label>
+            <label className="font-semibold block mb-2 text-white">
+              Which VA benefits have you used? <span className="text-white ml-1">*</span>
+            </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {benefitsOptions.map((opt) => (
                 <label key={opt} className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
@@ -119,7 +139,9 @@ export default function BenefitsForm() {
 
           {/* Q3: Has disability rating */}
           <div>
-            <label className="font-semibold block mb-2 text-white">Do you have a service-connected disability rating from the VA? <span className="text-white">*</span></label>
+            <label className="font-semibold block mb-2 text-white">
+              Do you have a service-connected disability rating from the VA? <span className="text-white ml-1">*</span>
+            </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
                 <input type="radio" name="has_disability_rating" value="Yes" checked={hasDisabilityRating === 'Yes'} onChange={handleRadio(setHasDisabilityRating, 'has_disability_rating')} className="accent-[#CBB87C] scale-110" />
@@ -134,7 +156,9 @@ export default function BenefitsForm() {
 
           {/* Q4: Disability rating dropdown */}
           <div>
-            <label className="font-semibold block mb-2 text-white">What is your current VA disability rating? <span className="text-white">*</span></label>
+            <label className="font-semibold block mb-2 text-white">
+              What is your current VA disability rating? <span className="text-white ml-1">*</span>
+            </label>
             <select className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-[#CBB87C] focus:outline-none" value={disabilityRating} onChange={handleSelect(setDisabilityRating, 'disability_rating')}>
               <option value="">Select rating</option>
               {disabilityOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
@@ -143,7 +167,9 @@ export default function BenefitsForm() {
 
           {/* Q5: Comfort delay */}
           <div>
-            <label className="font-semibold block mb-2 text-white">How long did it take to feel comfortable applying for VA disability benefits? <span className="text-white">*</span></label>
+            <label className="font-semibold block mb-2 text-white">
+              How long did it take to feel comfortable applying for VA disability benefits? <span className="text-white ml-1">*</span>
+            </label>
             <select className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-[#CBB87C] focus:outline-none" value={comfortDelay} onChange={handleSelect(setComfortDelay, 'comfort_delay')}>
               <option value="">Select one</option>
               {comfortOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
@@ -152,7 +178,9 @@ export default function BenefitsForm() {
 
           {/* Q6: Decision time */}
           <div>
-            <label className="font-semibold block mb-2 text-white">How long did it take to receive a decision on your VA disability benefits? <span className="text-white">*</span></label>
+            <label className="font-semibold block mb-2 text-white">
+              How long did it take to receive a decision on your VA disability benefits? <span className="text-white ml-1">*</span>
+            </label>
             <select className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-[#CBB87C] focus:outline-none" value={decisionTime} onChange={handleSelect(setDecisionTime, 'decision_time')}>
               <option value="">Select one</option>
               {decisionOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
@@ -161,7 +189,9 @@ export default function BenefitsForm() {
 
           {/* Q7: Payments impact */}
           <div>
-            <label className="font-semibold block mb-2 text-white">Do you think VA disability payments would have made an impact on your early transition into civilian society? <span className="text-white">*</span></label>
+            <label className="font-semibold block mb-2 text-white">
+              Do you think VA disability payments would have made an impact on your early transition into civilian society? <span className="text-white ml-1">*</span>
+            </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
                 <input type="radio" name="va_healthcare" value="Yes" checked={impactPayments === 'Yes'} onChange={handleRadio(setImpactPayments, 'va_healthcare')} className="accent-[#CBB87C] scale-110" />

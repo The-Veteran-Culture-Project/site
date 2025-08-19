@@ -1,0 +1,111 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { lucia } from "@/lib/auth";
+import bcrypt from "bcryptjs";
+
+let errorMessage: string | null = null;
+let success = false;
+
+// Process form submission
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const username = formData.get("username")?.toString();
+  const password = formData.get("password")?.toString();
+
+  if (!username || !password) {
+    errorMessage = "Username and password are required";
+  } else {
+    // Find user
+    const user = await db.select().from(SurveyUser)
+      .where(eq(SurveyUser.username, username))
+      .get();
+    
+    if (!user) {
+      errorMessage = "Invalid username or password";
+    } else {
+      // Check password
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      
+      if (!passwordMatch) {
+        errorMessage = "Invalid username or password";
+      } else {
+        // Create session
+        const session = await lucia.createSession(user.id, {});
+        const sessionCookie = lucia.createSessionCookie(session.id);
+        
+        // Set cookie and redirect
+        Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+        success = true;
+        return Astro.redirect("/admin/results");
+      }
+    }
+  }
+}
+---
+
+<Layout title="Admin Login" isLandingPage={false}>
+  <div class="flex min-h-screen items-center justify-center">
+    <div class="w-full max-w-sm p-6 bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold text-white text-center mb-6">Admin Login</h2>
+      
+      {errorMessage && (
+        <div class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded mb-4">
+          {errorMessage}
+        </div>
+      )}
+      
+      {success && (
+        <div class="bg-green-500/10 border border-green-500 text-green-500 px-4 py-2 rounded mb-4">
+          Login successful. Redirecting...
+        </div>
+      )}
+
+      <form method="POST">
+        <div class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-300">Username</label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              value="admin"
+              autocomplete="username"
+              required
+              class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500/50"
+            />
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              autocomplete="current-password"
+              required
+              class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500/50"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Sign in
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Simple redirect animation
+  if (document.querySelector('div.bg-green-500/10')) {
+    setTimeout(() => {
+      window.location.href = "/admin/results";
+    }, 1000);
+  }
+</script>

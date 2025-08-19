@@ -1,0 +1,20 @@
+---
+import { lucia } from "@/lib/auth";
+
+// Support both GET and POST methods
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value;
+if (sessionId) {
+  try {
+    // Invalidate the session
+    await lucia.invalidateSession(sessionId);
+  } catch (e) {
+    console.error("Error invalidating session:", e);
+  }
+}
+
+// Remove the session cookie
+Astro.cookies.delete(lucia.sessionCookieName, { path: "/" });
+
+// Redirect to login page
+return Astro.redirect("/admin/login");
+---

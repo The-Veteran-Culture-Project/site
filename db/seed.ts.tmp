@@ -1,7 +1,6 @@
-import { db, SurveyUser, SurveyResponses } from "astro:db";
+import { db, SurveyUser } from "astro:db";
 import { eq } from "astro:db";
 import bcrypt from "bcryptjs";
-import { randomUUID } from "node:crypto";
 
 export default async function seed() {
   // Check if admin user already exists
@@ -22,6 +21,4 @@ export default async function seed() {
     ]);
     console.log("Created admin user");
   }
-  
-  // Removed sample survey data seeding - we'll use real user data instead
 }

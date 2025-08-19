@@ -11,6 +11,7 @@ interface SurveyPageLayoutProps {
   backHref?: string
   nextHref?: string
   nextDisabled?: boolean
+  nextButtonText?: string
   onNext?: () => void
   onBack?: () => void
   children: ReactNode
@@ -23,6 +24,7 @@ export default function SurveyPageLayout({
   backHref,
   nextHref,
   nextDisabled = false,
+  nextButtonText = "Next",
   onNext,
   onBack,
   children,
@@ -81,7 +83,7 @@ export default function SurveyPageLayout({
                   nextDisabled ? 'bg-gray-400 text-white cursor-not-allowed hover:bg-gray-400' : ''
                 }`}
               >
-                Next
+                {nextButtonText}
               </Button>
             )}
           </div>
