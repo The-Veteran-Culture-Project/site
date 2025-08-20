@@ -32,3 +32,18 @@ declare module "lucia" {
 interface DatabaseUserAttributes {
   username: string;
 }
+
+// Admin session verification helper
+export async function verifyAdminSession(cookies: { get: (name: string) => { value: string } | undefined }) {
+  const sessionCookie = cookies.get(lucia.sessionCookieName);
+  if (!sessionCookie) return null;
+  
+  const { session, user } = await lucia.validateSession(sessionCookie.value);
+  
+  // Verify that the user is an admin (currently we only have one admin user)
+  if (!session || !user || user.username !== "admin") {
+    return null;
+  }
+  
+  return user;
+}

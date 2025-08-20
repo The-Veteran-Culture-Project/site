@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import SurveyStepOne from "@/components/SurveyStepOne.tsx";
+import { SurveyProtectionWrapper } from "@/components/SurveyProtectionWrapper";
 import { getCollection } from "astro:content";
 
 const questions = await getCollection("axisQuestions");
@@ -8,5 +9,7 @@ const categoryQuestions = questions.filter(q => q.data.category === "Patriotism 
 ---
 
 <Layout title="Survey Step 1 - The Veteran Culture Project" isLandingPage={false}>
-  <SurveyStepOne questions={categoryQuestions} client:only="react" />
+  <SurveyProtectionWrapper client:only="react">
+    <SurveyStepOne questions={categoryQuestions} client:only="react" />
+  </SurveyProtectionWrapper>
 </Layout>

@@ -1,7 +1,8 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import { Button } from "../../components/ui/button";
-import MarketingSubscribersTable from "../../components/admin/MarketingSubscribersTable";
+import Layout from "@/layouts/Layout.astro";
+import { Button } from "@/components/ui/button";
+import MarketingSubscribersTable from "@/components/admin/MarketingSubscribersTable";
+import AdminNavigation from "@/components/admin/AdminNavigation.astro";
 import { db, MarketingSubscriber } from "astro:db";
 
 // Check if user is logged in
@@ -30,21 +31,16 @@ try {
 ---
 
 <Layout title="Marketing Subscribers | Admin">
-  <div class="container mx-auto px-4 py-8">
-    <div class="mb-8 flex items-center justify-between">
+  <AdminNavigation activePage="marketing" />
+
+  <div class="container mx-auto px-4 pb-8">
+    <div class="mb-8">
       <h1 class="text-2xl font-bold text-white">Marketing Subscribers</h1>
-      <div class="space-x-4">
-        <a href="/admin/results" class="text-blue-400 hover:text-blue-300">Survey Results</a>
-        <a href="/admin/logout" class="text-red-400 hover:text-red-300">Logout</a>
-      </div>
     </div>
 
     <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
       <MarketingSubscribersTable subscribers={subscribersData} client:load />
     </div>
 
-    <div class="mt-8 text-center">
-      <a href="/admin/results" class="text-blue-500 hover:underline">Back to Survey Results</a>
-    </div>
   </div>
 </Layout>

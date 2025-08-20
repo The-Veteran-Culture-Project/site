@@ -2,14 +2,16 @@
 import Layout from "@/layouts/Layout.astro";
 import { Button } from "@/components/ui/button";
 import SurveyProgressBar from "@/components/SurveyProgressBar.tsx";
+import { SurveyProtectionWrapper } from "@/components/SurveyProtectionWrapper";
 
 const buttonClass =
   "flex flex-1 p-6 mx-4 mt-4 text-xl rounded-lg font-semibold justify-center min-w-36";
 ---
 
 <Layout title="Survey - Linear Data 1" isLandingPage={false}>
-  <div class="flex flex-col flex-1 container-sm mx-auto">
-    <form>
+  <SurveyProtectionWrapper client:only="react">
+    <div class="flex flex-col flex-1 container-sm mx-auto">
+      <form>
       <h2 class="text-3xl font-bold p-4 text-center">
         Before & After Service
       </h2>
@@ -37,6 +39,7 @@ const buttonClass =
       </div>
     </form>
   </div>
+  </SurveyProtectionWrapper>
   
   <script>
     // Scroll to top if coming from another survey page

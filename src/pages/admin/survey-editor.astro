@@ -1,0 +1,53 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { QuestionEditor } from "@/components/admin/QuestionEditor";
+import { lucia } from "@/lib/auth";
+import AdminNavigation from "@/components/admin/AdminNavigation.astro";
+
+// Check authentication
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+// Validate session
+let userId = null;
+try {
+  const session = await lucia.validateSession(sessionId);
+  if (session.fresh) {
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+  }
+  if (!session.user) {
+    return Astro.redirect("/admin/login");
+  }
+  userId = session.user.id;
+} catch (e) {
+  Astro.cookies.delete(lucia.sessionCookieName, { path: "/" });
+  return Astro.redirect("/admin/login");
+}
+---
+
+<Layout title="Survey Question Editor - Admin">
+  <AdminNavigation activePage="survey-editor" />
+  
+  <main class="min-h-[calc(100vh-9rem)]">
+    <div class="container px-4 mx-auto">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold">Survey Question Editor</h1>
+        <p class="text-zinc-400">Manage all survey questions in one place</p>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <QuestionEditor client:load adminId={userId} />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<script>
+  // Handle any client-side initialization
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Survey Editor initialized');
+  });
+</script>

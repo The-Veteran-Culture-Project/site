@@ -1,8 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import SurveyStepFour from "@/components/SurveyStepFour.tsx";
+import { SurveyProtectionWrapper } from "@/components/SurveyProtectionWrapper";
 ---
 
 <Layout title="Survey Demographics - The Veteran Culture Project" isLandingPage={false}>
-  <SurveyStepFour client:only="react" />
+  <SurveyProtectionWrapper client:only="react">
+    <SurveyStepFour client:only="react" />
+  </SurveyProtectionWrapper>
 </Layout>

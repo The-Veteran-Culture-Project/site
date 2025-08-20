@@ -2,10 +2,13 @@
 import Layout from "@/layouts/Layout.astro";
 import SurveyThankYou from "@/components/SurveyThankYou.tsx";
 import SurveyPageLayout from "@/components/SurveyPageLayout.tsx";
+import { SurveyProtectionWrapper } from "@/components/SurveyProtectionWrapper";
 ---
 
 <Layout title="Thank You - The Veteran Culture Project" isLandingPage={false}>
-  <SurveyPageLayout client:load>
-    <SurveyThankYou client:load />
-  </SurveyPageLayout>
+  <SurveyProtectionWrapper client:only="react">
+    <SurveyPageLayout client:load>
+      <SurveyThankYou client:load />
+    </SurveyPageLayout>
+  </SurveyProtectionWrapper>
 </Layout>

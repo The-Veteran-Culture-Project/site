@@ -1,0 +1,75 @@
+---
+export interface Props {
+  activePage?: string;
+}
+
+const { activePage = 'dashboard' } = Astro.props;
+---
+
+<div class="bg-zinc-900 border-b border-zinc-800 mb-8">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col md:flex-row items-center justify-between py-4">
+      <div class="flex items-center mb-4 md:mb-0">
+        <a href="/admin" class="text-xl font-bold text-white">VCP Admin</a>
+      </div>
+      <nav class="flex flex-wrap gap-2">
+        <a 
+          href="/admin" 
+          class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activePage === 'dashboard' 
+              ? 'bg-primary text-white' 
+              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+          }`}
+        >
+          Dashboard
+        </a>
+        <a 
+          href="/admin/results" 
+          class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activePage === 'results' 
+              ? 'bg-primary text-white' 
+              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+          }`}
+        >
+          Survey Results
+        </a>
+        <a 
+          href="/admin/survey-editor" 
+          class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activePage === 'survey-editor' 
+              ? 'bg-primary text-white' 
+              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+          }`}
+        >
+          Survey Editor
+        </a>
+        <a 
+          href="/admin/marketing" 
+          class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activePage === 'marketing' 
+              ? 'bg-primary text-white' 
+              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+          }`}
+        >
+          Marketing Subscribers
+        </a>
+        <a 
+          href="/admin/beta-password" 
+          class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activePage === 'beta-password' 
+              ? 'bg-primary text-white' 
+              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+          }`}
+        >
+          Beta Password
+        </a>
+        <a 
+          href="/admin/logout" 
+          class="px-3 py-2 rounded-md text-sm font-medium bg-red-800 text-white hover:bg-red-700 transition-colors ml-2"
+        >
+          Logout
+        </a>
+      </nav>
+    </div>
+  </div>
+</div>

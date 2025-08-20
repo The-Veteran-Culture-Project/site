@@ -46,11 +46,76 @@ const MarketingSubscriber = defineTable({
   },
 });
 
+const Question = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    text: column.text(),
+    category: column.text(),
+    axis: column.text(),
+    version: column.number({ default: 1 }),
+    updatedAt: column.date({ default: new Date() }),
+    updatedBy: column.text({
+      references: () => SurveyUser.columns.id,
+    }),
+    fileSlug: column.text({ unique: true }),  // Maps to content collection filename
+    active: column.boolean({ default: true }), // Whether the question is active
+  },
+});
+
+const QuestionHistory = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    questionId: column.text({
+      references: () => Question.columns.id,
+    }),
+    text: column.text(),
+    category: column.text(),
+    axis: column.text(),
+    version: column.number(),
+    updatedAt: column.date(),
+    updatedBy: column.text({
+      references: () => SurveyUser.columns.id,
+    }),
+  },
+});
+
+const SiteSettings = defineTable({
+  columns: {
+    key: column.text({ primaryKey: true }),
+    value: column.text(),
+    updatedAt: column.date({ default: new Date() }),
+    updatedBy: column.text({
+      references: () => SurveyUser.columns.id,
+      optional: true
+    }),
+  },
+});
+
+const BetaAccessRequest = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    name: column.text(),
+    email: column.text(),
+    status: column.text({ default: 'pending' }), // pending, approved, rejected
+    requestedAt: column.date({ default: new Date() }),
+    processedAt: column.date({ optional: true }),
+    processedBy: column.text({
+      references: () => SurveyUser.columns.id,
+      optional: true
+    }),
+    notes: column.text({ optional: true }),
+  },
+});
+
 export default defineDb({
   tables: {
     SurveyUser,
     Session,
     SurveyResponses,
     MarketingSubscriber,
+    Question,
+    QuestionHistory,
+    SiteSettings,
+    BetaAccessRequest,
   },
 });

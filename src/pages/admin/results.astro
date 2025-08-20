@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { ResultsTable } from "@/components/admin/ResultsTable";
+import AdminNavigation from "@/components/admin/AdminNavigation.astro";
 import { lucia } from "@/lib/auth";
 import { db, desc, SurveyResponses, eq, MarketingSubscriber } from 'astro:db';
 
@@ -104,18 +105,12 @@ if (results.length > 0) {
 ---
 
 <Layout title="Admin - Survey Results" isLandingPage={false}>
-  <div class="container mx-auto px-4 py-8">
+  <AdminNavigation activePage="results" />
+  
+  <div class="container mx-auto px-4 pb-8">
     <div class="max-w-7xl mx-auto">
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-white">Survey Results Admin View</h1>
-        <div class="flex gap-4">
-          <a href="/admin/marketing" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
-            Marketing Subscribers
-          </a>
-          <a href="/admin/logout" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
-            Log out
-          </a>
-        </div>
       </div>
       <div class="flex justify-between items-center mb-4">
         <p class="text-white">Total results: {results.length}</p>
