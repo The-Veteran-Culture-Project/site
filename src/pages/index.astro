@@ -6,6 +6,7 @@ import Layout from "@/layouts/Layout.astro";
 import content from "@/content/pages/home.json";
 import { Button } from "@/components/ui/button";
 import { LoginDialog } from "@/components/LoginDialog.tsx";
+import MarketingSignup from "@/components/MarketingSignup.tsx";
 
 const { body, disclaimer } = content;
 const buttonStyle =
@@ -51,11 +52,40 @@ const user = Astro.locals.user;
               </Button>
             </div>
           </div>
-          <p class="text-sm text-zinc-400 text-center max-w-xl italic">
+          
+          <p class="text-sm text-zinc-400 text-center max-w-xl italic mb-8">
             {disclaimer}
           </p>
+          
+          <div class="w-full max-w-2xl mx-auto mt-6">
+            <div id="marketing-signup-container">
+              <!-- MarketingSignup component will be rendered here -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </main>
 </Layout>
+
+<script>
+  import React from 'react';
+  import { createRoot } from 'react-dom/client';
+  import MarketingSignup from '../components/MarketingSignup';
+  
+  // Wait for the DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('marketing-signup-container');
+    if (container) {
+      const root = createRoot(container);
+      root.render(
+        React.createElement(MarketingSignup, {
+          buttonText: "Stay Connected",
+          heading: "Get occasional updates on findings, film progress, and ways to stay engaged.",
+          subheading: "",
+          className: "w-full"
+        })
+      );
+    }
+  });
+</script>

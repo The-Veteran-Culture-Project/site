@@ -95,7 +95,7 @@ export const POST: APIRoute = async ({ request }) => {
       first_name: validatedData.first_name,
       last_name: validatedData.last_name,
       email: validatedData.email,
-      subscribe: isSubscribe,
+      subscribe: false, // Always false since we handle marketing signup separately
       story_opt_in: isStoryOptIn,
       military_score: validatedData.military_score,
       civilian_score: validatedData.civilian_score,

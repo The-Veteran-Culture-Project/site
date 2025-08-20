@@ -83,6 +83,32 @@ export default function SurveyStepSix() {
         va_benefits: va_benefits || {}
       };
       
+      // Before submitting survey, directly handle the marketing signup if the checkbox is checked
+      if (latestContact.subscribe === true && latestContact.email) {
+        console.log("⭐ SurveyStepSix: Newsletter checkbox is checked, submitting to marketing database");
+        
+        try {
+          const marketingResponse = await fetch('/api/marketing-signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: latestContact.email,
+              name: `${latestContact.first_name || ''} ${latestContact.last_name || ''}`.trim(),
+              source: 'survey-submit'
+            })
+          });
+          
+          console.log("⭐ Marketing signup response status:", marketingResponse.status);
+          const marketingData = await marketingResponse.json();
+          console.log("⭐ Marketing signup response data:", marketingData);
+        } catch (marketingError) {
+          console.error("⭐ Error submitting to marketing database:", marketingError);
+          // Continue with survey submission even if marketing signup fails
+        }
+      }
+      
       // Submit the data to the API
       const response = await fetch('/api/submit-survey', {
         method: 'POST',

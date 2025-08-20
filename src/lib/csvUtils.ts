@@ -4,6 +4,14 @@
 
 import type { SurveyResult } from "@/components/admin/ResultsTable";
 
+export interface Subscriber {
+  id: string;
+  email: string;
+  name?: string;
+  created_at: string;
+  source?: string;
+}
+
 /**
  * Convert survey results to CSV format
  * @param results Array of survey result objects
@@ -112,35 +120,69 @@ export function convertResultsToCSV(results: SurveyResult[]): string {
 }
 
 /**
- * Trigger CSV download in the browser
- * @param csvContent CSV content string
- * @param fileName Filename for download
+ * Convert marketing subscribers to CSV format
+ * @param subscribers Array of marketing subscriber objects
+ * @returns CSV formatted string
  */
-export function downloadCSV(csvContent: string, fileName: string = 'survey-results.csv'): void {
-  // Add BOM for Excel to recognize UTF-8
-  const BOM = "\uFEFF";
-  
-  // Create blob with CSV content and BOM for proper UTF-8 handling
-  const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-  
-  // Create download link
-  const link = document.createElement('a');
-  
-  // Create object URL for the blob
+export function convertSubscribersToCSV(subscribers: Subscriber[]): string {
+  if (!subscribers || subscribers.length === 0) {
+    return '';
+  }
+
+  // Define CSV headers
+  const headers = [
+    'ID',
+    'Email',
+    'Name',
+    'Date Subscribed',
+    'Source'
+  ];
+
+  // Create array for CSV rows, starting with headers
+  const csvRows = [headers];
+
+  // Add each subscriber as a row
+  subscribers.forEach(subscriber => {
+    const row = [
+      subscriber.id,
+      subscriber.email,
+      subscriber.name || '',
+      new Date(subscriber.created_at).toLocaleString(),
+      subscriber.source || 'website'
+    ];
+    
+    csvRows.push(row);
+  });
+
+  // Convert rows to CSV format
+  // For each row, we quote all fields and join with commas
+  // Then all rows are joined with line breaks
+  return csvRows
+    .map(row => row.map(field => 
+      `"${String(field).replace(/"/g, '""')}"`
+    ).join(','))
+    .join('\r\n');
+}
+
+/**
+ * Download CSV file
+ * @param csvContent The CSV content as a string
+ * @param filename The filename to download as
+ */
+export function downloadCSV(csvContent: string, filename: string): void {
+  // Create a blob with UTF-8 encoding
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   
-  // Set link properties
+  // Create a link and trigger download
+  const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', fileName);
-  link.style.visibility = 'hidden';
-  
-  // Add to document, click to download, then remove
+  link.setAttribute('download', filename);
+  link.style.display = 'none';
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   
-  // Clean up the URL object
-  setTimeout(() => {
-    URL.revokeObjectURL(url);
-  }, 100);
+  // Clean up
+  URL.revokeObjectURL(url);
 }

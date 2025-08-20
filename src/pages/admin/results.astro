@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { ResultsTable } from "@/components/admin/ResultsTable";
 import { lucia } from "@/lib/auth";
-import { db, desc, SurveyResponses } from 'astro:db';
+import { db, desc, SurveyResponses, eq, MarketingSubscriber } from 'astro:db';
 
 // Check authentication
 const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value;
@@ -32,12 +32,24 @@ const rawResults = await db.select().from(SurveyResponses)
 
 console.log("Raw results from database:", rawResults);
 
+// Fetch marketing subscribers to cross-reference with survey results
+const marketingSubscribers = await db.select().from(MarketingSubscriber).all();
+console.log("Marketing subscribers:", marketingSubscribers);
+
+// Create a set of marketing subscription emails for easy lookup
+const marketingEmails = new Set(marketingSubscribers.map(sub => sub.email.toLowerCase()));
+console.log("Marketing emails set:", marketingEmails);
+
 // Parse the JSON strings for demographics and va_benefits
 const results = rawResults.map(result => {
   // Log each raw result before processing
   console.log("Processing raw result:", result);
   console.log("Raw subscribe value:", result.subscribe, "Type:", typeof result.subscribe);
   console.log("Raw story_opt_in value:", result.story_opt_in, "Type:", typeof result.story_opt_in);
+  
+  // Check if the email is in the marketing subscribers list
+  const isMarketingSubscriber = marketingEmails.has(result.email.toLowerCase());
+  console.log(`Email ${result.email} marketing subscription status: ${isMarketingSubscriber}`);
   
   // Helper function to safely parse JSON or return empty object
   const safeParseJSON = (value) => {
@@ -55,8 +67,14 @@ const results = rawResults.map(result => {
   const processed = {
     ...result,
     // Force boolean values to be true booleans
-    subscribe: result.subscribe === 1 || String(result.subscribe) === "1" || String(result.subscribe) === "true",
-    story_opt_in: result.story_opt_in === 1 || String(result.story_opt_in) === "1" || String(result.story_opt_in) === "true",
+    // For subscribe: also check if the email is in marketing database
+    subscribe: isMarketingSubscriber || 
+               result.subscribe === 1 || 
+               String(result.subscribe) === "1" || 
+               String(result.subscribe) === "true",
+    story_opt_in: result.story_opt_in === 1 || 
+                 String(result.story_opt_in) === "1" || 
+                 String(result.story_opt_in) === "true",
     demographics: safeParseJSON(result.demographics),
     va_benefits: safeParseJSON(result.va_benefits)
   };
@@ -91,6 +109,9 @@ if (results.length > 0) {
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-white">Survey Results Admin View</h1>
         <div class="flex gap-4">
+          <a href="/admin/marketing" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+            Marketing Subscribers
+          </a>
           <a href="/admin/logout" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
             Log out
           </a>

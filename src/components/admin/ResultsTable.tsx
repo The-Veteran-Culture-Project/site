@@ -242,7 +242,6 @@ export function ResultsTable({ initialResults }: Props) {
               <TableHead className="text-white">Timestamp</TableHead>
               <TableHead className="text-white">Name</TableHead>
               <TableHead className="text-white">Email</TableHead>
-              <TableHead className="text-white">Newsletter</TableHead>
               <TableHead className="text-white">Story Share</TableHead>
               <TableHead className="text-white">Military Score</TableHead>
               <TableHead className="text-white">Civilian Score</TableHead>
@@ -269,14 +268,6 @@ export function ResultsTable({ initialResults }: Props) {
                   {result.first_name} {result.last_name}
                 </TableCell>
                 <TableCell className="text-gray-300">{result.email}</TableCell>
-                <TableCell className="text-gray-300">
-                  {/* Super explicit check for any kind of truthy value */}
-                  {(result.subscribe === true || 
-                    result.subscribe === 1 || 
-                    String(result.subscribe) === "1" || 
-                    String(result.subscribe).toLowerCase() === "true") 
-                    ? "✅ Yes" : "❌ No"}
-                </TableCell>
                 <TableCell className="text-gray-300">
                   {/* Super explicit check for any kind of truthy value */}
                   {(result.story_opt_in === true || 

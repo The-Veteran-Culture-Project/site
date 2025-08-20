@@ -36,10 +36,21 @@ const SurveyResponses = defineTable({
   },
 });
 
+const MarketingSubscriber = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    email: column.text({ unique: true }),
+    name: column.text({ optional: true }),
+    created_at: column.date({ default: new Date() }),
+    source: column.text({ optional: true }),
+  },
+});
+
 export default defineDb({
   tables: {
     SurveyUser,
     Session,
     SurveyResponses,
+    MarketingSubscriber,
   },
 });

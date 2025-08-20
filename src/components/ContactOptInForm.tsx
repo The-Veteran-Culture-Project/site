@@ -165,6 +165,55 @@ export default function ContactOptInForm() {
                 }
               });
               
+              // If checkbox is checked, save to the marketing database immediately
+              if (isChecked && email && validateEmail(email)) {
+                console.log("📧 Attempting to save to marketing database:", email);
+                
+                // Create the request body
+                const requestBody = { 
+                  email: email,
+                  name: `${firstName} ${lastName}`.trim(),
+                  source: 'survey-page-6'
+                };
+                
+                console.log("📧 Marketing API request body:", JSON.stringify(requestBody));
+                
+                // Submit to marketing database
+                fetch('/api/marketing-signup', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(requestBody),
+                })
+                .then(response => {
+                  console.log("📧 Marketing API response status:", response.status);
+                  if (!response.ok) {
+                    console.error('Failed to save to marketing database, status:', response.status);
+                    return response.text().then(text => {
+                      try {
+                        return JSON.parse(text);
+                      } catch (e) {
+                        console.error('Invalid JSON response:', text);
+                        return { error: 'Invalid response format' };
+                      }
+                    });
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  console.log("📧 Marketing API response data:", data);
+                  if (data.success || data.message === 'Email already subscribed') {
+                    console.log('✅ Successfully saved to marketing database');
+                  } else {
+                    console.error('❌ Error in marketing API response:', data);
+                  }
+                })
+                .catch(err => {
+                  console.error('❌ Error saving to marketing database:', err);
+                });
+              }
+              
               // Verify the store was updated
               const updatedStore = answersStore.get();
               const updatedContact = updatedStore.contact as ContactAnswers;
@@ -175,8 +224,7 @@ export default function ContactOptInForm() {
             className="mt-1 accent-[#CBB87C]"
           />
           <span>
-            Would you like to receive updates about the final project and future Veteran Culture research?
-            <span className="text-sm text-gray-400 block mt-1">You will receive updates about the film, survey findings, and how to stay involved</span>
+            Would you like to receive updates about the survey findings, documentary film and how to stay involved
           </span>
         </label>
 

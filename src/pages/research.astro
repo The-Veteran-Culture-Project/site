@@ -54,8 +54,36 @@ const sections = {
           <CollapsibleSection title="Marginalization Strategy - Low Military / Low Civilian" client:load>
             <div set:html={marked.parse(sections.marginalization)} />
           </CollapsibleSection>
+          
+          <div class="mt-16 w-full max-w-2xl mx-auto">
+            <div id="marketing-signup-container">
+              <!-- MarketingSignup component will be rendered here -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </main>
 </Layout>
+
+<script>
+  import React from 'react';
+  import { createRoot } from 'react-dom/client';
+  import MarketingSignup from '../components/MarketingSignup';
+  
+  // Wait for the DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('marketing-signup-container');
+    if (container) {
+      const root = createRoot(container);
+      root.render(
+        React.createElement(MarketingSignup, {
+          buttonText: "Stay Connected",
+          heading: "Get occasional updates on findings, film progress, and ways to stay engaged.",
+          subheading: "",
+          className: "w-full"
+        })
+      );
+    }
+  });
+</script>
