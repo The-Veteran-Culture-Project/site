@@ -21,9 +21,62 @@ export default async function seed() {
         id: "admin-user",
         username: "admin",
         password: hashedPassword,
+        role: "admin",
+        email: "admin@veterancultureproject.org",
+        created_at: new Date(),
+        is_active: true,
       },
     ]);
     console.log("Created admin user");
+  } else {
+    // Update existing admin user to have the new fields if they don't exist
+    if (!existingAdmin.role || !existingAdmin.email || !existingAdmin.created_at) {
+      await db.update(SurveyUser)
+        .set({ 
+          role: existingAdmin.role || "admin",
+          email: existingAdmin.email || "admin@veterancultureproject.org",
+          created_at: existingAdmin.created_at || new Date(),
+          is_active: existingAdmin.is_active !== undefined ? existingAdmin.is_active : true
+        })
+        .where(eq(SurveyUser.id, existingAdmin.id));
+      console.log("Updated existing admin user with new fields");
+    }
+  }
+
+  // Create additional sample admin users if they don't exist
+  const sampleAdmins = [
+    {
+      id: "admin-josh",
+      username: "josh",
+      email: "josh@veterancultureproject.org",
+      password: "temppass123"
+    },
+    {
+      id: "admin-researcher",
+      username: "researcher",
+      email: "researcher@veterancultureproject.org", 
+      password: "research123"
+    }
+  ];
+
+  for (const admin of sampleAdmins) {
+    const existing = await db.select().from(SurveyUser)
+      .where(eq(SurveyUser.username, admin.username))
+      .get();
+    
+    if (!existing) {
+      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      await db.insert(SurveyUser).values({
+        id: admin.id,
+        username: admin.username,
+        password: hashedPassword,
+        role: "admin",
+        email: admin.email,
+        created_at: new Date(),
+        is_active: true,
+      });
+      console.log(`Created admin user: ${admin.username}`);
+    }
   }
   
   // Check if questions have already been migrated

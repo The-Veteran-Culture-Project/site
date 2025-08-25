@@ -6,6 +6,11 @@ const SurveyUser = defineTable({
     id: column.text({ primaryKey: true }),
     username: column.text({ unique: true }),
     password: column.text(),
+    role: column.text({ default: "user" }), // "admin" or "user"
+    email: column.text({ optional: true }),
+    created_at: column.date({ default: new Date() }),
+    last_login: column.date({ optional: true }),
+    is_active: column.boolean({ default: true }),
   },
 });
 
@@ -16,6 +21,18 @@ const Session = defineTable({
     userId: column.text({
       references: () => SurveyUser.columns.id,
     }),
+  },
+});
+
+const LoginActivity = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    userId: column.text({
+      references: () => SurveyUser.columns.id,
+    }),
+    login_time: column.date({ default: new Date() }),
+    ip_address: column.text({ optional: true }),
+    user_agent: column.text({ optional: true }),
   },
 });
 
@@ -111,6 +128,7 @@ export default defineDb({
   tables: {
     SurveyUser,
     Session,
+    LoginActivity,
     SurveyResponses,
     MarketingSubscriber,
     Question,

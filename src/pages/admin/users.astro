@@ -1,0 +1,302 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AdminNavigation from "@/components/admin/AdminNavigation.astro";
+import { lucia } from "@/lib/auth";
+import { db, SurveyUser, LoginActivity } from "astro:db";
+import { eq, desc, and } from "astro:db";
+
+// Check if user is logged in and is admin
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Check if user is admin
+const userRecord = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!userRecord || userRecord.role !== "admin") {
+  return Astro.redirect("/admin/login");
+}
+
+// Get all admin users
+const adminUsers = await db.select({
+  id: SurveyUser.id,
+  username: SurveyUser.username,
+  email: SurveyUser.email,
+  created_at: SurveyUser.created_at,
+  last_login: SurveyUser.last_login,
+  is_active: SurveyUser.is_active,
+  role: SurveyUser.role
+}).from(SurveyUser)
+  .where(eq(SurveyUser.role, "admin"))
+  .orderBy(desc(SurveyUser.created_at));
+
+// Get recent login activity for all admin users
+const recentLogins = await db.select({
+  userId: LoginActivity.userId,
+  login_time: LoginActivity.login_time,
+  ip_address: LoginActivity.ip_address,
+  username: SurveyUser.username
+}).from(LoginActivity)
+  .innerJoin(SurveyUser, eq(LoginActivity.userId, SurveyUser.id))
+  .where(eq(SurveyUser.role, "admin"))
+  .orderBy(desc(LoginActivity.login_time))
+  .limit(20);
+---
+
+<Layout title="Admin User Management" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-8">Admin User Management</h1>
+        <AdminNavigation activePage="users" />
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Admin Users List -->
+        <div class="lg:col-span-2">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+            <div class="px-6 py-4 border-b border-zinc-800">
+              <div class="flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-white">Admin Users</h2>
+                <a 
+                  href="/admin/users/new" 
+                  class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/80 transition-colors"
+                >
+                  Add New Admin
+                </a>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-zinc-800">
+                <thead class="bg-zinc-800">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">
+                      Created
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">
+                      Last Login
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-zinc-900 divide-y divide-zinc-800">
+                  {adminUsers.map((admin) => (
+                    <tr class="hover:bg-zinc-800">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex flex-col">
+                          <div class="text-sm font-medium text-white">{admin.username}</div>
+                          <div class="text-sm text-zinc-400">{admin.email || 'No email'}</div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          admin.is_active 
+                            ? 'bg-green-900 text-green-300' 
+                            : 'bg-red-900 text-red-300'
+                        }`}>
+                          {admin.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
+                        {admin.created_at.toLocaleDateString()}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
+                        {admin.last_login ? admin.last_login.toLocaleDateString() : 'Never'}
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                          <a 
+                            href={`/admin/users/edit/${admin.id}`}
+                            class="text-primary hover:text-primary/80"
+                          >
+                            Edit
+                          </a>
+                          {admin.id !== user.id && (
+                            <>
+                              <button 
+                                class="text-red-400 hover:text-red-300"
+                                onclick={`toggleUserStatus('${admin.id}', ${admin.is_active})`}
+                              >
+                                {admin.is_active ? 'Deactivate' : 'Activate'}
+                              </button>
+                              <button 
+                                class="text-red-500 hover:text-red-400"
+                                onclick={`deleteUser('${admin.id}', '${admin.username}')`}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Login Activity -->
+        <div class="lg:col-span-1">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+            <div class="px-6 py-4 border-b border-zinc-800">
+              <h2 class="text-xl font-semibold text-white">Recent Login Activity</h2>
+            </div>
+            <div class="px-6 py-4">
+              <div class="space-y-4">
+                {recentLogins.map((login) => (
+                  <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-b-0">
+                    <div>
+                      <div class="text-sm font-medium text-white">{login.username}</div>
+                      <div class="text-xs text-zinc-400">
+                        {login.login_time.toLocaleString()}
+                      </div>
+                      {login.ip_address && (
+                        <div class="text-xs text-zinc-500">IP: {login.ip_address}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {recentLogins.length === 0 && (
+                  <p class="text-zinc-400 text-sm">No recent login activity</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Credentials -->
+          <div class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+            <div class="px-6 py-4 border-b border-zinc-800">
+              <h2 class="text-xl font-semibold text-white">Admin Login Info</h2>
+            </div>
+            <div class="px-6 py-4">
+              <div class="space-y-3">
+                {adminUsers.map((admin) => (
+                  <div class="bg-zinc-800 p-3 rounded">
+                    <div class="text-sm font-medium text-white">{admin.username}</div>
+                    <div class="text-xs text-zinc-400">Email: {admin.email || 'Not set'}</div>
+                    <div class="text-xs text-zinc-500">
+                      Status: <span class={admin.is_active ? 'text-green-400' : 'text-red-400'}>
+                        {admin.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                <div class="mt-3 p-3 bg-yellow-900/30 border border-yellow-800 rounded">
+                  <div class="text-xs text-yellow-300">
+                    💡 Default password for new users is "admin". Change after first login for security.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+            <div class="px-6 py-4 border-b border-zinc-800">
+              <h2 class="text-xl font-semibold text-white">Quick Stats</h2>
+            </div>
+            <div class="px-6 py-4">
+              <div class="space-y-4">
+                <div class="flex justify-between">
+                  <span class="text-sm text-zinc-400">Total Admin Users:</span>
+                  <span class="text-sm font-medium text-white">{adminUsers.length}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-zinc-400">Active Users:</span>
+                  <span class="text-sm font-medium text-white">
+                    {adminUsers.filter(u => u.is_active).length}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-zinc-400">Recent Logins (24h):</span>
+                  <span class="text-sm font-medium text-white">
+                    {recentLogins.filter(l => 
+                      (new Date().getTime() - l.login_time.getTime()) < 24 * 60 * 60 * 1000
+                    ).length}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function toggleUserStatus(userId, currentStatus) {
+      const action = currentStatus ? 'deactivate' : 'activate';
+      if (!confirm(`Are you sure you want to ${action} this user?`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/admin/users/toggle-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId, status: !currentStatus })
+        });
+
+        if (response.ok) {
+          location.reload();
+        } else {
+          const errorText = await response.text();
+          alert(`Error updating user status: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating user status');
+      }
+    }
+
+    async function deleteUser(userId, username) {
+      if (!confirm(`Are you sure you want to permanently delete the user "${username}"? This action cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/admin/users/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId })
+        });
+
+        if (response.ok) {
+          location.reload();
+        } else {
+          const errorText = await response.text();
+          alert(`Error deleting user: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error deleting user');
+      }
+    }
+
+    // Make functions globally available
+    window.toggleUserStatus = toggleUserStatus;
+    window.deleteUser = deleteUser;
+  </script>
+</Layout>
