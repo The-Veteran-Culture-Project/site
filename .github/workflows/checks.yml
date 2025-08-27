@@ -2,6 +2,8 @@ name: PR Checks
 
 on: pull_request
 
+permissions:
+  contents: read
 jobs:
   build:
     name: Run PR Checks
