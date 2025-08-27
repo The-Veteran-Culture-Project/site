@@ -1,5 +1,3 @@
-permissions:
-  contents: read
 name: Deploy Pages Site Prod
 
 on:
@@ -13,6 +11,8 @@ env:
   ASTRO_DB_APP_TOKEN: ${{ secrets.ASTRO_DB_APP_TOKEN }}
   ASTRO_DB_REMOTE_URL: ${{ secrets.ASTRO_DB_REMOTE_URL }}
 
+permissions:
+  contents: read
 jobs:
   build_stage:
     name: Build and Deploy to Cloudflare
