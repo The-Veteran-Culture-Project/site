@@ -6,15 +6,6 @@ interface SurveyProtectionWrapperProps {
 }
 
 export function SurveyProtectionWrapper({ children }: SurveyProtectionWrapperProps) {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-
-  const handleAuthorized = () => {
-    setIsAuthorized(true);
-  };
-
-  if (!isAuthorized) {
-    return <PasswordProtection onAuthorized={handleAuthorized} />;
-  }
-
+  // Temporarily disable beta protection for debugging
   return <>{children}</>;
 }

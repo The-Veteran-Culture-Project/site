@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { db, SurveyResponses } from "astro:db";
+import { db, SurveyResponses, QuestionResponse, ResponseAnalytics } from "astro:db";
 import { eq } from "astro:db";
 import { lucia } from "@/lib/auth";
 
@@ -40,11 +40,32 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Delete the survey response from the database
+    // Delete related records first to avoid foreign key constraint violations
+    console.log(`Deleting related records for survey response ID: ${id}`);
+    
+    // Delete question responses
+    const questionResponsesResult = await db
+      .delete(QuestionResponse)
+      .where(eq(QuestionResponse.survey_response_id, id))
+      .run();
+    
+    console.log(`Deleted ${questionResponsesResult.rowsAffected} question responses`);
+    
+    // Delete response analytics
+    const analyticsResult = await db
+      .delete(ResponseAnalytics)
+      .where(eq(ResponseAnalytics.survey_response_id, id))
+      .run();
+    
+    console.log(`Deleted ${analyticsResult.rowsAffected} analytics records`);
+    
+    // Now delete the survey response from the database
     const result = await db
       .delete(SurveyResponses)
       .where(eq(SurveyResponses.id, id))
       .run();
+    
+    console.log(`Deleted survey response, rows affected: ${result.rowsAffected}`);
 
     if (result.rowsAffected === 0) {
       return new Response(

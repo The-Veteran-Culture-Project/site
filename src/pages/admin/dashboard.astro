@@ -1,0 +1,507 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AdminNavigation from "@/components/admin/AdminNavigation.astro";
+import { lucia } from "@/lib/auth";
+import { db, SurveyUser, QuestionResponse, ResponseAnalytics, QuestionStats, Question, SurveyResponses } from "astro:db";
+import { eq, desc, sql, and } from "astro:db";
+
+// Check if user is logged in and is admin
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Check if user is admin
+const userRecord = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!userRecord || userRecord.role !== "admin") {
+  return Astro.redirect("/admin/login");
+}
+
+// Get detailed analytics data
+const responseAnalytics = await db.select().from(ResponseAnalytics)
+  .orderBy(desc(ResponseAnalytics.started_at))
+  .limit(20);
+
+// Get real-time question statistics from actual responses
+const realTimeQuestionStats = await db.select({
+  questionText: QuestionResponse.question_text,
+  questionCategory: QuestionResponse.question_category,
+  questionAxis: QuestionResponse.question_axis,
+  totalResponses: sql<number>`count(*)`,
+  averageResponse: sql<number>`round(avg(response_value), 2)`,
+  averageResponseTime: sql<number>`round(avg(response_time_ms), 0)`,
+}).from(QuestionResponse)
+  .groupBy(QuestionResponse.question_text)
+  .orderBy(sql<number>`count(*) desc`)
+  .limit(10);
+
+// Get overall completion statistics - using actual survey response data
+const completionStats = await db.select({
+  totalStarted: sql<number>`count(*)`,
+  totalCompleted: sql<number>`count(*)`, // All entries in SurveyResponses are completed surveys
+  averageCompletionRate: sql<number>`100`, // All surveys in this table are 100% complete
+}).from(SurveyResponses).get();
+
+// Get response timing from ResponseAnalytics if available
+const timingStats = await db.select({
+  averageResponseTime: sql<number>`round(avg(average_response_time_ms), 0)`,
+}).from(ResponseAnalytics).get();
+
+// Get survey responses aggregated data
+const surveyAggregates = await db.select({
+  totalResponses: sql<number>`count(*)`,
+  averageMilitaryScore: sql<number>`round(avg(military_score), 2)`,
+  averageCivilianScore: sql<number>`round(avg(civilian_score), 2)`,
+  subscribeCount: sql<number>`count(case when subscribe = 1 then 1 end)`,
+  storyOptInCount: sql<number>`count(case when story_opt_in = 1 then 1 end)`,
+}).from(SurveyResponses).get();
+
+// Get strategy distribution
+const strategyDistribution = await db.select({
+  strategy: SurveyResponses.strategy,
+  count: sql<number>`count(*)`,
+  percentage: sql<number>`round(count(*) * 100.0 / (select count(*) from SurveyResponses), 1)`,
+}).from(SurveyResponses)
+  .groupBy(SurveyResponses.strategy)
+  .orderBy(sql<number>`count(*) desc`);
+
+// Get demographics insights
+const allResponses = await db.select({
+  demographics: SurveyResponses.demographics,
+  va_benefits: SurveyResponses.va_benefits,
+}).from(SurveyResponses);
+
+// Process demographics data
+const demographicsStats = {
+  ageRanges: {} as Record<string, number>,
+  genders: {} as Record<string, number>,
+  races: {} as Record<string, number>,
+  statusAffiliation: {} as Record<string, number>,
+  branches: {} as Record<string, number>,
+  combatExperience: {} as Record<string, number>,
+  vaApplications: {} as Record<string, number>,
+  disabilityRatings: {} as Record<string, number>,
+};
+
+allResponses.forEach(response => {
+  // Parse demographics
+  const demographics = typeof response.demographics === 'string' 
+    ? JSON.parse(response.demographics) 
+    : response.demographics || {};
+  
+  const vaData = typeof response.va_benefits === 'string'
+    ? JSON.parse(response.va_benefits)
+    : response.va_benefits || {};
+
+  // Age ranges
+  if (demographics.age_range) {
+    demographicsStats.ageRanges[demographics.age_range] = 
+      (demographicsStats.ageRanges[demographics.age_range] || 0) + 1;
+  }
+
+  // Gender
+  if (demographics.gender) {
+    demographicsStats.genders[demographics.gender] = 
+      (demographicsStats.genders[demographics.gender] || 0) + 1;
+  }
+
+  // Race
+  if (demographics.race) {
+    demographicsStats.races[demographics.race] = 
+      (demographicsStats.races[demographics.race] || 0) + 1;
+  }
+
+  // Status/Affiliation
+  if (demographics.status_affiliation) {
+    demographicsStats.statusAffiliation[demographics.status_affiliation] = 
+      (demographicsStats.statusAffiliation[demographics.status_affiliation] || 0) + 1;
+  }
+
+  // Military branch
+  if (demographics.branch) {
+    demographicsStats.branches[demographics.branch] = 
+      (demographicsStats.branches[demographics.branch] || 0) + 1;
+  }
+
+  // Combat experience
+  if (demographics.combat) {
+    demographicsStats.combatExperience[demographics.combat] = 
+      (demographicsStats.combatExperience[demographics.combat] || 0) + 1;
+  }
+
+  // VA applications
+  if (vaData.has_applied) {
+    demographicsStats.vaApplications[vaData.has_applied] = 
+      (demographicsStats.vaApplications[vaData.has_applied] || 0) + 1;
+  }
+
+  // Disability ratings
+  if (vaData.has_disability_rating === 'Yes' && vaData.disability_rating) {
+    const rating = vaData.disability_rating;
+    demographicsStats.disabilityRatings[rating] = 
+      (demographicsStats.disabilityRatings[rating] || 0) + 1;
+  }
+});
+
+// Recent detailed responses
+const recentResponses = await db.select({
+  responseId: QuestionResponse.id,
+  surveyId: QuestionResponse.survey_response_id,
+  questionText: QuestionResponse.question_text,
+  category: QuestionResponse.question_category,
+  axis: QuestionResponse.question_axis,
+  responseValue: QuestionResponse.response_value,
+  responseTime: QuestionResponse.response_time_ms,
+  answeredAt: QuestionResponse.answered_at,
+}).from(QuestionResponse)
+  .orderBy(desc(QuestionResponse.answered_at))
+  .limit(15);
+---
+
+<Layout title="Admin Dashboard" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-8">Admin Dashboard</h1>
+        <AdminNavigation activePage="dashboard" />
+      </div>
+
+            <!-- Overall Statistics -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Total Surveys</h3>
+          <p class="text-3xl font-bold text-blue-400">{surveyAggregates?.totalResponses || 0}</p>
+        </div>
+        
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Newsletter Signups</h3>
+          <p class="text-3xl font-bold text-green-400">{surveyAggregates?.subscribeCount || 0}</p>
+          <p class="text-sm text-zinc-400">
+            {surveyAggregates?.totalResponses ? 
+              Math.round((surveyAggregates.subscribeCount / surveyAggregates.totalResponses) * 100) : 0}% opt-in rate
+          </p>
+        </div>
+        
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Story Sharing</h3>
+          <p class="text-3xl font-bold text-purple-400">{surveyAggregates?.storyOptInCount || 0}</p>
+          <p class="text-sm text-zinc-400">
+            {surveyAggregates?.totalResponses ? 
+              Math.round((surveyAggregates.storyOptInCount / surveyAggregates.totalResponses) * 100) : 0}% willing to share
+          </p>
+        </div>
+        
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Avg. Scores</h3>
+          <p class="text-lg font-bold text-yellow-400">
+            M: {surveyAggregates?.averageMilitaryScore || 0} | C: {surveyAggregates?.averageCivilianScore || 0}
+          </p>
+          <p class="text-sm text-zinc-400">Military | Civilian</p>
+        </div>
+      </div>
+
+      <!-- Survey Strategy Distribution -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-white mb-4">Acculturation Strategy Distribution</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {strategyDistribution.map(strategy => (
+            <div class="bg-zinc-800 rounded-lg p-4">
+              <h3 class="text-lg font-medium text-white mb-2">{strategy.strategy}</h3>
+              <p class="text-2xl font-bold text-blue-400 mb-1">{strategy.count}</p>
+              <p class="text-sm text-zinc-400">{strategy.percentage}% of responses</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Demographics Insights -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Age Distribution -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">Age Distribution</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.ageRanges)
+              .sort(([,a], [,b]) => b - a)
+              .map(([age, count]) => (
+              <div class="flex justify-between items-center">
+                <span class="text-zinc-300">{age}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Military Branch Distribution -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">Military Branch</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.branches)
+              .sort(([,a], [,b]) => b - a)
+              .map(([branch, count]) => (
+              <div class="flex justify-between items-center">
+                <span class="text-zinc-300">{branch}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Combat Experience -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">Combat Experience</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.combatExperience)
+              .sort(([,a], [,b]) => b - a)
+              .map(([combat, count]) => (
+              <div class="flex justify-between items-center">
+                <span class="text-zinc-300">{combat}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Race/Ethnicity -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">Race/Ethnicity</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.races)
+              .sort(([,a], [,b]) => b - a)
+              .map(([race, count]) => (
+              <div class="flex justify-between items-center">
+                <span class="text-zinc-300">{race}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Status/Affiliation -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">Status/Affiliation</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.statusAffiliation)
+              .sort(([,a], [,b]) => b - a)
+              .map(([status, count]) => (
+              <div class="flex justify-between items-center">
+                <span class="text-zinc-300">{status}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- VA Benefits Application -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">VA Benefits Application</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.vaApplications)
+              .sort(([,a], [,b]) => b - a)
+              .map(([applied, count]) => (
+              <div class="flex justify-between items-center">
+                <span class="text-zinc-300">{applied}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Survey Response Analytics -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Surveys Completed</h3>
+          <p class="text-3xl font-bold text-blue-400">{completionStats?.totalStarted || 0}</p>
+          <p class="text-sm text-zinc-400">Successfully submitted</p>
+        </div>
+        
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Completed</h3>
+          <p class="text-3xl font-bold text-green-400">{completionStats?.totalCompleted || 0}</p>
+          <p class="text-sm text-zinc-400">
+            {completionStats?.totalStarted && completionStats?.totalCompleted ? 
+              Math.round((completionStats.totalCompleted / completionStats.totalStarted) * 100) : 100}% completion rate
+          </p>
+        </div>
+        
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Avg. Completion</h3>
+          <p class="text-3xl font-bold text-yellow-400">100%</p>
+          <p class="text-sm text-zinc-400">All recorded surveys completed</p>
+        </div>
+        
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-2">Avg. Response Time</h3>
+          <p class="text-3xl font-bold text-purple-400">
+            {timingStats?.averageResponseTime ? 
+              Math.round(timingStats.averageResponseTime / 1000) : 'N/A'}
+            {timingStats?.averageResponseTime ? 's' : ''}
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Question Performance -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+          <div class="px-6 py-4 border-b border-zinc-800">
+            <h2 class="text-xl font-semibold text-white">Top Questions by Response Count (Real-time)</h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              {realTimeQuestionStats.map((stat) => (
+                <div class="bg-zinc-800 p-4 rounded-lg">
+                  <div class="flex justify-between items-start mb-2">
+                    <h4 class="text-sm font-medium text-white line-clamp-2">
+                      {stat.questionText}
+                    </h4>
+                    <span class="text-xs text-zinc-400 ml-2">{stat.questionAxis} Axis</span>
+                  </div>
+                  <div class="text-xs text-zinc-500 mb-2">{stat.questionCategory}</div>
+                  <div class="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span class="text-zinc-400">Responses:</span>
+                      <span class="text-white font-medium ml-1">{stat.totalResponses}</span>
+                    </div>
+                    <div>
+                      <span class="text-zinc-400">Avg. Value:</span>
+                      <span class="text-white font-medium ml-1">
+                        {stat.averageResponse ? Number(stat.averageResponse).toFixed(1) : 'N/A'}
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-zinc-400">Avg. Time:</span>
+                      <span class="text-white font-medium ml-1">
+                        {stat.averageResponseTime ? 
+                          Math.round(stat.averageResponseTime / 1000) + 's' : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {realTimeQuestionStats.length === 0 && (
+              <p class="text-zinc-400 text-center py-8">No question responses available yet.</p>
+            )}
+          </div>
+        </div>
+
+        <!-- Recent Survey Sessions -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+          <div class="px-6 py-4 border-b border-zinc-800">
+            <h2 class="text-xl font-semibold text-white">Recent Survey Sessions</h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              {responseAnalytics.map((analytics) => (
+                <div class="bg-zinc-800 p-4 rounded-lg">
+                  <div class="flex justify-between items-start mb-2">
+                    <div>
+                      <span class="text-sm font-medium text-white">
+                        Session {analytics.survey_response_id.slice(0, 8)}...
+                      </span>
+                      <div class="text-xs text-zinc-400">
+                        Started: {analytics.started_at.toLocaleString()}
+                      </div>
+                    </div>
+                    <span class={`px-2 py-1 rounded text-xs font-medium ${
+                      analytics.completion_rate >= 100 
+                        ? 'bg-green-900 text-green-300' 
+                        : analytics.completion_rate >= 50
+                        ? 'bg-yellow-900 text-yellow-300'
+                        : 'bg-red-900 text-red-300'
+                    }`}>
+                      {Math.round(analytics.completion_rate)}% Complete
+                    </span>
+                  </div>
+                  <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span class="text-zinc-400">Progress:</span>
+                      <span class="text-white font-medium ml-1">
+                        {analytics.questions_answered}/{analytics.total_questions}
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-zinc-400">Avg. Time:</span>
+                      <span class="text-white font-medium ml-1">
+                        {analytics.average_response_time_ms ? 
+                          Math.round(analytics.average_response_time_ms / 1000) + 's' : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                  {analytics.device_type && (
+                    <div class="mt-2 text-xs text-zinc-400">
+                      Device: {analytics.device_type}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {responseAnalytics.length === 0 && (
+              <p class="text-zinc-400 text-center py-8">No detailed response data available yet.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Individual Responses -->
+      <div class="mt-8 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+        <div class="px-6 py-4 border-b border-zinc-800">
+          <h2 class="text-xl font-semibold text-white">Recent Individual Question Responses</h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-zinc-800">
+            <thead class="bg-zinc-800">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Question</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Category</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Axis</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Response</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Time</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Answered</th>
+              </tr>
+            </thead>
+            <tbody class="bg-zinc-900 divide-y divide-zinc-800">
+              {recentResponses.map((response) => (
+                <tr class="hover:bg-zinc-800">
+                  <td class="px-6 py-4 text-sm text-white max-w-xs truncate" title={response.questionText}>
+                    {response.questionText}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-zinc-300">{response.category}</td>
+                  <td class="px-6 py-4 text-sm text-zinc-300">
+                    <span class={`px-2 py-1 rounded text-xs font-medium ${
+                      response.axis === 'X' ? 'bg-blue-900 text-blue-300' : 'bg-purple-900 text-purple-300'
+                    }`}>
+                      {response.axis}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="font-medium text-white">{response.responseValue}</span>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-zinc-300">
+                    {response.responseTime ? Math.round(response.responseTime / 1000) + 's' : 'N/A'}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-zinc-400">
+                    {response.answeredAt.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {recentResponses.length === 0 && (
+            <div class="p-8 text-center text-zinc-400">
+              No individual question responses recorded yet.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

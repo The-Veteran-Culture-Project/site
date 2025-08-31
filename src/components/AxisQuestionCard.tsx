@@ -4,6 +4,7 @@ import { useStore } from "@nanostores/react";
 import { answersStore } from "@/stores/answersStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { recordQuestionResponse } from "@/lib/surveyResponseTracker";
 
 interface Props {
   questionNumber: number;
@@ -26,13 +27,29 @@ const AxisQuestionCard = ({
   questionNumber,
   question,
   axis,
+  category,
   onInputChange,
 }: Props) => {
   const $answers = useStore(answersStore);
 
-  const onInput = (question: string, axis: string) => (value: string) => {
+  const onInput = (question: string, axis: string) => async (value: string) => {
+    const startTime = Date.now();
     const offset = choices[value];
     onInputChange(question, axis, offset);
+    
+    // Track the response for analytics
+    try {
+      await recordQuestionResponse({
+        questionId: `q-${questionNumber}`,
+        questionText: question,
+        category: category,
+        axis: axis as 'X' | 'Y',
+        responseValue: offset,
+        responseTimeMs: Date.now() - startTime,
+      });
+    } catch (error) {
+      console.warn('Failed to track question response:', error);
+    }
   };
 
   const hasAnswered = $answers[question] && typeof $answers[question] === 'object' && 'offset' in $answers[question];

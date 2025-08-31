@@ -25,15 +25,19 @@ const races = [
   "Asian",
   "Native American or Alaska Native",
   "Native Hawaiian or Pacific Islander",
-  "Other",
+  "Prefer not to say",
 ];
 
-const militaryStatuses = [
-  "Active Duty",
+const statusAffiliations = [
   "Veteran",
-  "National Guard",
-  "Reserves",
-  "Civilian",
+  "Active Duty",
+  "National Guard / Reservist",
+  "Military Spouse",
+  "Veteran Family Member",
+  "Civilian – Researcher",
+  "Civilian – Mental Health Professional",
+  "Civilian – Journalist / Media",
+  "Civilian – No Military Affiliation",
 ];
 
 const yearsSinceSeparation = [
@@ -78,28 +82,17 @@ function DemographicsForm() {
   const [age, setAge] = useState<string>(demographics.age_range || "");
   const [gender, setGender] = useState<string>(demographics.gender || "");
   const [genderSelf, setGenderSelf] = useState<string>(demographics.gender_self_described || "");
-  const [raceSelected, setRaceSelected] = useState<string[]>(demographics.race || []);
-  const [militaryStatus, setMilitaryStatus] = useState<string>(demographics.military_status || "");
+  const [raceSelected, setRaceSelected] = useState<string>(demographics.race || "");
+  const [statusAffiliation, setStatusAffiliation] = useState<string>(demographics.status_affiliation || "");
   const [yearsSep, setYearsSep] = useState<string>(demographics.years_since_separation || "");
   const [branch, setBranch] = useState<string>(demographics.branch || "");
   const [mos, setMos] = useState<string>(demographics.mos || "");
   const [combat, setCombat] = useState<string>(demographics.combat || "");
 
   // Update store and local state
-  function handleRaceChange(race: string) {
-    let updated: string[];
-    if (raceSelected.includes(race)) {
-      updated = raceSelected.filter((r: string) => r !== race);
-    } else {
-      updated = [...raceSelected, race];
-    }
-    setRaceSelected(updated);
-    setValue("demographics.race", updated);
-  }
-
   // Required fields check
   const requiredFieldsFilled =
-    age && gender && raceSelected.length > 0 && militaryStatus && combat;
+    age && gender && raceSelected && statusAffiliation && combat;
 
   // Sync local state to store on change
   function setValueAndState(key: string, value: any, setter: (v: any) => void) {
@@ -158,33 +151,31 @@ function DemographicsForm() {
           {/* Race */}
           <div>
             <label className="text-white font-semibold mb-2 block">Race/Ethnicity *</label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {races.map((r) => (
-                <label key={r} className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
-                  <input
-                    type="checkbox"
-                    className="accent-[#CBB87C] scale-110"
-                    checked={raceSelected.includes(r)}
-                    onChange={() => handleRaceChange(r)}
-                  />
-                  <span className="text-white">{r}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Military Status */}
-          <div>
-            <label className="text-white font-semibold mb-2 block">Military Status *</label>
             <select
               className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors"
-              value={militaryStatus}
-              onChange={e => setValueAndState("demographics.military_status", e.target.value, setMilitaryStatus)}
+              value={raceSelected}
+              onChange={e => setValueAndState("demographics.race", e.target.value, setRaceSelected)}
               required
             >
               <option value="" className="bg-gray-800">Select...</option>
-              {militaryStatuses.map((m) => (
-                <option key={m} value={m} className="bg-gray-800">{m}</option>
+              {races.map((r) => (
+                <option key={r} value={r} className="bg-gray-800">{r}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status / Affiliation */}
+          <div>
+            <label className="text-white font-semibold mb-2 block">Status / Affiliation *</label>
+            <select
+              className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 hover:border-[#CBB87C] focus:border-[#CBB87C] focus:outline-none transition-colors"
+              value={statusAffiliation}
+              onChange={e => setValueAndState("demographics.status_affiliation", e.target.value, setStatusAffiliation)}
+              required
+            >
+              <option value="" className="bg-gray-800">Select...</option>
+              {statusAffiliations.map((s) => (
+                <option key={s} value={s} className="bg-gray-800">{s}</option>
               ))}
             </select>
           </div>

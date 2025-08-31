@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { answersStore } from "@/stores/answersStore.ts";
 import AxisQuestionCard from "@/components/AxisQuestionCard.tsx";
 import SurveyProgressBar from "@/components/SurveyProgressBar.tsx";
+import { initSurveyTracking, startQuestionTiming } from "@/lib/surveyResponseTracker";
 
 interface question {
   data: {
@@ -54,6 +55,8 @@ const handleInputChange = (question: string, axis: string, offset: number) => {
 const QuestionForm = ({ questions }: Props) => {
   useEffect(() => {
     answersStore.set({});
+    // Initialize detailed response tracking
+    initSurveyTracking();
   }, []);
 
   const categoryMap = buildCategoryMap(questions);
@@ -70,6 +73,12 @@ const QuestionForm = ({ questions }: Props) => {
   const [currentQuestions, setCurrentQuestions] = useState(
     categoryMap.get(categories[0]) || [],
   );
+  
+  // Start timing when questions are displayed
+  useEffect(() => {
+    startQuestionTiming();
+  }, [currentQuestions]);
+
   const allQuestionsAnsweredForPage = currentQuestions.every(
     (q) => $answers[q.data.question] !== undefined,
   );

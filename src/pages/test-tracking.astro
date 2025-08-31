@@ -1,0 +1,66 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const questions = await getCollection("axisQuestions");
+const sampleQuestions = questions.slice(0, 3); // Just a few questions for demo
+---
+
+<Layout title="Response Tracking Demo" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-8">Response Tracking Demo</h1>
+      
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-white mb-4">How to Test Response Tracking</h2>
+        <ol class="list-decimal list-inside space-y-2 text-zinc-300">
+          <li>Fill out the survey normally by going to <a href="/survey/1" class="text-blue-400 hover:underline">/survey/1</a></li>
+          <li>Complete at least a few questions (the tracking activates when you select answers)</li>
+          <li>Go to the admin panel: <a href="/admin/login" class="text-blue-400 hover:underline">/admin/login</a> (admin/admin)</li>
+          <li>Navigate to "Individual Responses" to see the detailed tracking data</li>
+          <li>Click on a session to see question-by-question responses with timing data</li>
+        </ol>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-white mb-4">New Features Summary</h2>
+        <div class="space-y-4 text-zinc-300">
+          <div>
+            <h3 class="font-semibold text-white">✅ Dashboard Overview</h3>
+            <p>Admin dashboard at <code class="bg-zinc-800 px-2 py-1 rounded">/admin/dashboard</code> showing aggregated survey analytics</p>
+          </div>
+          
+          <div>
+            <h3 class="font-semibold text-white">✅ Individual Response Tracking</h3>
+            <p>Detailed question-by-question tracking at <code class="bg-zinc-800 px-2 py-1 rounded">/admin/response-analytics</code></p>
+          </div>
+          
+          <div>
+            <h3 class="font-semibold text-white">✅ Live Survey Integration</h3>
+            <p>Response tracking now works automatically in the live survey forms</p>
+          </div>
+          
+          <div>
+            <h3 class="font-semibold text-white">✅ Drill-down Capabilities</h3>
+            <p>Click on any survey session to see detailed timing and response data</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <a 
+          href="/survey/1" 
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors mr-4"
+        >
+          Start Survey Test
+        </a>
+        <a 
+          href="/admin/login" 
+          class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+        >
+          Admin Panel
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

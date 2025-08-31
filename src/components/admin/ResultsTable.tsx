@@ -28,9 +28,8 @@ export interface SurveyResult {
     age_range?: string;
     gender?: string;
     gender_self_described?: string;
-    race?: string[];
-    military_status?: string;
-    years_since_separation?: string;
+    race?: string;
+    status_affiliation?: string;
     branch?: string;
     mos?: string;
     combat?: string;
@@ -77,13 +76,18 @@ export function ResultsTable({ initialResults }: Props) {
   
   // Toggle select single row
   const toggleSelectRow = (id: string) => {
+    console.log("🔘 Toggling selection for ID:", id);
     setSelectedRows(prev => {
       const newSelected = { ...prev };
       if (newSelected[id]) {
+        console.log("🔘 Deselecting row:", id);
         delete newSelected[id];
       } else {
+        console.log("🔘 Selecting row:", id);
         newSelected[id] = true;
       }
+      
+      console.log("🔘 New selected rows:", newSelected);
       
       // Check if all are selected to update selectAll state
       if (Object.keys(newSelected).length === results.length) {
@@ -135,18 +139,29 @@ export function ResultsTable({ initialResults }: Props) {
   // Delete selected rows
   const deleteSelectedRows = async () => {
     const selectedIds = Object.keys(selectedRows);
-    if (selectedIds.length === 0) return;
+    console.log("🗑️ Delete button clicked, selectedIds:", selectedIds);
+    console.log("🗑️ selectedRows state:", selectedRows);
+    
+    if (selectedIds.length === 0) {
+      console.log("🗑️ No rows selected, aborting delete");
+      return;
+    }
     
     // Confirm deletion
     if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} selected survey response(s)? This action cannot be undone.`)) {
+      console.log("🗑️ User cancelled delete");
       return;
     }
+    
+    console.log("🗑️ Starting delete process for:", selectedIds);
     
     try {
       setBulkActionInProgress(true);
       
       // Delete each selected row
       const deletePromises = selectedIds.map(async (id) => {
+        console.log("🗑️ Deleting survey with ID:", id);
+        
         const response = await fetch('/api/delete-survey', {
           method: 'POST',
           headers: {
@@ -155,7 +170,10 @@ export function ResultsTable({ initialResults }: Props) {
           body: JSON.stringify({ id }),
         });
         
+        console.log("🗑️ Delete response for ID", id, "status:", response.status);
+        
         const data = await response.json();
+        console.log("🗑️ Delete response data for ID", id, ":", data);
         
         if (!response.ok) {
           throw new Error(data.message || `Failed to delete survey response ${id}`);
@@ -248,6 +266,7 @@ export function ResultsTable({ initialResults }: Props) {
               <TableHead className="text-white">Strategy</TableHead>
               <TableHead className="text-white">Demographics</TableHead>
               <TableHead className="text-white">Benefits</TableHead>
+              <TableHead className="text-white">Details</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -285,11 +304,8 @@ export function ResultsTable({ initialResults }: Props) {
                     <div className="mt-2 space-y-1 text-sm">
                       <p>Age: {result.demographics?.age_range || 'N/A'}</p>
                       <p>Gender: {result.demographics?.gender || 'N/A'}</p>
-                      <p>Race: {Array.isArray(result.demographics?.race) 
-                        ? result.demographics?.race?.join(', ') 
-                        : 'N/A'}</p>
-                      <p>Military Status: {result.demographics?.military_status || 'N/A'}</p>
-                      <p>Years Since Separation: {result.demographics?.years_since_separation || 'N/A'}</p>
+                      <p>Race: {result.demographics?.race || 'N/A'}</p>
+                      <p>Status/Affiliation: {result.demographics?.status_affiliation || 'N/A'}</p>
                       <p>Branch: {result.demographics?.branch || 'N/A'}</p>
                       <p>MOS: {result.demographics?.mos || 'N/A'}</p>
                       <p>Combat Experience: {result.demographics?.combat || 'N/A'}</p>
@@ -316,6 +332,32 @@ export function ResultsTable({ initialResults }: Props) {
                       )}
                     </div>
                   </details>
+                </TableCell>
+                <TableCell className="text-gray-300">
+                  {(() => {
+                    // Parse story_opt_in value consistently
+                    const storyOptIn = result.story_opt_in === 1 || 
+                                     String(result.story_opt_in) === "1" || 
+                                     String(result.story_opt_in) === "true" ||
+                                     result.story_opt_in === true;
+                    
+                    if (storyOptIn) {
+                      return (
+                        <a 
+                          href={`/admin/survey-details/${result.id}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors inline-block"
+                        >
+                          View Details
+                        </a>
+                      );
+                    } else {
+                      return (
+                        <span className="bg-gray-600 text-gray-300 px-3 py-1 rounded text-sm cursor-not-allowed inline-block" title="Participant did not opt-in for story sharing">
+                          No Story Access
+                        </span>
+                      );
+                    }
+                  })()}
                 </TableCell>
               </TableRow>
             ))}

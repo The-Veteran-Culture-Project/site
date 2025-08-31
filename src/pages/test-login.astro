@@ -1,0 +1,102 @@
+---
+// This page will automatically attempt a login
+import { db, SurveyUser, LoginActivity } from "astro:db";
+import { eq } from "astro:db";
+import bcrypt from "bcryptjs";
+import { lucia } from "@/lib/auth";
+import { randomUUID } from "node:crypto";
+
+let result = "";
+let usersBefore = [];
+let usersAfter = [];
+let loginActivitiesBefore = [];
+let loginActivitiesAfter = [];
+
+try {
+  // Get users before
+  usersBefore = await db.select().from(SurveyUser).where(eq(SurveyUser.username, "admin"));
+  loginActivitiesBefore = await db.select().from(LoginActivity);
+  
+  console.log("Before login - Admin user:", usersBefore[0]);
+  console.log("Before login - Login activities count:", loginActivitiesBefore.length);
+
+  const username = "admin";
+  const password = "admin";
+  
+  const user = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.username, username))
+    .get();
+
+  if (user && await bcrypt.compare(password, user.password)) {
+    // Update last login time
+    console.log("Updating last_login for user:", user.id);
+    await db.update(SurveyUser)
+      .set({ last_login: new Date() })
+      .where(eq(SurveyUser.id, user.id));
+
+    // Track login activity
+    const loginActivityId = randomUUID();
+    console.log("Inserting login activity:", loginActivityId);
+    
+    await db.insert(LoginActivity).values({
+      id: loginActivityId,
+      userId: user.id,
+      login_time: new Date(),
+      ip_address: "127.0.0.1",
+      user_agent: "Test Login Page"
+    });
+
+    // Get users after
+    usersAfter = await db.select().from(SurveyUser).where(eq(SurveyUser.username, "admin"));
+    loginActivitiesAfter = await db.select().from(LoginActivity);
+    
+    console.log("After login - Admin user:", usersAfter[0]);
+    console.log("After login - Login activities count:", loginActivitiesAfter.length);
+
+    result = "Login successful - data updated";
+  } else {
+    result = "Login failed";
+  }
+} catch (error) {
+  console.error("Error during test login:", error);
+  result = `Error: ${error.message}`;
+}
+---
+
+<html>
+<head>
+  <title>Test Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #111; color: #fff; }
+    .section { margin: 20px 0; padding: 20px; background: #222; border-radius: 8px; }
+    pre { background: #333; padding: 10px; border-radius: 4px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Test Login Result</h1>
+  
+  <div class="section">
+    <h2>Result: {result}</h2>
+  </div>
+  
+  <div class="section">
+    <h2>Users Before Login</h2>
+    <pre>{JSON.stringify(usersBefore, null, 2)}</pre>
+  </div>
+  
+  <div class="section">
+    <h2>Users After Login</h2>
+    <pre>{JSON.stringify(usersAfter, null, 2)}</pre>
+  </div>
+  
+  <div class="section">
+    <h2>Login Activities Before ({loginActivitiesBefore.length})</h2>
+    <pre>{JSON.stringify(loginActivitiesBefore.slice(-3), null, 2)}</pre>
+  </div>
+  
+  <div class="section">
+    <h2>Login Activities After ({loginActivitiesAfter.length})</h2>
+    <pre>{JSON.stringify(loginActivitiesAfter.slice(-3), null, 2)}</pre>
+  </div>
+</body>
+</html>

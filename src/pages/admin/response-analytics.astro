@@ -1,0 +1,275 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AdminNavigation from "@/components/admin/AdminNavigation.astro";
+import { lucia } from "@/lib/auth";
+import { db, SurveyUser, QuestionResponse, ResponseAnalytics, Question } from "astro:db";
+import { eq, desc, sql, and } from "astro:db";
+
+// Check if user is logged in and is admin
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Check if user is admin
+const userRecord = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!userRecord || userRecord.role !== "admin") {
+  return Astro.redirect("/admin/login");
+}
+
+// Get query parameters for filtering
+const url = new URL(Astro.request.url);
+const sessionFilter = url.searchParams.get('session');
+
+// Get survey sessions for overview
+const surveySessions = await db.select({
+  surveyResponseId: ResponseAnalytics.survey_response_id,
+  startedAt: ResponseAnalytics.started_at,
+  questionsAnswered: ResponseAnalytics.questions_answered,
+  totalQuestions: ResponseAnalytics.total_questions,
+  completionRate: ResponseAnalytics.completion_rate,
+  averageResponseTime: ResponseAnalytics.average_response_time_ms,
+  deviceType: ResponseAnalytics.device_type,
+}).from(ResponseAnalytics)
+  .orderBy(desc(ResponseAnalytics.started_at))
+  .limit(50);
+
+// Get detailed responses for a specific session if requested
+let detailedResponses: any[] = [];
+let selectedSession: any = null;
+
+if (sessionFilter) {
+  selectedSession = surveySessions.find(s => s.surveyResponseId === sessionFilter);
+  
+  if (selectedSession) {
+    detailedResponses = await db.select({
+      id: QuestionResponse.id,
+      questionText: QuestionResponse.question_text,
+      category: QuestionResponse.question_category,
+      axis: QuestionResponse.question_axis,
+      responseValue: QuestionResponse.response_value,
+      responseTime: QuestionResponse.response_time_ms,
+      answeredAt: QuestionResponse.answered_at,
+    }).from(QuestionResponse)
+      .where(eq(QuestionResponse.survey_response_id, sessionFilter))
+      .orderBy(QuestionResponse.answered_at);
+  }
+}
+---
+
+<Layout title="Individual Response Analytics" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-8">Individual Response Analytics</h1>
+        <AdminNavigation activePage="response-analytics" />
+      </div>
+
+      {selectedSession ? (
+        <!-- Detailed Session View -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-semibold text-white">
+              Session Details: {selectedSession.surveyResponseId.slice(0, 12)}...
+            </h2>
+            <a 
+              href="/admin/response-analytics" 
+              class="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              ← Back to Sessions
+            </a>
+          </div>
+          
+          <!-- Session Summary -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-white mb-2">Progress</h3>
+              <p class="text-3xl font-bold text-blue-400">
+                {Math.round(selectedSession.completionRate)}%
+              </p>
+              <p class="text-sm text-zinc-400">
+                {selectedSession.questionsAnswered}/{selectedSession.totalQuestions} questions
+              </p>
+            </div>
+            
+            <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-white mb-2">Avg. Response Time</h3>
+              <p class="text-3xl font-bold text-green-400">
+                {selectedSession.averageResponseTime ? 
+                  Math.round(selectedSession.averageResponseTime / 1000) + 's' : 'N/A'}
+              </p>
+            </div>
+            
+            <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-white mb-2">Device</h3>
+              <p class="text-lg font-medium text-white">{selectedSession.deviceType || 'Unknown'}</p>
+            </div>
+            
+            <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-white mb-2">Started</h3>
+              <p class="text-sm text-white">{selectedSession.startedAt.toLocaleString()}</p>
+            </div>
+          </div>
+
+          <!-- Question-by-Question Responses -->
+          <div class="bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+            <div class="px-6 py-4 border-b border-zinc-800">
+              <h3 class="text-xl font-semibold text-white">Question Responses</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-zinc-800">
+                <thead class="bg-zinc-800">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Order</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Question</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Axis</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Response</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Answered</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-zinc-900 divide-y divide-zinc-800">
+                  {detailedResponses.map((response, index) => (
+                    <tr class="hover:bg-zinc-800">
+                      <td class="px-6 py-4 text-sm text-zinc-300">#{index + 1}</td>
+                      <td class="px-6 py-4 text-sm text-white max-w-xs" title={response.questionText}>
+                        <div class="truncate">{response.questionText}</div>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-zinc-300">{response.category}</td>
+                      <td class="px-6 py-4 text-sm text-zinc-300">
+                        <span class={`px-2 py-1 rounded text-xs font-medium ${
+                          response.axis === 'X' ? 'bg-blue-900 text-blue-300' : 'bg-purple-900 text-purple-300'
+                        }`}>
+                          {response.axis}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 text-sm">
+                        <span class={`font-medium ${
+                          response.responseValue > 0 ? 'text-green-400' : 
+                          response.responseValue < 0 ? 'text-red-400' : 'text-yellow-400'
+                        }`}>
+                          {response.responseValue}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-zinc-300">
+                        {response.responseTime ? Math.round(response.responseTime / 1000) + 's' : 'N/A'}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-zinc-400">
+                        {response.answeredAt.toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {detailedResponses.length === 0 && (
+                <div class="p-8 text-center text-zinc-400">
+                  No detailed responses found for this session.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <!-- Survey Sessions Overview -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg">
+          <div class="px-6 py-4 border-b border-zinc-800">
+            <h2 class="text-xl font-semibold text-white">Survey Sessions</h2>
+            <p class="text-sm text-zinc-400 mt-1">
+              {surveySessions.length === 0 ? 
+                "No detailed response sessions recorded yet. Complete a survey with the new tracking to see data here." :
+                "Click on a session to view detailed responses"
+              }
+            </p>
+          </div>
+          <div class="overflow-x-auto">
+            {surveySessions.length > 0 ? (
+              <table class="min-w-full divide-y divide-zinc-800">
+                <thead class="bg-zinc-800">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Session ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Started</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Progress</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Questions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Avg. Time</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Device</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-300 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-zinc-900 divide-y divide-zinc-800">
+                  {surveySessions.map((session) => (
+                    <tr class="hover:bg-zinc-800">
+                      <td class="px-6 py-4 text-sm text-white font-mono">
+                        {session.surveyResponseId.slice(0, 12)}...
+                      </td>
+                      <td class="px-6 py-4 text-sm text-zinc-300">
+                        {session.startedAt.toLocaleString()}
+                      </td>
+                      <td class="px-6 py-4 text-sm">
+                        <div class="flex items-center">
+                          <div class="flex-1 bg-zinc-700 rounded-full h-2 mr-2">
+                            <div 
+                              class={`h-2 rounded-full ${
+                                session.completionRate >= 100 ? 'bg-green-500' :
+                                session.completionRate >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                              style={`width: ${Math.min(session.completionRate, 100)}%`}
+                            ></div>
+                          </div>
+                          <span class="text-white font-medium text-xs">
+                            {Math.round(session.completionRate)}%
+                          </span>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 text-sm text-zinc-300">
+                        {session.questionsAnswered}/{session.totalQuestions}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-zinc-300">
+                        {session.averageResponseTime ? 
+                          Math.round(session.averageResponseTime / 1000) + 's' : 'N/A'}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-zinc-300">
+                        {session.deviceType || 'Unknown'}
+                      </td>
+                      <td class="px-6 py-4 text-sm">
+                        <a 
+                          href={`/admin/response-analytics?session=${session.surveyResponseId}`}
+                          class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                        >
+                          View Details
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div class="p-8 text-center">
+                <div class="text-zinc-400 mb-4">
+                  <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  No detailed response sessions recorded yet.
+                </div>
+                <div class="text-sm text-zinc-500 mb-4">
+                  Complete a survey with the new response tracking to see detailed analytics here.
+                </div>
+                <a href="/survey/1" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                  Take Survey to Generate Data
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</Layout>

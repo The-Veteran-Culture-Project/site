@@ -1,0 +1,298 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { lucia } from "@/lib/auth";
+import { generateTwoFactorSetup } from "@/lib/twoFactor";
+
+// Check authentication
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Get full user data
+const fullUser = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!fullUser || fullUser.role !== 'admin') {
+  return Astro.redirect("/admin/login");
+}
+
+let setupData: { secret: string; qrCode: string; manualEntryKey: string } | null = null;
+let errorMessage: string | null = null;
+let successMessage: string | null = null;
+
+// Handle form submission
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("action")?.toString();
+  
+  if (action === "generate") {
+    // Generate new 2FA setup
+    setupData = await generateTwoFactorSetup(fullUser.username);
+    
+    // Store secret temporarily in session storage (for verification)
+    Astro.cookies.set('temp_2fa_secret', setupData.secret, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 600, // 10 minutes
+      sameSite: 'strict'
+    });
+  } else if (action === "verify") {
+    // Verify and enable 2FA
+    const verificationCode = formData.get("verificationCode")?.toString();
+    const tempSecret = Astro.cookies.get('temp_2fa_secret')?.value;
+    
+    if (!verificationCode || !tempSecret) {
+      errorMessage = "Missing verification code or setup data";
+    } else {
+      // Verify the code
+      const { verifyTwoFactorToken } = await import("@/lib/twoFactor");
+      
+      if (verifyTwoFactorToken(verificationCode, tempSecret)) {
+        // Save to database
+        await db.update(SurveyUser)
+          .set({ 
+            two_factor_secret: tempSecret,
+            two_factor_enabled: true 
+          })
+          .where(eq(SurveyUser.id, user.id));
+        
+        // Clear temp secret
+        Astro.cookies.delete('temp_2fa_secret');
+        
+        successMessage = "Two-factor authentication has been enabled successfully!";
+      } else {
+        errorMessage = "Invalid verification code. Please try again.";
+      }
+    }
+  } else if (action === "disable") {
+    // Disable 2FA
+    const confirmPassword = formData.get("confirmPassword")?.toString();
+    
+    if (!confirmPassword) {
+      errorMessage = "Password confirmation required";
+    } else {
+      const bcrypt = await import("bcryptjs");
+      if (await bcrypt.compare(confirmPassword, fullUser.password)) {
+        await db.update(SurveyUser)
+          .set({ 
+            two_factor_secret: null,
+            two_factor_enabled: false 
+          })
+          .where(eq(SurveyUser.id, user.id));
+        
+        successMessage = "Two-factor authentication has been disabled.";
+        
+        // Refresh user data
+        const updatedUser = await db.select().from(SurveyUser)
+          .where(eq(SurveyUser.id, user.id))
+          .get();
+        if (updatedUser) {
+          fullUser.two_factor_enabled = updatedUser.two_factor_enabled;
+          fullUser.two_factor_secret = updatedUser.two_factor_secret;
+        }
+      } else {
+        errorMessage = "Incorrect password";
+      }
+    }
+  }
+}
+
+// Check for temp setup data if we're in the middle of setup
+if (!setupData) {
+  const tempSecret = Astro.cookies.get('temp_2fa_secret')?.value;
+  if (tempSecret) {
+    setupData = await generateTwoFactorSetup(fullUser.username);
+    setupData.secret = tempSecret; // Use the stored secret
+  }
+}
+---
+
+<Layout title="Two-Factor Authentication Setup" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-white">Two-Factor Authentication</h1>
+      <p class="text-gray-300 mt-2">Secure your admin account with an additional layer of protection</p>
+    </div>
+
+    {errorMessage && (
+      <div class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded mb-6">
+        {errorMessage}
+      </div>
+    )}
+
+    {successMessage && (
+      <div class="bg-green-500/10 border border-green-500 text-green-500 px-4 py-3 rounded mb-6">
+        {successMessage}
+      </div>
+    )}
+
+    {!fullUser.two_factor_enabled ? (
+      <div class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-white mb-4">Enable Two-Factor Authentication</h2>
+        
+        {!setupData ? (
+          <div>
+            <p class="text-gray-300 mb-4">
+              Two-factor authentication adds an extra layer of security to your account by requiring 
+              a code from your phone in addition to your password.
+            </p>
+            
+            <form method="POST">
+              <input type="hidden" name="action" value="generate" />
+              <button 
+                type="submit"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-medium"
+              >
+                Set Up Two-Factor Authentication
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div>
+            <div class="mb-6">
+              <h3 class="text-lg font-medium text-white mb-3">Step 1: Scan QR Code</h3>
+              <p class="text-gray-300 mb-4">
+                Use your authenticator app (Google Authenticator, Authy, etc.) to scan this QR code:
+              </p>
+              
+              <div class="bg-white p-4 rounded-lg inline-block mb-4">
+                <img src={setupData.qrCode} alt="2FA QR Code" class="w-48 h-48" />
+              </div>
+              
+              <details class="mb-4">
+                <summary class="text-gray-300 cursor-pointer hover:text-white">
+                  Can't scan? Enter manually
+                </summary>
+                <div class="mt-2 p-3 bg-gray-700 rounded">
+                  <p class="text-sm text-gray-300 mb-2">Manual entry key:</p>
+                  <code class="text-green-400 font-mono text-sm break-all">{setupData.manualEntryKey}</code>
+                </div>
+              </details>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-medium text-white mb-3">Step 2: Verify Setup</h3>
+              <p class="text-gray-300 mb-4">
+                Enter the 6-digit code from your authenticator app to complete setup:
+              </p>
+              
+              <form method="POST" class="space-y-4">
+                <input type="hidden" name="action" value="verify" />
+                
+                <div>
+                  <label for="verificationCode" class="block text-sm font-medium text-gray-300 mb-2">
+                    Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    name="verificationCode"
+                    id="verificationCode"
+                    placeholder="000000"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    required
+                    class="w-32 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-center font-mono tracking-widest"
+                  />
+                </div>
+                
+                <div class="flex space-x-3">
+                  <button 
+                    type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium"
+                  >
+                    Enable 2FA
+                  </button>
+                  
+                  <button 
+                    type="button"
+                    onclick="window.location.reload()"
+                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    ) : (
+      <div class="bg-gray-800 rounded-lg p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+          <h2 class="text-xl font-semibold text-white">Two-Factor Authentication Enabled</h2>
+        </div>
+        
+        <p class="text-gray-300 mb-6">
+          Your account is protected with two-factor authentication. You'll need to enter a code 
+          from your authenticator app when logging in.
+        </p>
+        
+        <details class="mb-4">
+          <summary class="text-red-400 cursor-pointer hover:text-red-300 font-medium">
+            Disable Two-Factor Authentication
+          </summary>
+          <div class="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded">
+            <p class="text-gray-300 mb-4">
+              <strong>Warning:</strong> Disabling 2FA will make your account less secure.
+            </p>
+            
+            <form method="POST" class="space-y-4">
+              <input type="hidden" name="action" value="disable" />
+              
+              <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-2">
+                  Confirm your password to disable 2FA:
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  required
+                  class="w-full max-w-sm px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                />
+              </div>
+              
+              <button 
+                type="submit"
+                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
+                onclick="return confirm('Are you sure you want to disable two-factor authentication?')"
+              >
+                Disable 2FA
+              </button>
+            </form>
+          </div>
+        </details>
+      </div>
+    )}
+
+    <div class="mt-6">
+      <a 
+        href="/admin/users" 
+        class="text-indigo-400 hover:text-indigo-300"
+      >
+        ← Back to Admin Dashboard
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Auto-format verification code input
+  const verificationInput = document.getElementById('verificationCode') as HTMLInputElement;
+  if (verificationInput) {
+    verificationInput.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      target.value = target.value.replace(/[^0-9]/g, '');
+    });
+  }
+</script>

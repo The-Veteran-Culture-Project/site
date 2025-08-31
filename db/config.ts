@@ -11,6 +11,8 @@ const SurveyUser = defineTable({
     created_at: column.date({ default: new Date() }),
     last_login: column.date({ optional: true }),
     is_active: column.boolean({ default: true }),
+    two_factor_secret: column.text({ optional: true }),
+    two_factor_enabled: column.boolean({ default: false }),
   },
 });
 
@@ -96,6 +98,60 @@ const QuestionHistory = defineTable({
   },
 });
 
+// Individual question responses for detailed analytics
+const QuestionResponse = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    survey_response_id: column.text({
+      references: () => SurveyResponses.columns.id,
+    }),
+    question_id: column.text({ optional: true }),
+    question_text: column.text(), // Store the exact question text at time of response
+    question_category: column.text(),
+    question_axis: column.text(), // "X" or "Y" axis
+    response_value: column.number(), // The numerical response (e.g., 1-5 scale)
+    response_text: column.text({ optional: true }), // Optional text representation
+    answered_at: column.date({ default: new Date() }),
+    response_time_ms: column.number({ optional: true }), // Time taken to answer in milliseconds
+  },
+});
+
+// Track response patterns and analytics
+const ResponseAnalytics = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    survey_response_id: column.text({
+      references: () => SurveyResponses.columns.id,
+    }),
+    total_questions: column.number(),
+    questions_answered: column.number(),
+    completion_rate: column.number(), // Percentage completed
+    total_response_time_ms: column.number({ optional: true }),
+    average_response_time_ms: column.number({ optional: true }),
+    started_at: column.date(),
+    completed_at: column.date({ optional: true }),
+    dropped_at_question: column.text({ optional: true }), // Question ID where user dropped off
+    device_type: column.text({ optional: true }), // mobile, desktop, tablet
+    browser_info: column.text({ optional: true }),
+  },
+});
+
+// Track question-level statistics
+const QuestionStats = defineTable({
+  columns: {
+    id: column.text({ primaryKey: true }),
+    question_id: column.text({
+      references: () => Question.columns.id,
+    }),
+    total_responses: column.number({ default: 0 }),
+    average_response: column.number({ optional: true }),
+    response_distribution: column.json({ optional: true }), // Count of each response value
+    average_response_time_ms: column.number({ optional: true }),
+    skip_rate: column.number({ default: 0 }), // Percentage who skipped this question
+    last_updated: column.date({ default: new Date() }),
+  },
+});
+
 const SiteSettings = defineTable({
   columns: {
     key: column.text({ primaryKey: true }),
@@ -133,6 +189,9 @@ export default defineDb({
     MarketingSubscriber,
     Question,
     QuestionHistory,
+    QuestionResponse,
+    ResponseAnalytics,
+    QuestionStats,
     SiteSettings,
     BetaAccessRequest,
   },

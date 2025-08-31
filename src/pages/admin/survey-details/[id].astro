@@ -1,0 +1,458 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AdminNavigation from "@/components/admin/AdminNavigation.astro";
+import { lucia } from "@/lib/auth";
+import { db, SurveyUser, QuestionResponse, SurveyResponses } from "astro:db";
+import { eq } from "astro:db";
+
+// Check if user is logged in and is admin
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Check if user is admin
+const userRecord = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!userRecord || userRecord.role !== "admin") {
+  return Astro.redirect("/admin/login");
+}
+
+// Get survey ID from URL params
+const surveyId = Astro.params.id;
+if (!surveyId) {
+  return Astro.redirect("/admin/results");
+}
+
+// Get the survey response data
+const surveyResponse = await db.select().from(SurveyResponses)
+  .where(eq(SurveyResponses.id, surveyId))
+  .get();
+
+if (!surveyResponse) {
+  return Astro.redirect("/admin/results");
+}
+
+// Check if participant opted in for story sharing
+// If not, redirect back with a message or show limited access
+const storyOptIn = surveyResponse.story_opt_in === 1 || 
+                  surveyResponse.story_opt_in === true ||
+                  String(surveyResponse.story_opt_in) === "true";
+
+if (!storyOptIn) {
+  // Redirect back to results with a privacy notice
+  return Astro.redirect("/admin/results?access=denied");
+}
+
+// Get individual question responses
+const questionResponses = await db.select({
+  id: QuestionResponse.id,
+  questionText: QuestionResponse.question_text,
+  questionCategory: QuestionResponse.question_category,
+  questionAxis: QuestionResponse.question_axis,
+  responseValue: QuestionResponse.response_value,
+  answeredAt: QuestionResponse.answered_at,
+}).from(QuestionResponse)
+  .where(eq(QuestionResponse.survey_response_id, surveyId))
+  .orderBy(QuestionResponse.answered_at);
+
+// Helper function to convert response value to text
+const getResponseText = (value: number) => {
+  switch(value) {
+    case -2: return "Strongly Disagree";
+    case -1: return "Disagree";
+    case 0: return "Neutral";
+    case 1: return "Agree";
+    case 2: return "Strongly Agree";
+    default: return "Unknown";
+  }
+};
+
+// Helper function to get strategy definition
+const getStrategyDefinition = (strategy: string) => {
+  switch(strategy.toLowerCase()) {
+    case 'assimilation':
+      return "High civilian identity, low military identity. These veterans have successfully integrated into civilian life and may downplay their military experience.";
+    case 'integration':
+      return "High civilian identity, high military identity. These veterans maintain strong connections to both their military service and civilian communities.";
+    case 'separation':
+      return "Low civilian identity, high military identity. These veterans may struggle with civilian integration and strongly identify with their military experience.";
+    case 'marginalization':
+      return "Low civilian identity, low military identity. These veterans may feel disconnected from both military and civilian communities and could benefit from additional support.";
+    default:
+      return "Strategy not defined.";
+  }
+};
+---
+
+<Layout title={`Survey Details - ${surveyResponse.first_name} ${surveyResponse.last_name}`} isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h1 class="text-3xl font-bold text-white">Survey Details</h1>
+          <a 
+            href="/admin/results" 
+            class="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            ← Back to Results
+          </a>
+        </div>
+        <AdminNavigation activePage="results" />
+      </div>
+
+      <!-- Survey Info -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
+        <div class="flex justify-between items-start mb-4">
+          <h2 class="text-xl font-semibold text-white">Survey Information</h2>
+          <div class="bg-green-900 border border-green-700 px-3 py-1 rounded-lg">
+            <span class="text-green-300 text-sm">✓ Story Sharing Consent Given</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-6">
+          <div>
+            <span class="text-zinc-400">Name:</span>
+            <div class="text-white font-medium">{surveyResponse.first_name} {surveyResponse.last_name}</div>
+          </div>
+          <div>
+            <span class="text-zinc-400">Email:</span>
+            <div class="text-white font-medium">{surveyResponse.email}</div>
+          </div>
+          <div>
+            <span class="text-zinc-400">Strategy:</span>
+            <div class="text-white font-medium">{surveyResponse.strategy}</div>
+          </div>
+          <div>
+            <span class="text-zinc-400">Submitted:</span>
+            <div class="text-white font-medium">{surveyResponse.created_at.toLocaleString()}</div>
+          </div>
+          <div>
+            <span class="text-zinc-400">Military Score:</span>
+            <div class="text-white font-medium">{surveyResponse.military_score}</div>
+          </div>
+          <div>
+            <span class="text-zinc-400">Civilian Score:</span>
+            <div class="text-white font-medium">{surveyResponse.civilian_score}</div>
+          </div>
+          <div>
+            <span class="text-zinc-400">Marketing Opt-in:</span>
+            <div class="text-white font-medium">{surveyResponse.subscribe ? 'Yes' : 'No'}</div>
+          </div>
+          <div>
+            <span class="text-zinc-400">Story Sharing:</span>
+            <div class="text-white font-medium">{surveyResponse.story_opt_in ? 'Yes' : 'No'}</div>
+          </div>
+        </div>
+        
+        <!-- Strategy Definition -->
+        <div class="border-t border-zinc-700 pt-4">
+          <h3 class="text-lg font-medium text-white mb-2">Strategy Definition: {surveyResponse.strategy}</h3>
+          <p class="text-zinc-300 text-sm leading-relaxed">
+            {getStrategyDefinition(surveyResponse.strategy)}
+          </p>
+        </div>
+      </div>
+
+      <!-- Demographics Information -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-white mb-4">Demographics</h2>
+        {(() => {
+          const demographics = typeof surveyResponse.demographics === 'string' 
+            ? JSON.parse(surveyResponse.demographics) 
+            : surveyResponse.demographics || {};
+          
+          return (
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <span class="text-zinc-400">Age Range:</span>
+                <div class="text-white font-medium">{demographics.age_range || 'Not provided'}</div>
+              </div>
+              <div>
+                <span class="text-zinc-400">Gender:</span>
+                <div class="text-white font-medium">
+                  {demographics.gender || 'Not provided'}
+                  {demographics.gender === 'Self-describe' && demographics.gender_self_described && (
+                    <span class="text-zinc-300"> ({demographics.gender_self_described})</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <span class="text-zinc-400">Race/Ethnicity:</span>
+                <div class="text-white font-medium">
+                  {demographics.race || 'Not provided'}
+                </div>
+              </div>
+              <div>
+                <span class="text-zinc-400">Status/Affiliation:</span>
+                <div class="text-white font-medium">{demographics.status_affiliation || 'Not provided'}</div>
+              </div>
+              <div>
+                <span class="text-zinc-400">Branch:</span>
+                <div class="text-white font-medium">{demographics.branch || 'Not provided'}</div>
+              </div>
+              <div>
+                <span class="text-zinc-400">MOS/Role:</span>
+                <div class="text-white font-medium">{demographics.mos || 'Not provided'}</div>
+              </div>
+              <div>
+                <span class="text-zinc-400">Combat Experience:</span>
+                <div class="text-white font-medium">{demographics.combat || 'Not provided'}</div>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      <!-- VA Benefits Information -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-white mb-4">VA Benefits Information</h2>
+        {(() => {
+          const vaData = typeof surveyResponse.va_benefits === 'string'
+            ? JSON.parse(surveyResponse.va_benefits)
+            : surveyResponse.va_benefits || {};
+          
+          return (
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <span class="text-zinc-400">Applied for VA Benefits:</span>
+                  <div class="text-white font-medium">{vaData.has_applied || 'Not provided'}</div>
+                </div>
+                <div>
+                  <span class="text-zinc-400">Has Disability Rating:</span>
+                  <div class="text-white font-medium">{vaData.has_disability_rating || 'Not provided'}</div>
+                </div>
+                {vaData.has_disability_rating === 'Yes' && vaData.disability_rating && (
+                  <div>
+                    <span class="text-zinc-400">Disability Rating:</span>
+                    <div class="text-white font-medium">{vaData.disability_rating}%</div>
+                  </div>
+                )}
+                <div>
+                  <span class="text-zinc-400">Uses VA Healthcare:</span>
+                  <div class="text-white font-medium">{vaData.va_healthcare || 'Not provided'}</div>
+                </div>
+                <div>
+                  <span class="text-zinc-400">Decision Timeframe:</span>
+                  <div class="text-white font-medium">{vaData.decision_time || 'Not provided'}</div>
+                </div>
+                <div>
+                  <span class="text-zinc-400">Delay Comfort Level:</span>
+                  <div class="text-white font-medium">{vaData.comfort_delay || 'Not provided'}</div>
+                </div>
+              </div>
+              
+              {vaData.benefits_used && Array.isArray(vaData.benefits_used) && vaData.benefits_used.length > 0 && (
+                <div>
+                  <span class="text-zinc-400">Benefits Used:</span>
+                  <div class="text-white font-medium mt-1">
+                    <div class="flex flex-wrap gap-2">
+                      {vaData.benefits_used.map((benefit, index) => (
+                        <span key={index} class="inline-block px-2 py-1 bg-zinc-800 rounded text-xs">
+                          {benefit}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {vaData.va_experience && (
+                <div>
+                  <span class="text-zinc-400">VA Experience Description:</span>
+                  <div class="text-white font-medium mt-1 p-3 bg-zinc-800 rounded">
+                    {vaData.va_experience}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      </div>
+
+      <!-- Question Responses -->
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-white">Survey Responses ({questionResponses.length} questions)</h2>
+          
+          <!-- Filter Controls -->
+          <div class="flex gap-2">
+            <select id="categoryFilter" class="bg-zinc-800 text-white text-sm rounded px-3 py-1 border border-zinc-700">
+              <option value="">All Categories</option>
+              <option value="Civilian & Military Relationships">Civilian & Military Relationships</option>
+              <option value="Mental Health & Addiction ">Mental Health & Addiction</option>
+              <option value="Patriotism & Purpose">Patriotism & Purpose</option>
+            </select>
+            
+            <select id="axisFilter" class="bg-zinc-800 text-white text-sm rounded px-3 py-1 border border-zinc-700">
+              <option value="">All Axes</option>
+              <option value="X">X-Axis</option>
+              <option value="Y">Y-Axis</option>
+            </select>
+            
+            <select id="responseFilter" class="bg-zinc-800 text-white text-sm rounded px-3 py-1 border border-zinc-700">
+              <option value="">All Responses</option>
+              <option value="positive">Positive (Agree/Strongly Agree)</option>
+              <option value="negative">Negative (Disagree/Strongly Disagree)</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </div>
+        </div>
+        
+        {questionResponses.length > 0 ? (
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="responsesTable">
+              <thead>
+                <tr class="border-b border-zinc-700">
+                  <th class="text-left text-zinc-400 py-3 px-4">#</th>
+                  <th class="text-left text-zinc-400 py-3 px-4">Question</th>
+                  <th class="text-center text-zinc-400 py-3 px-4">Category</th>
+                  <th class="text-center text-zinc-400 py-3 px-4">Axis</th>
+                  <th class="text-center text-zinc-400 py-3 px-4">Score</th>
+                  <th class="text-center text-zinc-400 py-3 px-4">Response</th>
+                  <th class="text-center text-zinc-400 py-3 px-4">Answered At</th>
+                </tr>
+              </thead>
+              <tbody id="responsesTableBody">
+                {questionResponses.map((response, index) => (
+                  <tr class={`border-b border-zinc-800 ${index % 2 === 0 ? 'bg-zinc-950' : ''} response-row`}
+                      data-category={response.questionCategory}
+                      data-axis={response.questionAxis}
+                      data-response-value={response.responseValue}>
+                    <td class="py-3 px-4 text-zinc-400 font-mono text-xs">
+                      {(index + 1).toString().padStart(2, '0')}
+                    </td>
+                    <td class="py-3 px-4 text-white max-w-md">
+                      <div class="truncate" title={response.questionText}>
+                        {response.questionText}
+                      </div>
+                    </td>
+                    <td class="py-3 px-4 text-center text-zinc-300">
+                      <span class="inline-block px-2 py-1 bg-zinc-800 rounded text-xs">
+                        {response.questionCategory}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center text-white font-medium">
+                      <span class={`inline-block px-2 py-1 rounded text-xs ${
+                        response.questionAxis === 'X' ? 'bg-blue-900 text-blue-200' : 'bg-green-900 text-green-200'
+                      }`}>
+                        {response.questionAxis}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center text-white font-bold text-lg">
+                      <span class={`${
+                        response.responseValue >= 1 ? 'text-green-400' : 
+                        response.responseValue <= -1 ? 'text-red-400' : 
+                        'text-gray-400'
+                      }`}>
+                        {response.responseValue > 0 ? '+' : ''}{response.responseValue}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                      <span class={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                        response.responseValue >= 1 ? 'bg-green-900 text-green-200' : 
+                        response.responseValue <= -1 ? 'bg-red-900 text-red-200' : 
+                        'bg-gray-700 text-gray-300'
+                      }`}>
+                        {getResponseText(response.responseValue)}
+                      </span>
+                    </td>
+                    <td class="py-3 px-4 text-center text-zinc-300 text-xs">
+                      {response.answeredAt ? new Date(response.answeredAt).toLocaleString() : 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div class="text-zinc-400 text-center py-8">
+            <p>No individual question responses available.</p>
+            <p class="text-sm mt-2">This survey was completed before detailed response tracking was implemented.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filter functionality for the responses table
+    document.addEventListener('DOMContentLoaded', function() {
+      const categoryFilter = document.getElementById('categoryFilter');
+      const axisFilter = document.getElementById('axisFilter');
+      const responseFilter = document.getElementById('responseFilter');
+      const tableBody = document.getElementById('responsesTableBody');
+      const allRows = Array.from(document.querySelectorAll('.response-row'));
+
+      function filterTable() {
+        const categoryValue = categoryFilter.value;
+        const axisValue = axisFilter.value;
+        const responseValue = responseFilter.value;
+        
+        let visibleCount = 0;
+        
+        allRows.forEach((row, index) => {
+          let show = true;
+          
+          // Category filter
+          if (categoryValue && row.dataset.category !== categoryValue) {
+            show = false;
+          }
+          
+          // Axis filter
+          if (axisValue && row.dataset.axis !== axisValue) {
+            show = false;
+          }
+          
+          // Response type filter
+          if (responseValue) {
+            const responseVal = parseInt(row.dataset.responseValue);
+            if (responseValue === 'positive' && responseVal < 1) show = false;
+            if (responseValue === 'negative' && responseVal > -1) show = false;
+            if (responseValue === 'neutral' && responseVal !== 0) show = false;
+          }
+          
+          if (show) {
+            row.style.display = '';
+            visibleCount++;
+            // Re-number visible rows
+            const numberCell = row.querySelector('td:first-child');
+            if (numberCell) {
+              numberCell.textContent = visibleCount.toString().padStart(2, '0');
+            }
+            // Update row striping for visible rows
+            row.className = row.className.replace(/bg-zinc-950/, '');
+            if (visibleCount % 2 === 0) {
+              row.className += ' bg-zinc-950';
+            }
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        // Update header count
+        const header = document.querySelector('h2');
+        if (header) {
+          const totalCount = allRows.length;
+          if (visibleCount === totalCount) {
+            header.textContent = `Survey Responses (${totalCount} questions)`;
+          } else {
+            header.textContent = `Survey Responses (${visibleCount} of ${totalCount} questions)`;
+          }
+        }
+      }
+
+      // Add event listeners to all filters
+      categoryFilter.addEventListener('change', filterTable);
+      axisFilter.addEventListener('change', filterTable);
+      responseFilter.addEventListener('change', filterTable);
+    });
+  </script>
+</Layout>

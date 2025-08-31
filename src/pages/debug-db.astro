@@ -1,0 +1,57 @@
+---
+import { db, LoginActivity, SurveyUser } from "astro:db";
+import { eq, desc } from "astro:db";
+import { randomUUID } from "node:crypto";
+
+// Get all login activities
+const allLoginActivities = await db.select().from(LoginActivity);
+console.log("All login activities:", allLoginActivities);
+
+// Get all users
+const allUsers = await db.select().from(SurveyUser);
+console.log("All users:", allUsers.map(u => ({ id: u.id, username: u.username, role: u.role })));
+
+// Insert a test login activity if none exist
+if (allLoginActivities.length === 0) {
+  try {
+    await db.insert(LoginActivity).values({
+      id: randomUUID(),
+      userId: "admin-user",
+      login_time: new Date(),
+      ip_address: "127.0.0.1",
+      user_agent: "Test Browser"
+    });
+    console.log("Inserted test login activity");
+  } catch (error) {
+    console.error("Error inserting test login activity:", error);
+  }
+}
+
+// Try the join query
+try {
+  const joinResult = await db.select({
+    userId: LoginActivity.userId,
+    login_time: LoginActivity.login_time,
+    ip_address: LoginActivity.ip_address,
+    username: SurveyUser.username
+  }).from(LoginActivity)
+    .innerJoin(SurveyUser, eq(LoginActivity.userId, SurveyUser.id));
+  
+  console.log("Join result:", joinResult);
+} catch (error) {
+  console.error("Join query error:", error);
+}
+
+// Get updated activities
+const updatedActivities = await db.select().from(LoginActivity);
+console.log("Updated login activities:", updatedActivities);
+---
+
+<html>
+<body>
+  <h1>Database Debug</h1>
+  <p>Check console for debug information</p>
+  <p>Login Activities: {allLoginActivities.length}</p>
+  <p>Users: {allUsers.length}</p>
+</body>
+</html>

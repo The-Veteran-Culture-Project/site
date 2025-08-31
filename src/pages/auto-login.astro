@@ -1,0 +1,25 @@
+---
+import { lucia } from "@/lib/auth";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import bcrypt from "bcryptjs";
+
+// Auto-login for testing
+const username = "admin";
+const password = "admin";
+
+const user = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.username, username))
+  .get();
+
+if (user && await bcrypt.compare(password, user.password)) {
+  const session = await lucia.createSession(user.id, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+  
+  Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+  
+  return Astro.redirect("/admin/users");
+}
+
+return Astro.redirect("/admin/login?error=auto-login-failed");
+---

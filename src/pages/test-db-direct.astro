@@ -1,0 +1,74 @@
+---
+import { db, SurveyUser, LoginActivity } from "astro:db";
+import { eq } from "astro:db";
+import { randomUUID } from "node:crypto";
+
+let testResult = "";
+
+try {
+  console.log("Direct DB test: Starting...");
+  
+  // Get the admin user
+  const adminUser = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.username, "admin"))
+    .get();
+  
+  if (!adminUser) {
+    throw new Error("Admin user not found");
+  }
+  
+  console.log("Direct DB test: Found admin user:", adminUser.id);
+  
+  // Test 1: Update last_login
+  const newLoginTime = new Date();
+  console.log("Direct DB test: Updating last_login to:", newLoginTime);
+  
+  const updateResult = await db.update(SurveyUser)
+    .set({ last_login: newLoginTime })
+    .where(eq(SurveyUser.id, adminUser.id));
+  
+  console.log("Direct DB test: Update result:", updateResult);
+  
+  // Test 2: Insert login activity
+  const activityId = randomUUID();
+  console.log("Direct DB test: Inserting login activity:", activityId);
+  
+  const insertResult = await db.insert(LoginActivity).values({
+    id: activityId,
+    userId: adminUser.id,
+    login_time: newLoginTime,
+    ip_address: "127.0.0.1",
+    user_agent: "Direct DB Test"
+  });
+  
+  console.log("Direct DB test: Insert result:", insertResult);
+  
+  // Verify the changes
+  const updatedUser = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.id, adminUser.id))
+    .get();
+  
+  const activities = await db.select().from(LoginActivity)
+    .where(eq(LoginActivity.userId, adminUser.id));
+  
+  testResult = `Success! Updated user last_login: ${updatedUser?.last_login}, Activities count: ${activities.length}`;
+  
+} catch (error) {
+  console.error("Direct DB test error:", error);
+  testResult = `Error: ${error.message}`;
+}
+---
+
+<html>
+<head>
+  <title>Direct DB Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #111; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>Direct Database Operations Test</h1>
+  <p>{testResult}</p>
+  <p><a href="/admin/users" style="color: #60a5fa;">Go to Admin Users</a></p>
+</body>
+</html>

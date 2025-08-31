@@ -1,0 +1,137 @@
+---
+// Demonstrate the login flow differences
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+
+const users = await db.select({
+  username: SurveyUser.username,
+  two_factor_enabled: SurveyUser.two_factor_enabled,
+  is_active: SurveyUser.is_active
+}).from(SurveyUser)
+  .where(eq(SurveyUser.role, "admin"));
+---
+
+<html>
+<head>
+  <title>2FA Login Flow Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #111; color: #fff; }
+    .flow-diagram { background: #222; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .step { background: #333; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #60a5fa; }
+    .conditional { border-left-color: #f59e0b; }
+    .arrow { text-align: center; font-size: 20px; color: #60a5fa; margin: 10px 0; }
+    .user-status { background: #1e40af; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    .enabled { border-left: 4px solid #4ade80; }
+    .disabled { border-left: 4px solid #ef4444; }
+  </style>
+</head>
+<body>
+  <h1>🔐 2FA Login Flow Demonstration</h1>
+  
+  <h2>Current Admin Users:</h2>
+  {users.map((user) => (
+    <div class={`user-status ${user.two_factor_enabled ? 'enabled' : 'disabled'}`}>
+      <strong>{user.username}</strong><br/>
+      2FA Status: {user.two_factor_enabled ? '✅ ENABLED' : '❌ DISABLED'}<br/>
+      Account: {user.is_active ? 'Active' : 'Inactive'}
+    </div>
+  ))}
+  
+  <div class="flow-diagram">
+    <h3>🔄 Login Flow for Users WITH 2FA Enabled:</h3>
+    
+    <div class="step">
+      1. User visits: <code>/admin/login</code><br/>
+      Enters username + password
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step">
+      2. Form submits to: <code>/api/login</code><br/>
+      Validates username + password
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step conditional">
+      3. 🔍 2FA Check: <code>if (user.two_factor_enabled)</code><br/>
+      Sets temporary session cookie
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step">
+      4. Redirects to: <code>/admin/verify-2fa</code><br/>
+      Shows 6-digit code input
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step">
+      5. User enters code → submits to: <code>/api/verify-2fa</code><br/>
+      Verifies TOTP token
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step">
+      6. Success! Redirects to: <code>/admin/users</code><br/>
+      Full session created, user logged in
+    </div>
+  </div>
+  
+  <div class="flow-diagram">
+    <h3>🔄 Login Flow for Users WITHOUT 2FA:</h3>
+    
+    <div class="step">
+      1. User visits: <code>/admin/login</code><br/>
+      Enters username + password
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step">
+      2. Form submits to: <code>/api/login</code><br/>
+      Validates username + password
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step conditional">
+      3. 🔍 2FA Check: <code>if (user.two_factor_enabled)</code><br/>
+      ❌ No 2FA - skip verification
+    </div>
+    
+    <div class="arrow">↓</div>
+    
+    <div class="step">
+      4. Success! Redirects to: <code>/admin/users</code><br/>
+      Full session created immediately
+    </div>
+  </div>
+  
+  <div style="background: #065f46; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <h3>🧪 Test Instructions:</h3>
+    <ol>
+      <li><strong>First Test (2FA Enabled):</strong> 
+        <ul>
+          <li>Go to <a href="/admin/login" style="color: #fbbf24;">/admin/login</a></li>
+          <li>Enter: admin / admin</li>
+          <li>Should redirect to <code>/admin/verify-2fa</code></li>
+          <li>Enter 6-digit code from authenticator app</li>
+        </ul>
+      </li>
+      <li><strong>Create Non-2FA User:</strong>
+        <ul>
+          <li>Go to <a href="/admin/users/new" style="color: #fbbf24;">/admin/users/new</a></li>
+          <li>Create new admin without enabling 2FA</li>
+          <li>Test login - should go directly to dashboard</li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+  
+  <p><a href="/admin/login" style="color: #60a5fa;">← Test Login Process</a></p>
+</body>
+</html>

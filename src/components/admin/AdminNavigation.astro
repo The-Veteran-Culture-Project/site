@@ -74,6 +74,16 @@ const { activePage = 'dashboard' } = Astro.props;
           Beta Password
         </a>
         <a 
+          href="/admin/2fa-setup" 
+          class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            activePage === '2fa-setup' 
+              ? 'bg-primary text-white' 
+              : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+          }`}
+        >
+          2FA Setup
+        </a>
+        <a 
           href="/admin/logout" 
           class="px-3 py-2 rounded-md text-sm font-medium bg-red-800 text-white hover:bg-red-700 transition-colors ml-2"
         >

@@ -1,0 +1,122 @@
+---
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { generateTwoFactorSetup, verifyTwoFactorToken } from "@/lib/twoFactor";
+
+// Test the 2FA flow step by step
+let testResults = [];
+
+try {
+  // Step 1: Get admin user
+  const adminUser = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.username, "admin"))
+    .get();
+  
+  if (!adminUser) {
+    throw new Error("Admin user not found");
+  }
+  
+  testResults.push({
+    step: "1. Found admin user",
+    status: "✅ SUCCESS",
+    data: `Username: ${adminUser.username}, 2FA Enabled: ${adminUser.two_factor_enabled}`
+  });
+  
+  // Step 2: Generate 2FA setup
+  const setupData = await generateTwoFactorSetup(adminUser.username);
+  testResults.push({
+    step: "2. Generated 2FA setup",
+    status: "✅ SUCCESS", 
+    data: `Secret generated, QR code created`
+  });
+  
+  // Step 3: Simulate enabling 2FA
+  await db.update(SurveyUser)
+    .set({ 
+      two_factor_secret: setupData.secret,
+      two_factor_enabled: true 
+    })
+    .where(eq(SurveyUser.id, adminUser.id));
+  
+  testResults.push({
+    step: "3. Enabled 2FA in database",
+    status: "✅ SUCCESS",
+    data: "2FA secret stored and enabled"
+  });
+  
+  // Step 4: Test token verification
+  // Note: In real usage, you'd get this from an authenticator app
+  // For testing, let's generate a token and verify it immediately
+  const { authenticator } = await import('otplib');
+  const testToken = authenticator.generate(setupData.secret);
+  const isValid = verifyTwoFactorToken(testToken, setupData.secret);
+  
+  testResults.push({
+    step: "4. Test token verification",
+    status: isValid ? "✅ SUCCESS" : "❌ FAILED",
+    data: `Generated token: ${testToken}, Valid: ${isValid}`
+  });
+  
+  // Step 5: Check updated user
+  const updatedUser = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.username, "admin"))
+    .get();
+  
+  testResults.push({
+    step: "5. Verify user updates",
+    status: "✅ SUCCESS",
+    data: `2FA Enabled: ${updatedUser?.two_factor_enabled}, Has Secret: ${!!updatedUser?.two_factor_secret}`
+  });
+  
+} catch (error) {
+  testResults.push({
+    step: "ERROR",
+    status: "❌ FAILED",
+    data: error.message
+  });
+}
+---
+
+<html>
+<head>
+  <title>2FA Test Flow</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #111; color: #fff; }
+    .test-result { margin: 15px 0; padding: 15px; background: #222; border-radius: 8px; }
+    .success { border-left: 4px solid #4ade80; }
+    .failed { border-left: 4px solid #ef4444; }
+    .step { font-weight: bold; color: #60a5fa; }
+    .status { font-weight: bold; margin: 5px 0; }
+    .data { color: #d1d5db; font-family: monospace; }
+    .next-steps { background: #1e40af; padding: 15px; border-radius: 8px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <h1>🔐 2FA Test Flow Results</h1>
+  
+  {testResults.map((result) => (
+    <div class={`test-result ${result.status.includes('SUCCESS') ? 'success' : 'failed'}`}>
+      <div class="step">{result.step}</div>
+      <div class="status">{result.status}</div>
+      <div class="data">{result.data}</div>
+    </div>
+  ))}
+  
+  <div class="next-steps">
+    <h2>🧪 Next Steps to Test Full Flow:</h2>
+    <ol>
+      <li><strong>Logout:</strong> Go to <a href="/admin/logout" style="color: #fbbf24;">/admin/logout</a></li>
+      <li><strong>Login Again:</strong> Go to <a href="/admin/login" style="color: #fbbf24;">/admin/login</a></li>
+      <li><strong>Enter Credentials:</strong> Username: admin, Password: admin</li>
+      <li><strong>2FA Challenge:</strong> You should be redirected to <code>/admin/verify-2fa</code></li>
+      <li><strong>Enter Code:</strong> Use authenticator app or the test token shown above</li>
+      <li><strong>Success:</strong> You'll be logged into the admin panel</li>
+    </ol>
+  </div>
+  
+  <div style="margin: 20px 0;">
+    <a href="/admin/login" style="color: #60a5fa;">← Back to Login</a> |
+    <a href="/admin/users" style="color: #60a5fa;">Admin Dashboard →</a>
+  </div>
+</body>
+</html>

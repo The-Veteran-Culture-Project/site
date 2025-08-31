@@ -1,0 +1,53 @@
+---
+// Test page for API
+---
+
+<html>
+<head>
+  <title>API Test</title>
+</head>
+<body style="background: #111; color: white; padding: 20px;">
+  <h1>Survey API Test</h1>
+  <button id="testBtn">Test Survey Submission</button>
+  <div id="result"></div>
+  
+  <script>
+    document.getElementById('testBtn').addEventListener('click', async () => {
+      const resultDiv = document.getElementById('result');
+      
+      try {
+        resultDiv.innerHTML = '<p>Testing...</p>';
+        
+        const response = await fetch('/api/submit-survey', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            first_name: "Test",
+            last_name: "User", 
+            email: "test@example.com",
+            subscribe: false,
+            story_opt_in: false,
+            military_score: 5,
+            civilian_score: 3,
+            strategy: "Integration",
+            demographics: {},
+            va_benefits: {}
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = '<p style="color: green;">Success: ' + JSON.stringify(data) + '</p>';
+        } else {
+          resultDiv.innerHTML = '<p style="color: red;">Error: ' + JSON.stringify(data) + '</p>';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = '<p style="color: red;">Error: ' + error.message + '</p>';
+      }
+    });
+  </script>
+</body>
+</html>

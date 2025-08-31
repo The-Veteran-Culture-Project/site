@@ -1,0 +1,96 @@
+---
+// Debug login process
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+
+let debugInfo = [];
+
+try {
+  // Check if admin user exists and what their current state is
+  const adminUser = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.username, "admin"))
+    .get();
+  
+  debugInfo.push({
+    check: "Admin user lookup",
+    result: adminUser ? "✅ Found" : "❌ Not found",
+    data: adminUser ? {
+      id: adminUser.id,
+      username: adminUser.username,
+      is_active: adminUser.is_active,
+      two_factor_enabled: adminUser.two_factor_enabled,
+      hasPassword: !!adminUser.password,
+      passwordLength: adminUser.password?.length
+    } : null
+  });
+  
+  if (adminUser) {
+    // Test password comparison
+    const bcrypt = await import("bcryptjs");
+    const passwordTest = await bcrypt.compare("admin", adminUser.password);
+    
+    debugInfo.push({
+      check: "Password verification",
+      result: passwordTest ? "✅ Password matches" : "❌ Password doesn't match",
+      data: `Testing 'admin' against stored hash`
+    });
+  }
+  
+} catch (error) {
+  debugInfo.push({
+    check: "Error during debug",
+    result: "❌ Error",
+    data: error.message
+  });
+}
+---
+
+<html>
+<head>
+  <title>Login Debug</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #111; color: #fff; }
+    .debug-item { background: #222; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .success { border-left: 4px solid #4ade80; }
+    .error { border-left: 4px solid #ef4444; }
+    .data { background: #333; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Login Debug Information</h1>
+  
+  {debugInfo.map((info) => (
+    <div class={`debug-item ${info.result.includes('✅') ? 'success' : 'error'}`}>
+      <h3>{info.check}</h3>
+      <p><strong>{info.result}</strong></p>
+      {info.data && (
+        <div class="data">
+          {typeof info.data === 'object' ? JSON.stringify(info.data, null, 2) : info.data}
+        </div>
+      )}
+    </div>
+  ))}
+  
+  <div style="background: #1e40af; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <h3>🧪 Manual Test Form</h3>
+    <p>Try submitting directly to the API:</p>
+    <form method="POST" action="/api/login" style="margin: 10px 0;">
+      <div style="margin: 10px 0;">
+        <label>Username: 
+          <input type="text" name="username" value="admin" style="background: #333; color: #fff; padding: 5px; border: 1px solid #666; border-radius: 4px;">
+        </label>
+      </div>
+      <div style="margin: 10px 0;">
+        <label>Password: 
+          <input type="password" name="password" value="admin" style="background: #333; color: #fff; padding: 5px; border: 1px solid #666; border-radius: 4px;">
+        </label>
+      </div>
+      <button type="submit" style="background: #4ade80; color: #000; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+        Test Login API
+      </button>
+    </form>
+  </div>
+  
+  <p><a href="/admin/login" style="color: #60a5fa;">← Back to Login Page</a></p>
+</body>
+</html>

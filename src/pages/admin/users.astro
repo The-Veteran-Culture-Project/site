@@ -33,22 +33,29 @@ const adminUsers = await db.select({
   created_at: SurveyUser.created_at,
   last_login: SurveyUser.last_login,
   is_active: SurveyUser.is_active,
-  role: SurveyUser.role
+  role: SurveyUser.role,
+  two_factor_enabled: SurveyUser.two_factor_enabled
 }).from(SurveyUser)
   .where(eq(SurveyUser.role, "admin"))
   .orderBy(desc(SurveyUser.created_at));
 
 // Get recent login activity for all admin users
-const recentLogins = await db.select({
-  userId: LoginActivity.userId,
-  login_time: LoginActivity.login_time,
-  ip_address: LoginActivity.ip_address,
-  username: SurveyUser.username
-}).from(LoginActivity)
-  .innerJoin(SurveyUser, eq(LoginActivity.userId, SurveyUser.id))
-  .where(eq(SurveyUser.role, "admin"))
-  .orderBy(desc(LoginActivity.login_time))
-  .limit(20);
+let recentLogins = [];
+try {
+  recentLogins = await db.select({
+    userId: LoginActivity.userId,
+    login_time: LoginActivity.login_time,
+    ip_address: LoginActivity.ip_address,
+    username: SurveyUser.username
+  }).from(LoginActivity)
+    .innerJoin(SurveyUser, eq(LoginActivity.userId, SurveyUser.id))
+    .where(eq(SurveyUser.role, "admin"))
+    .orderBy(desc(LoginActivity.login_time))
+    .limit(20);
+} catch (error) {
+  console.error("Error fetching recent logins:", error);
+  recentLogins = [];
+}
 ---
 
 <Layout title="Admin User Management" isLandingPage={false}>
@@ -105,13 +112,20 @@ const recentLogins = await db.select({
                         </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap">
-                        <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          admin.is_active 
-                            ? 'bg-green-900 text-green-300' 
-                            : 'bg-red-900 text-red-300'
-                        }`}>
-                          {admin.is_active ? 'Active' : 'Inactive'}
-                        </span>
+                        <div class="flex flex-col space-y-1">
+                          <span class={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            admin.is_active 
+                              ? 'bg-green-900 text-green-300' 
+                              : 'bg-red-900 text-red-300'
+                          }`}>
+                            {admin.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                          {admin.two_factor_enabled && (
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-900 text-blue-300">
+                              2FA Enabled
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-400">
                         {admin.created_at.toLocaleDateString()}
@@ -196,6 +210,9 @@ const recentLogins = await db.select({
                       Status: <span class={admin.is_active ? 'text-green-400' : 'text-red-400'}>
                         {admin.is_active ? 'Active' : 'Inactive'}
                       </span>
+                      {admin.two_factor_enabled && (
+                        <span class="ml-2 text-blue-400">• 2FA Enabled</span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -231,6 +248,12 @@ const recentLogins = await db.select({
                     {recentLogins.filter(l => 
                       (new Date().getTime() - l.login_time.getTime()) < 24 * 60 * 60 * 1000
                     ).length}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-zinc-400">2FA Enabled:</span>
+                  <span class="text-sm font-medium text-white">
+                    {adminUsers.filter(u => u.two_factor_enabled).length} / {adminUsers.length}
                   </span>
                 </div>
               </div>

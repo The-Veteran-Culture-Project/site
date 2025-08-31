@@ -6,6 +6,7 @@ import { answersStore } from "@/stores/answersStore.ts";
 import { useEffect, useState } from "react";
 import type { ContactAnswers } from '@/stores/answersStore';
 import { useToast } from '@/hooks/use-toast';
+import { getSessionInfo } from "@/lib/surveyResponseTracker";
 
 export default function SurveyStepSix() {
   const $answers = useStore(answersStore);
@@ -17,9 +18,9 @@ export default function SurveyStepSix() {
     setIsClient(true);
   }, []);
 
-  // Email validation regex with common TLDs
+  // Email validation regex - standard format
   const validateEmail = (email: string) => {
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[com|edu|org|net|gov|mil|biz|info|io|co|uk|us|ca]+)$/i;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
@@ -30,7 +31,18 @@ export default function SurveyStepSix() {
                          contact?.email && 
                          validateEmail(contact.email); // Validate email format
 
+  // Debug contact validation
+  console.log("Contact validation debug:", {
+    contact,
+    first_name: !!contact?.first_name,
+    last_name: !!contact?.last_name,
+    email: !!contact?.email,
+    emailValid: contact?.email ? validateEmail(contact.email) : false,
+    contactComplete
+  });
+
   const handleNext = async () => {
+    console.log("🔥 VIEW RESULTS BUTTON CLICKED! Starting submission...");
     setIsSubmitting(true);
     
     try {
@@ -68,6 +80,33 @@ export default function SurveyStepSix() {
       console.log("SUBMITTING WITH CONTACT:", latestContact);
       console.log("Subscribe:", latestContact.subscribe, "Type:", typeof latestContact.subscribe);
       console.log("Story opt-in:", latestContact.story_opt_in, "Type:", typeof latestContact.story_opt_in);
+      console.log("Military Score:", militaryScore, "Type:", typeof militaryScore);
+      console.log("Civilian Score:", civilianScore, "Type:", typeof civilianScore);
+      console.log("Strategy:", strategy, "Type:", typeof strategy);
+      console.log("Demographics:", demographics);
+      console.log("VA Benefits:", va_benefits);
+      console.log("Full Answers Store:", $answers);
+      console.log("🔍 Score calculation debug:");
+      console.log("  Answers object keys:", Object.keys($answers));
+      Object.entries($answers).forEach(([key, value]) => {
+        if (typeof value === 'object' && value && 'axis' in value && 'offset' in value) {
+          console.log(`  Answer ${key}:`, value);
+        }
+      });
+      
+      // Get the current response tracking session info
+      const sessionInfo = getSessionInfo();
+      
+      // Extract individual question responses (axis questions only)
+      const questionResponses: Record<string, { axis: string; offset: number; question: string }> = {};
+      Object.entries($answers).forEach(([key, value]) => {
+        if (typeof value === 'object' && value && 'axis' in value && 'offset' in value && 'question' in value) {
+          questionResponses[key] = value as { axis: string; offset: number; question: string };
+        }
+      });
+      
+      console.log("🔍 Individual question responses to save:", questionResponses);
+      console.log("🔍 Number of individual responses:", Object.keys(questionResponses).length);
       
       // Prepare the survey data object with explicit boolean values
       const surveyData = {
@@ -80,7 +119,9 @@ export default function SurveyStepSix() {
         civilian_score: civilianScore,
         strategy: strategy,
         demographics: demographics || {},
-        va_benefits: va_benefits || {}
+        va_benefits: va_benefits || {},
+        questionResponses: questionResponses, // Include individual question responses
+        responseSessionId: sessionInfo.sessionId // Link to response tracking session
       };
       
       // Before submitting survey, directly handle the marketing signup if the checkbox is checked
@@ -110,6 +151,7 @@ export default function SurveyStepSix() {
       }
       
       // Submit the data to the API
+      console.log("🔍 About to submit this data:", surveyData);
       const response = await fetch('/api/submit-survey', {
         method: 'POST',
         headers: {

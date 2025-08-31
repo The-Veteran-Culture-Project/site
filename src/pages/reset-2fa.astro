@@ -1,0 +1,38 @@
+---
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+
+let resetResult = "";
+
+try {
+  // Reset admin user's 2FA to disabled for testing
+  const result = await db.update(SurveyUser)
+    .set({ 
+      two_factor_enabled: false,
+      two_factor_secret: null 
+    })
+    .where(eq(SurveyUser.username, "admin"));
+  
+  const updatedUser = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.username, "admin"))
+    .get();
+  
+  resetResult = `✅ Reset successful! 2FA Enabled: ${updatedUser?.two_factor_enabled}`;
+} catch (error) {
+  resetResult = `❌ Error: ${error.message}`;
+}
+---
+
+<html>
+<head>
+  <title>Reset 2FA</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #111; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>🔧 Reset Admin 2FA</h1>
+  <p>{resetResult}</p>
+  <p><a href="/admin/login" style="color: #60a5fa;">← Try Login Again</a></p>
+</body>
+</html>

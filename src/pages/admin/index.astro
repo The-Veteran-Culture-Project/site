@@ -1,28 +1,6 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import { lucia } from "@/lib/auth";
-import AdminNavigation from "@/components/admin/AdminNavigation.astro";
-
-// Check authentication
-try {
-  const sessionId = Astro.cookies.get("auth_session")?.value;
-  if (!sessionId) {
-    return Astro.redirect("/admin/login");
-  }
-
-  const session = await lucia.getSession(sessionId);
-  if (!session) {
-    Astro.cookies.delete("auth_session");
-    return Astro.redirect("/admin/login");
-  }
-  // User is authenticated, continue to dashboard
-} catch (e) {
-  console.error("Auth error:", e);
-  Astro.cookies.delete("auth_session");
-  return Astro.redirect("/admin/login");
-}
-
-// User is authenticated, proceed with rendering
+// Redirect to dashboard
+return Astro.redirect("/admin/dashboard");
 ---
 
 <Layout title="Admin Dashboard" isLandingPage={false}>

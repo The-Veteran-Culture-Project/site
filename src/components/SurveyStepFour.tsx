@@ -18,9 +18,7 @@ export default function SurveyStepFour() {
   const demographicsComplete = demographics.age_range && 
                               demographics.gender && 
                               demographics.race && 
-                              Array.isArray(demographics.race) && 
-                              demographics.race.length > 0 && 
-                              demographics.military_status &&
+                              demographics.status_affiliation &&
                               demographics.combat;
 
   // Debug logging
