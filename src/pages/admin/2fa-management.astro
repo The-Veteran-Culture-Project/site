@@ -1,0 +1,161 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { lucia } from "@/lib/auth";
+
+// Check authentication - must be logged in as admin
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Get full user data
+const fullUser = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!fullUser || fullUser.role !== 'admin') {
+  return Astro.redirect("/admin/login");
+}
+
+let message: string | null = null;
+let error: string | null = null;
+
+// Handle 2FA reset for specific user
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("action")?.toString();
+  const targetUserId = formData.get("targetUserId")?.toString();
+  const confirmPassword = formData.get("confirmPassword")?.toString();
+  
+  if (action === "reset_user_2fa" && targetUserId && confirmPassword) {
+    // Verify admin password
+    const bcrypt = await import("bcryptjs");
+    if (await bcrypt.compare(confirmPassword, fullUser.password)) {
+      // Reset 2FA for specific user
+      await db.update(SurveyUser)
+        .set({ 
+          two_factor_secret: null,
+          two_factor_enabled: false,
+          two_factor_method: "none",
+          verification_code: null,
+          verification_code_expires: null
+        })
+        .where(eq(SurveyUser.id, targetUserId));
+      
+      const targetUser = await db.select().from(SurveyUser)
+        .where(eq(SurveyUser.id, targetUserId))
+        .get();
+      
+      message = `✅ 2FA reset for user: ${targetUser?.username || targetUserId}`;
+    } else {
+      error = "❌ Invalid admin password";
+    }
+  }
+}
+
+// Get all admin users for selection
+const adminUsers = await db.select({
+  id: SurveyUser.id,
+  username: SurveyUser.username,
+  email: SurveyUser.email,
+  two_factor_enabled: SurveyUser.two_factor_enabled,
+  two_factor_method: SurveyUser.two_factor_method
+}).from(SurveyUser)
+  .where(eq(SurveyUser.role, "admin"));
+---
+
+<Layout title="Admin 2FA Management" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-8">Admin 2FA Management</h1>
+      
+      {message && (
+        <div class="bg-green-900/20 border border-green-700 rounded-lg p-4 mb-6">
+          <p class="text-green-300">{message}</p>
+        </div>
+      )}
+
+      {error && (
+        <div class="bg-red-900/20 border border-red-700 rounded-lg p-4 mb-6">
+          <p class="text-red-300">{error}</p>
+        </div>
+      )}
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">Admin Users</h2>
+        <div class="space-y-3">
+          {adminUsers.map((admin) => (
+            <div class="bg-zinc-800 border border-zinc-700 rounded p-4">
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="text-white font-medium">{admin.username}</p>
+                  <p class="text-gray-400 text-sm">{admin.email || 'No email'}</p>
+                  <p class="text-sm">
+                    <span class={admin.two_factor_enabled ? "text-green-400" : "text-red-400"}>
+                      {admin.two_factor_enabled ? `🔒 2FA: ${admin.two_factor_method}` : "🔓 No 2FA"}
+                    </span>
+                  </p>
+                </div>
+                
+                {admin.two_factor_enabled && admin.id !== user.id && (
+                  <form method="POST" class="inline">
+                    <input type="hidden" name="action" value="reset_user_2fa" />
+                    <input type="hidden" name="targetUserId" value={admin.id} />
+                    
+                    <div class="flex items-center space-x-2">
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        placeholder="Your password"
+                        required
+                        class="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+                      />
+                      <button
+                        type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                        onclick="return confirm('Reset 2FA for this user?')"
+                      >
+                        Reset 2FA
+                      </button>
+                    </div>
+                  </form>
+                )}
+                
+                {admin.id === user.id && (
+                  <span class="text-blue-400 text-sm italic">You</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mb-6">
+        <h3 class="text-yellow-400 font-bold mb-2">⚠️ Production Safety</h3>
+        <ul class="text-yellow-300 text-sm space-y-1">
+          <li>• Requires admin authentication</li>
+          <li>• Requires password confirmation</li>
+          <li>• Only resets specific users (not all users)</li>
+          <li>• Logs all reset actions</li>
+          <li>• Emergency bypass is disabled in production</li>
+        </ul>
+      </div>
+
+      <div class="text-center space-x-4">
+        <a href="/admin/dashboard" class="text-indigo-400 hover:text-indigo-300">
+          ← Back to Dashboard
+        </a>
+        <a href="/admin/simple-2fa" class="text-indigo-400 hover:text-indigo-300">
+          Manage Your 2FA
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

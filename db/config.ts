@@ -8,11 +8,15 @@ const SurveyUser = defineTable({
     password: column.text(),
     role: column.text({ default: "user" }), // "admin" or "user"
     email: column.text({ optional: true }),
+    phone_number: column.text({ optional: true }),
     created_at: column.date({ default: new Date() }),
     last_login: column.date({ optional: true }),
     is_active: column.boolean({ default: true }),
     two_factor_secret: column.text({ optional: true }),
     two_factor_enabled: column.boolean({ default: false }),
+    two_factor_method: column.text({ default: "none" }), // "none", "sms", "email", "totp"
+    verification_code: column.text({ optional: true }),
+    verification_code_expires: column.date({ optional: true }),
   },
 });
 
@@ -177,6 +181,7 @@ const BetaAccessRequest = defineTable({
       optional: true
     }),
     notes: column.text({ optional: true }),
+    passwordSent: column.boolean({ default: false, optional: true }),
   },
 });
 

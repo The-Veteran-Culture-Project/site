@@ -1,0 +1,129 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { lucia } from "@/lib/auth";
+import { verifyTwoFactorToken } from "@/lib/twoFactor";
+
+// Check authentication
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Get full user data
+const fullUser = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!fullUser || fullUser.role !== 'admin') {
+  return Astro.redirect("/admin/login");
+}
+
+let debugResult: any = null;
+
+// Handle debug test
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const testCode = formData.get("testCode")?.toString();
+  
+  if (testCode && fullUser.two_factor_secret) {
+    const isValid = verifyTwoFactorToken(testCode, fullUser.two_factor_secret);
+    debugResult = {
+      code: testCode,
+      secret: fullUser.two_factor_secret.substring(0, 8) + "...", // Show partial for security
+      isValid,
+      timestamp: new Date().toISOString(),
+      userHas2FA: fullUser.two_factor_enabled,
+      secretExists: !!fullUser.two_factor_secret
+    };
+  }
+}
+---
+
+<Layout title="2FA Debug Tool" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-8">2FA Debug Tool</h1>
+      
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">Current 2FA Status</h2>
+        <div class="space-y-2 text-gray-300">
+          <p><strong>Username:</strong> {fullUser.username}</p>
+          <p><strong>2FA Enabled:</strong> {fullUser.two_factor_enabled ? '✅ Yes' : '❌ No'}</p>
+          <p><strong>Secret Exists:</strong> {fullUser.two_factor_secret ? '✅ Yes' : '❌ No'}</p>
+          <p><strong>Secret Length:</strong> {fullUser.two_factor_secret?.length || 0} chars</p>
+          {fullUser.two_factor_secret && (
+            <p><strong>Secret Preview:</strong> {fullUser.two_factor_secret.substring(0, 8)}...</p>
+          )}
+        </div>
+      </div>
+
+      {fullUser.two_factor_secret && (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+          <h2 class="text-xl font-bold text-white mb-4">Test 2FA Code</h2>
+          <form method="POST">
+            <div class="mb-4">
+              <label for="testCode" class="block text-sm font-medium text-gray-300 mb-2">
+                Enter 6-digit code from your authenticator app:
+              </label>
+              <input
+                type="text"
+                name="testCode"
+                id="testCode"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:border-indigo-500 focus:ring focus:ring-indigo-500/50"
+                placeholder="123456"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Test Code
+            </button>
+          </form>
+        </div>
+      )}
+
+      {debugResult && (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h2 class="text-xl font-bold text-white mb-4">Test Result</h2>
+          <div class="space-y-2 text-gray-300">
+            <p><strong>Code Tested:</strong> {debugResult.code}</p>
+            <p><strong>Secret Used:</strong> {debugResult.secret}</p>
+            <p><strong>Result:</strong> {debugResult.isValid ? '✅ VALID' : '❌ INVALID'}</p>
+            <p><strong>Timestamp:</strong> {debugResult.timestamp}</p>
+            <p><strong>User Has 2FA:</strong> {debugResult.userHas2FA ? 'Yes' : 'No'}</p>
+            <p><strong>Secret Exists:</strong> {debugResult.secretExists ? 'Yes' : 'No'}</p>
+          </div>
+          
+          {!debugResult.isValid && (
+            <div class="mt-4 p-4 bg-red-900/20 border border-red-700 rounded-md">
+              <h3 class="text-red-400 font-bold mb-2">Troubleshooting Tips:</h3>
+              <ul class="text-red-300 text-sm space-y-1">
+                <li>• Make sure your device's time is synchronized</li>
+                <li>• Try the next code that appears in your app</li>
+                <li>• Check if you scanned the QR code correctly</li>
+                <li>• Verify you're using the right app (Google Authenticator, Authy, etc.)</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div class="mt-6">
+        <a href="/admin/2fa-setup" class="text-indigo-400 hover:text-indigo-300">
+          ← Back to 2FA Setup
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

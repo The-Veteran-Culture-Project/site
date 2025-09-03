@@ -76,11 +76,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // Allow access to login page
     if (context.url.pathname === "/admin/login") {
       if (session) {
-        // If already logged in, redirect to admin
+        // If already logged in, redirect to dashboard
         return new Response("Redirect", {
           status: 302,
           headers: {
-            "Location": "/admin"
+            "Location": "/admin/dashboard"
           }
         });
       }

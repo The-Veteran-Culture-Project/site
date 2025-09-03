@@ -1,0 +1,148 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+
+// SECURITY: Only allow in development
+const isDevelopment = import.meta.env.DEV;
+if (!isDevelopment) {
+  return Astro.redirect("/admin/login");
+}
+
+let message = "";
+let success = false;
+
+// Emergency bypass - disable all 2FA
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const action = formData.get("action")?.toString();
+    const confirmText = formData.get("confirmText")?.toString();
+    
+    if (action === "emergency_disable" && confirmText === "EMERGENCY") {
+      // Disable 2FA for ALL users to unlock admin access
+      await db.update(SurveyUser)
+        .set({ 
+          two_factor_secret: null,
+          two_factor_enabled: false 
+        });
+      
+      message = "🚨 EMERGENCY: 2FA disabled for ALL users. Admin access restored.";
+      success = true;
+    } else if (confirmText !== "EMERGENCY") {
+      message = "❌ Please type 'EMERGENCY' exactly to confirm.";
+    }
+  } catch (error) {
+    message = `Error: ${error}`;
+  }
+}
+
+// Get current admin users status
+let adminUsers = [];
+try {
+  adminUsers = await db.select({
+    id: SurveyUser.id,
+    username: SurveyUser.username,
+    two_factor_enabled: SurveyUser.two_factor_enabled,
+    two_factor_secret: SurveyUser.two_factor_secret
+  }).from(SurveyUser)
+    .where(eq(SurveyUser.role, "admin"));
+} catch (error) {
+  console.log("Could not fetch admin users:", error);
+}
+---
+
+<Layout title="Emergency 2FA Bypass" isLandingPage={false}>
+  <div class="min-h-screen bg-red-950 flex items-center justify-center px-4">
+    <div class="max-w-md w-full">
+      <div class="bg-red-900 border-2 border-red-700 rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-red-100 mb-4 text-center">🚨 Emergency Admin Access</h1>
+        
+        <div class="bg-orange-900 border border-orange-600 rounded p-4 mb-4">
+          <p class="text-orange-100 text-sm">
+            <strong>⚠️ DEVELOPMENT ONLY:</strong> This page is automatically disabled in production for security.
+          </p>
+        </div>
+        
+        <div class="bg-red-800 border border-red-600 rounded p-4 mb-6">
+          <p class="text-red-100 text-sm">
+            <strong>LOCKED OUT?</strong> This page will disable 2FA for all admin users 
+            to restore access to the admin panel.
+          </p>
+        </div>
+
+        {message && (
+          <div class={`border rounded p-4 mb-6 ${success ? 'bg-green-900 border-green-700 text-green-100' : 'bg-red-800 border-red-600 text-red-100'}`}>
+            <p class="font-mono text-sm">{message}</p>
+          </div>
+        )}
+
+        {adminUsers.length > 0 && (
+          <div class="bg-red-800 border border-red-600 rounded p-4 mb-6">
+            <h3 class="text-red-100 font-bold mb-2">Current Admin Status:</h3>
+            {adminUsers.map((admin) => (
+              <div class="text-sm text-red-200 mb-1">
+                <span class="font-mono">{admin.username}</span>: 
+                <span class={admin.two_factor_enabled ? "text-yellow-300" : "text-green-300"}>
+                  {admin.two_factor_enabled ? " 🔒 2FA Enabled" : " 🔓 2FA Disabled"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!success && (
+          <form method="POST" class="space-y-4">
+            <input type="hidden" name="action" value="emergency_disable" />
+            
+            <div>
+              <label for="confirmText" class="block text-sm font-medium text-red-100 mb-2">
+                Type "EMERGENCY" to confirm:
+              </label>
+              <input
+                type="text"
+                name="confirmText"
+                id="confirmText"
+                placeholder="EMERGENCY"
+                required
+                class="w-full px-3 py-2 bg-red-800 border border-red-600 rounded text-red-100 placeholder-red-400"
+              />
+            </div>
+            
+            <button
+              type="submit"
+              class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded border-2 border-red-500"
+            >
+              🚨 EMERGENCY: Disable All 2FA
+            </button>
+          </form>
+        )}
+
+        {success && (
+          <div class="space-y-4">
+            <div class="text-center">
+              <a 
+                href="/admin/login" 
+                class="inline-block py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded"
+              >
+                ✅ Go to Admin Login
+              </a>
+            </div>
+            
+            <div class="bg-yellow-900/50 border border-yellow-600 rounded p-3">
+              <p class="text-yellow-200 text-xs">
+                <strong>Note:</strong> You can re-enable 2FA properly later using the admin 2FA setup page.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  body {
+    background: #7f1d1d !important;
+  }
+</style>

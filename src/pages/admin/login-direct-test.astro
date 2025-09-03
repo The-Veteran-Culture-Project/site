@@ -1,0 +1,79 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Direct Login Test" isLandingPage={false}>
+  <div class="flex min-h-screen items-center justify-center">
+    <div class="w-full max-w-sm p-6 bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold text-white text-center mb-6">Direct Login Test</h2>
+      
+      <div class="space-y-4">
+        <button
+          id="directTest"
+          class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md"
+        >
+          Test Direct POST to Login API
+        </button>
+        
+        <div id="result" class="mt-4 p-3 bg-gray-700 rounded text-white text-sm hidden">
+          <strong>Result:</strong> <span id="resultText"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  console.log('🔍 DIRECT TEST: Page loaded');
+  
+  const button = document.getElementById('directTest');
+  const result = document.getElementById('result');
+  const resultText = document.getElementById('resultText');
+  
+  if (button) {
+    button.addEventListener('click', async function() {
+      console.log('🚀 DIRECT TEST: Starting direct POST test');
+      
+      try {
+        // Show loading
+        button.textContent = 'Testing...';
+        button.disabled = true;
+        
+        // Direct fetch to login API
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: 'username=admin&password=admin',
+          redirect: 'manual' // Don't follow redirects so we can see them
+        });
+        
+        console.log('📡 DIRECT TEST: Response received');
+        console.log('📡 DIRECT TEST: Status:', response.status);
+        console.log('📡 DIRECT TEST: Headers:', response.headers);
+        
+        // Show result
+        result.classList.remove('hidden');
+        
+        if (response.status === 302) {
+          const location = response.headers.get('Location');
+          resultText.textContent = `Redirect to: ${location}`;
+          console.log('🔄 DIRECT TEST: Redirect to:', location);
+        } else {
+          const text = await response.text();
+          resultText.textContent = `Status: ${response.status}, Body: ${text.substring(0, 100)}...`;
+          console.log('📄 DIRECT TEST: Response body:', text.substring(0, 200));
+        }
+        
+      } catch (error) {
+        console.error('❌ DIRECT TEST: Error:', error);
+        result.classList.remove('hidden');
+        resultText.textContent = `Error: ${error.message}`;
+      } finally {
+        button.textContent = 'Test Direct POST to Login API';
+        button.disabled = false;
+      }
+    });
+  }
+</script>

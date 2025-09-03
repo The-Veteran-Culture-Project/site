@@ -25,6 +25,8 @@ export default async function seed() {
         email: "admin@veterancultureproject.org",
         created_at: new Date(),
         is_active: true,
+        two_factor_enabled: false, // Disabled for development
+        two_factor_method: "none",
       },
     ]);
     console.log("Created admin user");
@@ -36,7 +38,9 @@ export default async function seed() {
           role: existingAdmin.role || "admin",
           email: existingAdmin.email || "admin@veterancultureproject.org",
           created_at: existingAdmin.created_at || new Date(),
-          is_active: existingAdmin.is_active !== undefined ? existingAdmin.is_active : true
+          is_active: existingAdmin.is_active !== undefined ? existingAdmin.is_active : true,
+          two_factor_enabled: false, // Disabled for development
+          two_factor_method: "none",
         })
         .where(eq(SurveyUser.id, existingAdmin.id));
       console.log("Updated existing admin user with new fields");

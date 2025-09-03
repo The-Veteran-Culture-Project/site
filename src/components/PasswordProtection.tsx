@@ -18,6 +18,8 @@ export function PasswordProtection({ onAuthorized }: PasswordProtectionProps) {
       const isAuth = sessionStorage.getItem('beta_survey_authorized') === 'true';
       const authTimestamp = sessionStorage.getItem('beta_auth_timestamp');
       
+      console.log('PasswordProtection - Checking auth:', { isAuth, authTimestamp });
+      
       if (isAuth && authTimestamp) {
         // Verify with server that auth is still valid (check for resets)
         try {
@@ -33,20 +35,26 @@ export function PasswordProtection({ onAuthorized }: PasswordProtectionProps) {
           });
 
           const data = await response.json();
+          console.log('Server auth check result:', data);
           
           if (data.resetRequired) {
             // Access was reset, clear session and require re-auth
+            console.log('Access was reset, clearing session');
             sessionStorage.removeItem('beta_survey_authorized');
             sessionStorage.removeItem('beta_auth_timestamp');
           } else if (isAuth) {
+            console.log('Auth valid, calling onAuthorized');
             onAuthorized();
           }
         } catch (err) {
+          console.log('Auth check failed, falling back to local check');
           // If check fails, proceed with normal auth check
           if (isAuth) {
             onAuthorized();
           }
         }
+      } else {
+        console.log('No valid auth found in sessionStorage');
       }
     };
     
@@ -143,7 +151,10 @@ export function PasswordProtection({ onAuthorized }: PasswordProtectionProps) {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => setShowRequestForm(false)}
+              onClick={() => {
+                setRequestSuccess(false);
+                setShowRequestForm(false);
+              }}
               className="mt-2"
             >
               Back to Password Entry
@@ -246,7 +257,7 @@ export function PasswordProtection({ onAuthorized }: PasswordProtectionProps) {
                   className="text-sm"
                   onClick={toggleRequestForm}
                 >
-                  Already have a password? Log in
+                  Already have a password? Take the survey
                 </Button>
               </CardFooter>
             </form>

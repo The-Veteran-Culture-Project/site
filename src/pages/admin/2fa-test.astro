@@ -1,0 +1,152 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { lucia } from "@/lib/auth";
+import { generateTwoFactorSetup } from "@/lib/twoFactor";
+
+// Check authentication
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Get full user data
+const fullUser = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!fullUser || fullUser.role !== 'admin') {
+  return Astro.redirect("/admin/login");
+}
+
+let message: string | null = null;
+
+// Handle quick enable/disable for testing
+if (Astro.request.method === "POST") {
+  console.log("🔧 2FA TEST: POST request received");
+  const formData = await Astro.request.formData();
+  const action = formData.get("action")?.toString();
+  console.log(`🔧 2FA TEST: Action = ${action}`);
+  
+  if (action === "quick_enable") {
+    console.log("🔧 2FA TEST: Generating 2FA setup...");
+    // Generate a test secret and enable 2FA quickly
+    const setupData = await generateTwoFactorSetup(fullUser.username);
+    console.log(`🔧 2FA TEST: Generated secret: ${setupData.secret}`);
+    
+    console.log(`🔧 2FA TEST: Updating user ${user.id} with 2FA data...`);
+    await db.update(SurveyUser)
+      .set({ 
+        two_factor_secret: setupData.secret,
+        two_factor_enabled: true 
+      })
+      .where(eq(SurveyUser.id, user.id));
+    
+    console.log("🔧 2FA TEST: Database updated successfully");
+    message = `2FA enabled for testing! Secret: ${setupData.secret} (Save this for your authenticator app)`;
+  } else if (action === "disable") {
+    console.log("🔧 2FA TEST: Disabling 2FA...");
+    await db.update(SurveyUser)
+      .set({ 
+        two_factor_secret: null,
+        two_factor_enabled: false 
+      })
+      .where(eq(SurveyUser.id, user.id));
+    
+    console.log("🔧 2FA TEST: 2FA disabled");
+    message = "2FA disabled.";
+  }
+  
+  console.log("🔧 2FA TEST: Refreshing user data...");
+  // Refresh user data
+  const updatedUser = await db.select().from(SurveyUser)
+    .where(eq(SurveyUser.id, user.id))
+    .get();
+  fullUser.two_factor_enabled = updatedUser?.two_factor_enabled || false;
+  fullUser.two_factor_secret = updatedUser?.two_factor_secret || null;
+}
+---
+
+<Layout title="2FA Test Tools" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-8">2FA Test Tools</h1>
+      
+      {message && (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6">
+          <p class="text-white font-mono text-sm">{message}</p>
+        </div>
+      )}
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">Current User Status</h2>
+        <div class="space-y-2 text-sm font-mono">
+          <p><span class="text-gray-400">User ID:</span> <span class="text-white">{fullUser.id}</span></p>
+          <p><span class="text-gray-400">Username:</span> <span class="text-white">{fullUser.username}</span></p>
+          <p><span class="text-gray-400">2FA Enabled:</span> <span class={fullUser.two_factor_enabled ? "text-green-400" : "text-red-400"}>{fullUser.two_factor_enabled ? "✅ Yes" : "❌ No"}</span></p>
+          <p><span class="text-gray-400">Secret Exists:</span> <span class={fullUser.two_factor_secret ? "text-green-400" : "text-red-400"}>{fullUser.two_factor_secret ? "✅ Yes" : "❌ No"}</span></p>
+          <p><span class="text-gray-400">Secret Length:</span> <span class="text-white">{fullUser.two_factor_secret ? fullUser.two_factor_secret.length : 0} chars</span></p>
+          {fullUser.two_factor_secret && (
+            <p><span class="text-gray-400">Secret Preview:</span> <span class="text-yellow-400">{fullUser.two_factor_secret.substring(0, 8)}...</span></p>
+          )}
+        </div>
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">Quick Actions</h2>
+        
+        {!fullUser.two_factor_enabled ? (
+          <form method="POST" class="mb-4">
+            <input type="hidden" name="action" value="quick_enable" />
+            <button
+              type="submit"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium"
+            >
+              Quick Enable 2FA (for testing)
+            </button>
+            <p class="text-gray-400 text-sm mt-2">This will generate a secret and enable 2FA immediately</p>
+          </form>
+        ) : (
+          <form method="POST" class="mb-4">
+            <input type="hidden" name="action" value="disable" />
+            <button
+              type="submit"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
+            >
+              Disable 2FA
+            </button>
+          </form>
+        )}
+      </div>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Test Instructions</h2>
+        <ol class="list-decimal list-inside space-y-2 text-gray-300">
+          <li>Click "Quick Enable 2FA" above</li>
+          <li>Copy the secret and add it to your authenticator app</li>
+          <li>Go to <a href="/api/logout" class="text-indigo-400 hover:text-indigo-300">logout</a></li>
+          <li>Try to <a href="/admin/login" class="text-indigo-400 hover:text-indigo-300">login</a> again</li>
+          <li>You should be redirected to 2FA verification</li>
+        </ol>
+      </div>
+
+      <div class="mt-6 text-center space-x-4">
+        <a href="/admin/dashboard" class="text-indigo-400 hover:text-indigo-300">
+          ← Back to Dashboard
+        </a>
+        <a href="/admin/2fa-setup" class="text-indigo-400 hover:text-indigo-300">
+          Proper 2FA Setup
+        </a>
+        <a href="/admin/2fa-debug" class="text-indigo-400 hover:text-indigo-300">
+          Debug Tool
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

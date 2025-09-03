@@ -16,7 +16,8 @@
     "astro": "astro",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "npx eslint ."
+    "lint": "npx eslint .",
+    "show-code": "./show-code.sh"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",

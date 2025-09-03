@@ -1,0 +1,50 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Login Test" isLandingPage={false}>
+  <div class="flex min-h-screen items-center justify-center">
+    <div class="w-full max-w-sm p-6 bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold text-white text-center mb-6">Simple Login Test</h2>
+      
+      <form method="POST" action="/api/login">
+        <div class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-300">Username</label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              value="admin"
+              required
+              class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm"
+            />
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              value="admin"
+              required
+              class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md"
+          >
+            Test Login (No JS)
+          </button>
+        </div>
+      </form>
+      
+      <div class="mt-4 text-sm text-gray-400">
+        This form has NO JavaScript - pure HTML form submission
+      </div>
+    </div>
+  </div>
+</Layout>

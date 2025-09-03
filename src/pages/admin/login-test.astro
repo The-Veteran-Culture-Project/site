@@ -1,0 +1,78 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Login Test" isLandingPage={false}>
+  <div class="flex min-h-screen items-center justify-center">
+    <div class="w-full max-w-sm p-6 bg-gray-800 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold text-white text-center mb-6">Login Test</h2>
+      
+      <form method="POST" action="/api/login" id="testForm">
+        <div class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
+              Username
+            </label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              value="admin"
+              required
+              class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500/50"
+            />
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              value="admin"
+              required
+              class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500/50"
+            />
+          </div>
+
+          <button
+            type="submit"
+            id="submitBtn"
+            class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Test Login
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-4">
+        <a href="/admin/login" class="text-indigo-400 hover:text-indigo-300 text-sm">
+          ← Back to regular login
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  console.log('🔍 LOGIN TEST: Page loaded');
+  
+  const form = document.getElementById('testForm');
+  if (form) {
+    console.log('🔍 LOGIN TEST: Form found');
+    
+    form.addEventListener('submit', function(e) {
+      console.log('🚀 LOGIN TEST: Form submit triggered');
+      console.log('🚀 LOGIN TEST: Action:', form.action);
+      console.log('🚀 LOGIN TEST: Method:', form.method);
+      
+      const formData = new FormData(form);
+      console.log('🚀 LOGIN TEST: Username:', formData.get('username'));
+      console.log('🚀 LOGIN TEST: Password provided:', !!formData.get('password'));
+    });
+  } else {
+    console.error('❌ LOGIN TEST: Form not found');
+  }
+</script>

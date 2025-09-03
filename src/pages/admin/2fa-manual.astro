@@ -1,0 +1,134 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { lucia } from "@/lib/auth";
+
+// Check authentication
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+let result = "";
+
+// Manual 2FA enable for debugging
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const action = formData.get("action")?.toString();
+    
+    if (action === "enable_2fa_manual") {
+      // Manual secret for testing - you can add this to Google Authenticator
+      const testSecret = "JBSWY3DPEHPK3PXP"; // This is a well-known test secret
+      
+      const updateResult = await db.update(SurveyUser)
+        .set({ 
+          two_factor_secret: testSecret,
+          two_factor_enabled: true 
+        })
+        .where(eq(SurveyUser.id, user.id));
+      
+      result = `✅ Manually enabled 2FA for user ${user.id}. Secret: ${testSecret}. Add this to your authenticator app.`;
+    } else if (action === "disable_2fa_manual") {
+      await db.update(SurveyUser)
+        .set({ 
+          two_factor_secret: null,
+          two_factor_enabled: false 
+        })
+        .where(eq(SurveyUser.id, user.id));
+      
+      result = "❌ Disabled 2FA manually.";
+    }
+  } catch (error) {
+    result = `Error: ${error}`;
+  }
+}
+
+// Get current user data
+const currentUser = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+---
+
+<Layout title="Manual 2FA Control" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-8">Manual 2FA Control</h1>
+      
+      {result && (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6">
+          <p class="text-white font-mono text-sm">{result}</p>
+        </div>
+      )}
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">Current Status</h2>
+        <div class="space-y-2 text-sm">
+          <p><span class="text-gray-400">User ID:</span> <span class="text-white">{currentUser?.id}</span></p>
+          <p><span class="text-gray-400">Username:</span> <span class="text-white">{currentUser?.username}</span></p>
+          <p><span class="text-gray-400">2FA Enabled:</span> 
+            <span class={currentUser?.two_factor_enabled ? "text-green-400" : "text-red-400"}>
+              {currentUser?.two_factor_enabled ? "✅ Yes" : "❌ No"}
+            </span>
+          </p>
+          <p><span class="text-gray-400">Has Secret:</span> 
+            <span class={currentUser?.two_factor_secret ? "text-green-400" : "text-red-400"}>
+              {currentUser?.two_factor_secret ? "✅ Yes" : "❌ No"}
+            </span>
+          </p>
+          {currentUser?.two_factor_secret && (
+            <p><span class="text-gray-400">Secret:</span> 
+              <span class="text-yellow-400 font-mono">{currentUser.two_factor_secret}</span>
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        {!currentUser?.two_factor_enabled ? (
+          <form method="POST">
+            <input type="hidden" name="action" value="enable_2fa_manual" />
+            <button
+              type="submit"
+              class="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md"
+            >
+              Enable 2FA Manually (Test Secret)
+            </button>
+          </form>
+        ) : (
+          <form method="POST">
+            <input type="hidden" name="action" value="disable_2fa_manual" />
+            <button
+              type="submit"
+              class="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md"
+            >
+              Disable 2FA
+            </button>
+          </form>
+        )}
+      </div>
+
+      <div class="mt-6 bg-yellow-900/20 border border-yellow-700 rounded-lg p-4">
+        <h3 class="text-yellow-400 font-bold mb-2">Test Instructions:</h3>
+        <ol class="list-decimal list-inside space-y-1 text-yellow-300 text-sm">
+          <li>Click "Enable 2FA Manually"</li>
+          <li>Add the secret "JBSWY3DPEHPK3PXP" to your authenticator app</li>
+          <li>Logout and try to login</li>
+          <li>You should be redirected to 2FA verification</li>
+        </ol>
+      </div>
+
+      <div class="mt-6 text-center">
+        <a href="/admin/dashboard" class="text-indigo-400 hover:text-indigo-300">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

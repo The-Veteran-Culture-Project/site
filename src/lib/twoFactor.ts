@@ -3,7 +3,7 @@ import { toDataURL } from 'qrcode';
 
 // Set TOTP options
 authenticator.options = {
-  window: 1, // Allow 1 step before/after current time
+  window: 2, // Allow 2 steps before/after current time (more forgiving)
   digits: 6,
   step: 30,
 };
@@ -41,7 +41,22 @@ export async function generateTwoFactorSetup(
  */
 export function verifyTwoFactorToken(token: string, secret: string): boolean {
   try {
-    return authenticator.verify({ token, secret });
+    // Clean the token (remove spaces, ensure it's 6 digits)
+    const cleanToken = token.replace(/\s+/g, '').trim();
+    
+    if (!/^\d{6}$/.test(cleanToken)) {
+      console.error('2FA verification error: Invalid token format', { token: cleanToken });
+      return false;
+    }
+    
+    const result = authenticator.verify({ token: cleanToken, secret });
+    console.log('2FA verification result:', { 
+      token: cleanToken, 
+      secretPreview: secret.substring(0, 8) + '...', 
+      result 
+    });
+    
+    return result;
   } catch (error) {
     console.error('2FA verification error:', error);
     return false;

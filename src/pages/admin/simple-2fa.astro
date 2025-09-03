@@ -1,0 +1,258 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { db, SurveyUser } from "astro:db";
+import { eq } from "astro:db";
+import { lucia } from "@/lib/auth";
+import { validatePhoneNumber, validateEmail, formatPhoneNumber, formatEmail } from "@/lib/simpleVerification";
+
+// Check authentication
+const sessionId = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
+if (!sessionId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { session, user } = await lucia.validateSession(sessionId);
+if (!session || !user) {
+  return Astro.redirect("/admin/login");
+}
+
+// Get full user data
+const fullUser = await db.select().from(SurveyUser)
+  .where(eq(SurveyUser.id, user.id))
+  .get();
+
+if (!fullUser || fullUser.role !== 'admin') {
+  return Astro.redirect("/admin/login");
+}
+
+let message: string | null = null;
+let error: string | null = null;
+
+// Handle form submission
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("action")?.toString();
+  
+  if (action === "setup_email") {
+    const email = formData.get("email")?.toString()?.trim();
+    
+    if (!email) {
+      error = "Email is required";
+    } else if (!(await validateEmail(email))) {
+      error = "Invalid email format";
+    } else {
+      const formattedEmail = formatEmail(email);
+      
+      await db.update(SurveyUser)
+        .set({ 
+          email: formattedEmail,
+          two_factor_method: "email",
+          two_factor_enabled: true 
+        })
+        .where(eq(SurveyUser.id, user.id));
+      
+      message = `✅ Email 2FA enabled! Verification codes will be sent to ${formattedEmail}`;
+      
+      // Refresh user data
+      const updatedUser = await db.select().from(SurveyUser)
+        .where(eq(SurveyUser.id, user.id))
+        .get();
+      if (updatedUser) {
+        Object.assign(fullUser, updatedUser);
+      }
+    }
+  } else if (action === "setup_sms") {
+    const phone = formData.get("phone")?.toString()?.trim();
+    
+    if (!phone) {
+      error = "Phone number is required";
+    } else if (!(await validatePhoneNumber(phone))) {
+      error = "Invalid phone number format. Include country code (e.g., +1234567890)";
+    } else {
+      const formattedPhone = formatPhoneNumber(phone);
+      
+      await db.update(SurveyUser)
+        .set({ 
+          phone_number: formattedPhone,
+          two_factor_method: "sms",
+          two_factor_enabled: true 
+        })
+        .where(eq(SurveyUser.id, user.id));
+      
+      message = `✅ SMS 2FA enabled! Verification codes will be sent to ${formattedPhone}`;
+      
+      // Refresh user data
+      const updatedUser = await db.select().from(SurveyUser)
+        .where(eq(SurveyUser.id, user.id))
+        .get();
+      if (updatedUser) {
+        Object.assign(fullUser, updatedUser);
+      }
+    }
+  } else if (action === "disable") {
+    await db.update(SurveyUser)
+      .set({ 
+        two_factor_method: "none",
+        two_factor_enabled: false,
+        verification_code: null,
+        verification_code_expires: null
+      })
+      .where(eq(SurveyUser.id, user.id));
+    
+    message = "✅ 2FA disabled";
+    
+    // Refresh user data
+    const updatedUser = await db.select().from(SurveyUser)
+      .where(eq(SurveyUser.id, user.id))
+      .get();
+    if (updatedUser) {
+        Object.assign(fullUser, updatedUser);
+    }
+  }
+}
+---
+
+<Layout title="Simple 2FA Setup" isLandingPage={false}>
+  <div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-3xl font-bold text-white mb-8">Simple Two-Factor Authentication</h1>
+      
+      {message && (
+        <div class="bg-green-900/20 border border-green-700 rounded-lg p-4 mb-6">
+          <p class="text-green-300">{message}</p>
+        </div>
+      )}
+
+      {error && (
+        <div class="bg-red-900/20 border border-red-700 rounded-lg p-4 mb-6">
+          <p class="text-red-300">{error}</p>
+        </div>
+      )}
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mb-6">
+        <h2 class="text-xl font-bold text-white mb-4">Current Status</h2>
+        <div class="space-y-2">
+          <p><span class="text-gray-400">Username:</span> <span class="text-white">{fullUser.username}</span></p>
+          <p><span class="text-gray-400">2FA Status:</span> 
+            <span class={fullUser.two_factor_enabled ? "text-green-400" : "text-red-400"}>
+              {fullUser.two_factor_enabled ? "✅ Enabled" : "❌ Disabled"}
+            </span>
+          </p>
+          {fullUser.two_factor_enabled && (
+            <>
+              <p><span class="text-gray-400">Method:</span> 
+                <span class="text-blue-400 capitalize">{fullUser.two_factor_method}</span>
+              </p>
+              {fullUser.two_factor_method === "email" && fullUser.email && (
+                <p><span class="text-gray-400">Email:</span> <span class="text-white">{fullUser.email}</span></p>
+              )}
+              {fullUser.two_factor_method === "sms" && fullUser.phone_number && (
+                <p><span class="text-gray-400">Phone:</span> <span class="text-white">{fullUser.phone_number}</span></p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {!fullUser.two_factor_enabled ? (
+        <div class="space-y-6">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+            <h3 class="text-lg font-bold text-white mb-4">📧 Enable Email Verification</h3>
+            <p class="text-gray-300 mb-4">Receive verification codes via email</p>
+            
+            <form method="POST" class="space-y-4">
+              <input type="hidden" name="action" value="setup_email" />
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={fullUser.email || ""}
+                  placeholder="admin@example.com"
+                  required
+                  class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                />
+              </div>
+              
+              <button
+                type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+              >
+                Enable Email 2FA
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+            <h3 class="text-lg font-bold text-white mb-4">📱 Enable SMS Verification</h3>
+            <p class="text-gray-300 mb-4">Receive verification codes via text message</p>
+            
+            <form method="POST" class="space-y-4">
+              <input type="hidden" name="action" value="setup_sms" />
+              
+              <div>
+                <label for="phone" class="block text-sm font-medium text-gray-300 mb-2">
+                  Phone Number (with country code)
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="phone"
+                  value={fullUser.phone_number || ""}
+                  placeholder="+1234567890"
+                  required
+                  class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                />
+                <p class="text-xs text-gray-400 mt-1">
+                  Include country code, e.g., +1 for US, +44 for UK
+                </p>
+              </div>
+              
+              <button
+                type="submit"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium"
+              >
+                Enable SMS 2FA
+              </button>
+            </form>
+          </div>
+        </div>
+      ) : (
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-bold text-white mb-4">Manage 2FA</h3>
+          
+          <form method="POST" class="space-y-4">
+            <input type="hidden" name="action" value="disable" />
+            
+            <div class="bg-red-900/20 border border-red-700 rounded p-4 mb-4">
+              <p class="text-red-300 text-sm">
+                <strong>Warning:</strong> Disabling 2FA will make your account less secure.
+              </p>
+            </div>
+            
+            <button
+              type="submit"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
+              onclick="return confirm('Are you sure you want to disable 2FA?')"
+            >
+              Disable 2FA
+            </button>
+          </form>
+        </div>
+      )}
+
+      <div class="mt-6 text-center space-x-4">
+        <a href="/admin/dashboard" class="text-indigo-400 hover:text-indigo-300">
+          ← Back to Dashboard
+        </a>
+        <a href="/emergency-2fa-bypass" class="text-red-400 hover:text-red-300">
+          Emergency Bypass
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
