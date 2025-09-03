@@ -89,6 +89,9 @@ const demographicsStats = {
   combatExperience: {} as Record<string, number>,
   vaApplications: {} as Record<string, number>,
   disabilityRatings: {} as Record<string, number>,
+  supportChoices: {} as Record<string, number>,
+  firstYearHelp: {} as Record<string, number>,
+  cashBenefitsViews: {} as Record<string, number>,
 };
 
 allResponses.forEach(response => {
@@ -148,6 +151,26 @@ allResponses.forEach(response => {
     const rating = vaData.disability_rating;
     demographicsStats.disabilityRatings[rating] = 
       (demographicsStats.disabilityRatings[rating] || 0) + 1;
+  }
+
+  // Support choice preferences
+  if (vaData.support_choice) {
+    demographicsStats.supportChoices[vaData.support_choice] = 
+      (demographicsStats.supportChoices[vaData.support_choice] || 0) + 1;
+  }
+
+  // First year help preferences (multi-select)
+  if (vaData.first_year_help && Array.isArray(vaData.first_year_help)) {
+    vaData.first_year_help.forEach(help => {
+      demographicsStats.firstYearHelp[help] = 
+        (demographicsStats.firstYearHelp[help] || 0) + 1;
+    });
+  }
+
+  // Cash benefits views
+  if (vaData.cash_benefits_use) {
+    demographicsStats.cashBenefitsViews[vaData.cash_benefits_use] = 
+      (demographicsStats.cashBenefitsViews[vaData.cash_benefits_use] || 0) + 1;
   }
 });
 
@@ -308,6 +331,54 @@ const recentResponses = await db.select({
               .map(([applied, count]) => (
               <div class="flex justify-between items-center">
                 <span class="text-zinc-300">{applied}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Benefit Preferences Analytics -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Support Choice Preferences -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">Preferred Support Type</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.supportChoices)
+              .sort(([,a], [,b]) => b - a)
+              .map(([choice, count]) => (
+              <div class="flex justify-between items-start">
+                <span class="text-zinc-300 text-sm flex-1 pr-2">{choice}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- First Year Help Preferences -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">First Year Help Preferences</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.firstYearHelp)
+              .sort(([,a], [,b]) => b - a)
+              .map(([help, count]) => (
+              <div class="flex justify-between items-center">
+                <span class="text-zinc-300 text-sm">{help}</span>
+                <span class="text-white font-medium">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Cash Benefits Views -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-white mb-4">Cash Benefits Opinion</h3>
+          <div class="space-y-2">
+            {Object.entries(demographicsStats.cashBenefitsViews)
+              .sort(([,a], [,b]) => b - a)
+              .map(([view, count]) => (
+              <div class="flex justify-between items-start">
+                <span class="text-zinc-300 text-sm flex-1 pr-2">{view}</span>
                 <span class="text-white font-medium">{count}</span>
               </div>
             ))}

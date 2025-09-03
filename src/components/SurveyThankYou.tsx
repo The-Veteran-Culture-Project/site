@@ -128,8 +128,14 @@ export default function SurveyThankYou() {
                 {va_benefits.disability_rating && (
                   <p><strong>Disability Rating:</strong> {va_benefits.disability_rating}</p>
                 )}
-                {va_benefits.va_healthcare && (
-                  <p><strong>Impact of Payments:</strong> {va_benefits.va_healthcare}</p>
+                {va_benefits.support_choice && (
+                  <p><strong>Preferred Support Type:</strong> {va_benefits.support_choice}</p>
+                )}
+                {va_benefits.first_year_help && va_benefits.first_year_help.length > 0 && (
+                  <p><strong>First Year Help:</strong> {va_benefits.first_year_help.join(', ')}</p>
+                )}
+                {va_benefits.cash_benefits_use && (
+                  <p><strong>Cash Benefits Opinion:</strong> {va_benefits.cash_benefits_use}</p>
                 )}
               </div>
             </div>

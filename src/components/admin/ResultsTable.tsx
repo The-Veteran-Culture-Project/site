@@ -43,6 +43,10 @@ export interface SurveyResult {
     decision_time?: string;
     va_healthcare?: string;
     va_experience?: string;
+    // New questions
+    support_choice?: string;
+    first_year_help?: string[];
+    cash_benefits_use?: string;
   };
 }
 
@@ -326,10 +330,17 @@ export function ResultsTable({ initialResults }: Props) {
                       )}
                       <p>Comfort Delay: {result.va_benefits?.comfort_delay || 'N/A'}</p>
                       <p>Decision Time: {result.va_benefits?.decision_time || 'N/A'}</p>
-                      <p>Disability Payment Impact: {result.va_benefits?.va_healthcare || 'N/A'}</p>
+                      <p>VA Healthcare: {result.va_benefits?.va_healthcare || 'N/A'}</p>
                       {result.va_benefits?.va_experience && (
-                        <p>Impact Description: {result.va_benefits.va_experience}</p>
+                        <p>VA Experience: {result.va_benefits.va_experience}</p>
                       )}
+                      <hr className="my-2 border-gray-600" />
+                      <p className="font-medium text-white">New Questions:</p>
+                      <p>Support Choice: {result.va_benefits?.support_choice || 'N/A'}</p>
+                      <p>First Year Help: {Array.isArray(result.va_benefits?.first_year_help) 
+                        ? result.va_benefits?.first_year_help?.join(', ') 
+                        : 'N/A'}</p>
+                      <p>Cash Benefits Use: {result.va_benefits?.cash_benefits_use || 'N/A'}</p>
                     </div>
                   </details>
                 </TableCell>

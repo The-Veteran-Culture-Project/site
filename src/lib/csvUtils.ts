@@ -49,7 +49,10 @@ export function convertResultsToCSV(results: SurveyResult[]): string {
     'Comfort Delay',
     'Decision Time',
     'VA Healthcare Impact',
-    'VA Experience Description'
+    'VA Experience Description',
+    'Support Choice',
+    'First Year Help',
+    'Cash Benefits Use'
   ];
 
   // Create array for CSV rows, starting with headers
@@ -106,7 +109,10 @@ export function convertResultsToCSV(results: SurveyResult[]): string {
       result.va_benefits?.comfort_delay || '',
       result.va_benefits?.decision_time || '',
       result.va_benefits?.va_healthcare || '',
-      result.va_benefits?.va_experience || ''
+      result.va_benefits?.va_experience || '',
+      result.va_benefits?.support_choice || '',
+      Array.isArray(result.va_benefits?.first_year_help) ? result.va_benefits.first_year_help.join('; ') : '',
+      result.va_benefits?.cash_benefits_use || ''
     ].map(sanitizeForCSV);
     
     // Add this row to our rows array

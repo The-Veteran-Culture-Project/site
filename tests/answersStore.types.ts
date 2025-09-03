@@ -13,6 +13,9 @@ const example: BenefitsAnswers = {
   has_applied: 'Yes',
   decision_time: 'Less than 3 months',
   va_experience: 'Good',
+  support_choice: '$1,000/month for two years, no strings attached',
+  first_year_help: ['Affordable housing', 'Mental health support'],
+  cash_benefits_use: 'It should be totally unconditional — trust veterans to choose',
 };
 
 export default example;

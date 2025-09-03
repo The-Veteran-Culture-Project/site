@@ -7,6 +7,10 @@ export type BenefitsAnswers = {
   has_applied?: string;
   decision_time?: string;
   va_experience?: string;
+  // New questions
+  support_choice?: string;
+  first_year_help?: string[];
+  cash_benefits_use?: string;
 };
 
 export type ContactAnswers = {

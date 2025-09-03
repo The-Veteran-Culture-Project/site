@@ -272,6 +272,40 @@ const getStrategyDefinition = (strategy: string) => {
                   </div>
                 </div>
               )}
+
+              {/* New benefit preference questions */}
+              {vaData.support_choice && (
+                <div>
+                  <span class="text-zinc-400">Preferred Support Type:</span>
+                  <div class="text-white font-medium mt-1 p-3 bg-zinc-800 rounded">
+                    {vaData.support_choice}
+                  </div>
+                </div>
+              )}
+
+              {vaData.first_year_help && Array.isArray(vaData.first_year_help) && vaData.first_year_help.length > 0 && (
+                <div>
+                  <span class="text-zinc-400">First Year Help Preferences:</span>
+                  <div class="text-white font-medium mt-1">
+                    <div class="flex flex-wrap gap-2">
+                      {vaData.first_year_help.map((help, index) => (
+                        <span key={index} class="inline-block px-2 py-1 bg-zinc-800 rounded text-xs">
+                          {help}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {vaData.cash_benefits_use && (
+                <div>
+                  <span class="text-zinc-400">Cash Benefits Opinion:</span>
+                  <div class="text-white font-medium mt-1 p-3 bg-zinc-800 rounded">
+                    {vaData.cash_benefits_use}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })()}

@@ -12,8 +12,9 @@ export default function BenefitsForm() {
   const [disabilityRating, setDisabilityRating] = useState(va_benefits?.disability_rating || '');
   const [comfortDelay, setComfortDelay] = useState(va_benefits?.comfort_delay || '');
   const [decisionTime, setDecisionTime] = useState(va_benefits?.decision_time || '');
-  const [impactPayments, setImpactPayments] = useState(va_benefits?.va_healthcare || '');
-  const [impactExplanation, setImpactExplanation] = useState(va_benefits?.va_experience || '');
+  const [supportChoice, setSupportChoice] = useState(va_benefits?.support_choice || '');
+  const [firstYearHelp, setFirstYearHelp] = useState(va_benefits?.first_year_help || []);
+  const [cashBenefitsUse, setCashBenefitsUse] = useState(va_benefits?.cash_benefits_use || '');
   const [formError, setFormError] = useState('');
 
   const updateStore = (newVals: Partial<BenefitsAnswers>) => {
@@ -43,6 +44,32 @@ export default function BenefitsForm() {
     'Over a year',
     'Still waiting',
     'Not applicable',
+  ];
+
+  const supportChoiceOptions = [
+    '$1,000/month for two years, no strings attached',
+    'Job placement services',
+    'Free school or training (e.g. GI Bill-style)',
+    'VA disability rating and healthcare',
+    'Other'
+  ];
+
+  const firstYearHelpOptions = [
+    'Affordable housing',
+    'Mental health support',
+    'Money with no strings attached',
+    'Clearer VA process',
+    'Childcare or family support',
+    'Job training',
+    'Community or mentorship',
+    'None of the above'
+  ];
+
+  const cashBenefitsOptions = [
+    'It should be totally unconditional — trust veterans to choose',
+    'It should be used for education, housing, or caregiving',
+    'It should be based on need or disability status',
+    "I don't think veterans should get cash benefits like that"
   ];
 
   const handleRadio = (setter: (val: string) => void, key: keyof BenefitsAnswers) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +102,21 @@ export default function BenefitsForm() {
     updateStore({ benefits_used: updated });
   };
 
+  const handleFirstYearHelp = (option: string) => {
+    let updated: string[] = [];
+    if (option === 'None of the above') {
+      updated = firstYearHelp.includes('None of the above') ? [] : ['None of the above'];
+    } else {
+      if (firstYearHelp.includes(option)) {
+        updated = firstYearHelp.filter((h) => h !== option);
+      } else {
+        updated = [...firstYearHelp.filter((h) => h !== 'None of the above'), option];
+      }
+    }
+    setFirstYearHelp(updated);
+    updateStore({ first_year_help: updated });
+  };
+
   const validate = () => {
     const requiredFields = [
       { value: hasApplied, name: 'VA benefits application' },
@@ -83,7 +125,9 @@ export default function BenefitsForm() {
       { value: hasDisabilityRating === 'No' || disabilityRating, name: 'Disability rating percentage' },
       { value: comfortDelay, name: 'Application comfort level' },
       { value: decisionTime, name: 'Decision timeline' },
-      { value: impactPayments, name: 'Impact assessment' }
+      { value: supportChoice, name: 'Support choice preference' },
+      { value: firstYearHelp.length > 0, name: 'First year help selection' },
+      { value: cashBenefitsUse, name: 'Cash benefits usage opinion' }
     ];
 
     const missingFields = requiredFields
@@ -187,27 +231,80 @@ export default function BenefitsForm() {
             </select>
           </div>
 
-          {/* Q7: Payments impact */}
+          {/* Q7: Support choice preference */}
           <div>
             <label className="font-semibold block mb-2 text-white">
-              Do you think VA disability payments would have made an impact on your early transition into civilian society? <span className="text-white ml-1">*</span>
+              If you had to choose between one of these types of support after leaving the military, which would you have preferred? <span className="text-white ml-1">*</span>
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
-                <input type="radio" name="va_healthcare" value="Yes" checked={impactPayments === 'Yes'} onChange={handleRadio(setImpactPayments, 'va_healthcare')} className="accent-[#CBB87C] scale-110" />
-                <span className="text-white">Yes</span>
-              </label>
-              <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
-                <input type="radio" name="va_healthcare" value="No" checked={impactPayments === 'No'} onChange={handleRadio(setImpactPayments, 'va_healthcare')} className="accent-[#CBB87C] scale-110" />
-                <span className="text-white">No</span>
-              </label>
+            <div className="space-y-3">
+              {supportChoiceOptions.map((option) => (
+                <label key={option} className="flex items-start gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
+                  <input 
+                    type="radio" 
+                    name="support_choice" 
+                    value={option} 
+                    checked={supportChoice === option} 
+                    onChange={handleRadio(setSupportChoice, 'support_choice')} 
+                    className="accent-[#CBB87C] scale-110 mt-1" 
+                  />
+                  <span className="text-white">{option}</span>
+                </label>
+              ))}
+              {supportChoice === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="Please specify..."
+                  className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-[#CBB87C] focus:outline-none"
+                  onChange={(e) => {
+                    const otherValue = `Other: ${e.target.value}`;
+                    setSupportChoice(otherValue);
+                    updateStore({ support_choice: otherValue });
+                  }}
+                />
+              )}
             </div>
           </div>
 
-          {/* Q8: Optional explanation */}
+          {/* Q8: First year help (multi-select) */}
           <div>
-            <label className="font-semibold block mb-2 text-white">If yes or no, please describe. (Optional)</label>
-            <textarea className="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-[#CBB87C] focus:outline-none resize-none" rows={5} value={impactExplanation} onChange={handleTextArea(setImpactExplanation, 'va_experience')} />
+            <label className="font-semibold block mb-2 text-white">
+              What would have helped you the most in your first year after transitioning out? (Pick 1–2) <span className="text-white ml-1">*</span>
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {firstYearHelpOptions.map((option) => (
+                <label key={option} className="flex items-center gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
+                  <input
+                    type="checkbox"
+                    className="accent-[#CBB87C] scale-110"
+                    checked={firstYearHelp.includes(option)}
+                    onChange={() => handleFirstYearHelp(option)}
+                  />
+                  <span className="text-white">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Q9: Cash benefits usage opinion */}
+          <div>
+            <label className="font-semibold block mb-2 text-white">
+              If veterans received $1,000/month for two years after service, how should it be used? (Pick the statement you most agree with) <span className="text-white ml-1">*</span>
+            </label>
+            <div className="space-y-3">
+              {cashBenefitsOptions.map((option) => (
+                <label key={option} className="flex items-start gap-3 p-3 rounded-lg bg-gray-800 border border-gray-600 hover:border-[#CBB87C] hover:bg-gray-700 cursor-pointer transition-all">
+                  <input 
+                    type="radio" 
+                    name="cash_benefits_use" 
+                    value={option} 
+                    checked={cashBenefitsUse === option} 
+                    onChange={handleRadio(setCashBenefitsUse, 'cash_benefits_use')} 
+                    className="accent-[#CBB87C] scale-110 mt-1" 
+                  />
+                  <span className="text-white">{option}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Error message */}

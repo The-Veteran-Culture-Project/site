@@ -33,8 +33,11 @@ export default function SurveyStepFive() {
       va_benefits?.comfort_delay &&
       va_benefits?.decision_time)) &&
     
-    // Final impact question
-    va_benefits?.va_healthcare
+    // New required questions
+    va_benefits?.support_choice &&
+    Array.isArray(va_benefits?.first_year_help) && 
+    va_benefits.first_year_help.length > 0 &&
+    va_benefits?.cash_benefits_use
   );
 
   // Debug validation
@@ -45,7 +48,9 @@ export default function SurveyStepFive() {
     disabilityRating: va_benefits?.disability_rating,
     comfortDelay: va_benefits?.comfort_delay,
     decisionTime: va_benefits?.decision_time,
-    vaHealthcare: va_benefits?.va_healthcare,
+    supportChoice: va_benefits?.support_choice,
+    firstYearHelp: va_benefits?.first_year_help,
+    cashBenefitsUse: va_benefits?.cash_benefits_use,
     isComplete: benefitsComplete
   });
 

@@ -52,7 +52,11 @@ const surveySubmissionSchema = z.object({
     comfort_delay: z.string().optional(),
     decision_time: z.string().optional(),
     va_healthcare: z.string().optional(),
-    va_experience: z.string().optional()
+    va_experience: z.string().optional(),
+    // New fields
+    support_choice: z.string().optional(),
+    first_year_help: z.array(z.string()).optional(),
+    cash_benefits_use: z.string().optional()
   }).optional()
 });
 
