@@ -23,7 +23,25 @@ export const PUT: APIRoute = async ({ params, request, cookies }) => {
     
     // Get request body
     const body = await request.json();
-    const { status, notes, password } = body;
+    const { status, notes, password, passwordSent } = body;
+    
+    // Handle passwordSent toggle
+    if (passwordSent !== undefined) {
+      await db.update(BetaAccessRequest)
+        .set({
+          passwordSent: passwordSent,
+          notes: notes || null,
+        })
+        .where(eq(BetaAccessRequest.id, requestId));
+      
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: `Password sent status updated`,
+        }),
+        { status: 200 }
+      );
+    }
     
     if (!status || !['approved', 'rejected'].includes(status)) {
       return new Response(JSON.stringify({ error: "Invalid status" }), {
